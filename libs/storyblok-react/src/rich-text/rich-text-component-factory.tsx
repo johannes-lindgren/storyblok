@@ -13,7 +13,7 @@ import {
     OrderedListNode,
     ParagraphNode,
     TextNode
-} from "../../../storyblok-js";
+} from "@johannes-lindgren/storyblok-js";
 import {RichTextComponent} from "@src/rich-text/rich-text-component";
 import {
     Blockquote,

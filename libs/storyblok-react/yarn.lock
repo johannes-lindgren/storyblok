@@ -2,7 +2,7 @@
 # yarn lockfile v1
 
 
-"@johannes-lindgren/storyblok-react@link:../storyblok-js":
+"@johannes-lindgren/storyblok-js@link:../storyblok-js":
   version "0.0.0"
   uid ""
 
