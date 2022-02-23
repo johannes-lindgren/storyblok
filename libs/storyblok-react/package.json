@@ -1,0 +1,33 @@
+{
+  "name": "@johannes-lindgren/storyblok-react",
+  "version": "0.0.1-development",
+  "main": "dist/cjs/index.js",
+  "module": "dist/esm/index.esm.js",
+  "author": "Johannes Lindgren",
+  "license": "MIT",
+  "files": [
+    "dist",
+    "package.json"
+  ],
+  "scripts": {
+    "build": "rollup -c",
+    "start": "rollup -c -w",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "@johannes-lindgren/storyblok-js": "latest"
+  },
+  "devDependencies": {
+    "@rollup/plugin-commonjs": "21.0.1",
+    "@rollup/plugin-node-resolve": "13.1.3",
+    "@types/react": "latest",
+    "react": "latest",
+    "rollup": "^2.64.0",
+    "rollup-plugin-peer-deps-external": "2.2.4",
+    "rollup-plugin-typescript2": "^0.31.1",
+    "typescript": "^4.5.4"
+  },
+  "peerDependencies": {
+    "react": ">=15.3.2"
+  }
+}
