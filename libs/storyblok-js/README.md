@@ -55,11 +55,22 @@ type Article = Block<{
 }>
 ```
 
-The `Block` utility type ensures that your type is valid. It makes all properties optional, and adds the three properties `component`, `uid`, and `_editable`.
+The `Block` utility type ensures that your type properly descibes a Storyblok component. It makes all properties optional, and adds the three properties `component`, `_uid`, and `_editable`. The above example is equivalent with:
+
+
+```typescript
+type Article = {
+    _uid: string
+    component: string
+    _editable?: string
+    title?: string
+    text?: string
+}
+```
 
 ### Content Fields
 
-The fields of Storyblok content/blocks can have many different. Some are trivial, for example text areas (string) - while other are more complex, for example links. Use the types in this package for your convenience:
+A storyblok component has several fields. These fields can have different types. Some of these types are trivial; such as text areas (string). But other types are more complex; such as links, options, rich text, etc. Use the types in this package for your convenience:
 
 #### Rich Text
 

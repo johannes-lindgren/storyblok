@@ -3,7 +3,10 @@
     "outDir": "lib",
     "target": "es6",
     "module": "esnext",
-    "lib": ["es2018"],
+    "lib": [
+      "es2018",
+      "dom"
+    ],
     "sourceMap": true,
     "strict": true,
     "strictFunctionTypes": true,

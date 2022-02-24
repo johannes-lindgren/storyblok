@@ -7,29 +7,9 @@ import {
     useRef,
     useState
 } from "react";
-import {ContentDeliveryClient, GetStoryOptions, Story} from "@johannes-lindgren/storyblok-js";
+import {ContentDeliveryClient, GetStoryOptions, Story, StoryblokBridgeV2} from "@johannes-lindgren/storyblok-js";
 import {StoryData} from "storyblok-js-client";
-
-declare global {
-    interface Window {
-        StoryblokBridge: StoryblokBridgeV2
-    }
-
-    interface Function {
-        on: Function
-    }
-}
-
-type StoryblokBridgeEventType = 'customEvent' | 'published' | 'input' | 'change' | 'unpublished' | 'enterEditmode'
-type StoryblokBridgeEventCallback = (event: StoryblokEventPayload) => void
-type StoryblokBridgeOptions = {
-    resolveRelations?: string[]
-}
-
-type StoryblokBridgeV2 = {
-    new(options?: StoryblokBridgeOptions): StoryblokBridgeV2
-    on: (type: StoryblokBridgeEventType | StoryblokBridgeEventType[], callback: StoryblokBridgeEventCallback) => void
-}
+import {loadBridge} from "../../../storyblok-js/src";
 
 type StoryblokContextData = {
     story: Story | undefined
@@ -43,8 +23,8 @@ const StoryblokContext = createContext<StoryblokContextData>({
 
 type StoryblokContextProps = {
     story?: StoryData
-    previewToken?: string
-    publicToken?: string
+    previewToken?: string | null
+    publicToken?: string | null
 } & Pick<GetStoryOptions, 'resolve_links' | 'resolve_relations'>
 
 const useStoryblokContext = () => (
@@ -73,27 +53,6 @@ const useStoryblokClient = (accessToken: string | undefined): ContentDeliveryCli
     ), [accessToken])
 )
 
-// appends the bridge script tag to our document
-// see https://www.storyblok.com/docs/guide/essentials/visual-editor#installing-the-storyblok-js-bridge
-const addBridge = (onLoad: () => void) => {
-    const storyblokBridgeId = 'storyblokBridge'
-    // Check if the script is already present
-    const existingScript = document.getElementById(storyblokBridgeId)
-    if (existingScript) {
-        return
-    }
-    const script = document.createElement("script")
-    script.async = true
-    script.src = "//app.storyblok.com/f/storyblok-v2-latest.js"
-    script.id = storyblokBridgeId
-    document.body.appendChild(script)
-    // Promisify callback
-    return script.onload = () => {
-        // once the script is loaded, init the event listeners
-        onLoad()
-    };
-}
-
 const useStoryblok = ({
                           story: initialStory,
                           previewToken,
@@ -110,7 +69,7 @@ const useStoryblok = ({
     //  Although this should rather be done in the Storyblok editor, and not in-app
     const {current: language} = useRef(initialStory?.lang)
 
-    const storyblokClient = useStoryblokClient(previewToken ?? publicToken)
+    const storyblokClient = useStoryblokClient(previewToken ?? publicToken ?? undefined)
 
     const initEventListeners = (storyblokBridge: StoryblokBridgeV2) => {
         // reload on Next.js page on save or publish event in the Visual Editor
@@ -159,11 +118,7 @@ const useStoryblok = ({
         if (!preview) {
             return
         }
-        addBridge(() => {
-            const {StoryblokBridge} = window
-            if (typeof StoryblokBridge === 'undefined') {
-                return
-            }
+        loadBridge().then(StoryblokBridge => {
             // initialize the bridge with your token
             const storyblokBridge = new StoryblokBridge({
                 resolveRelations: resolve_relations
