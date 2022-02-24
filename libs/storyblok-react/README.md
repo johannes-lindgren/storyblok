@@ -55,21 +55,33 @@ To render a story, fetch the story with the bundled content delivery client and 
 ```typescript jsx
 const client = new ContentDeliveryClient(publicToken)
 const story = await client.getStory('/dir/subdir/my-story')
-return <Story story={story} />
+
+return (
+    <Story story={story} />
+)
 ```
 
 That's it!
 
 ## Preview Mode
 
-Except for providing a preview token, you do not need to do anything to enable the Storyblok preview in your application — `@johannes-lindgren/storyblok-react` handles the rest!
+To enable preview, simply 
+
+1. Provide a preview token.
+2. Provide a draft version of the story.
 
 ```typescript jsx
-<Story 
-    story={story}
-    previewToken={myPreviewToken}
-    preview
->
+const client = new ContentDeliveryClient(previewToken)
+const story = await client.getStory('/dir/subdir/my-story', {
+    version: 'draft'
+})
+
+return (
+    <Story 
+        story={story}
+        previewToken={previewToken}
+    />
+)
 ```
 
 ## Resolve Relations & Links

@@ -7,9 +7,14 @@ import {
     useRef,
     useState
 } from "react";
-import {ContentDeliveryClient, GetStoryOptions, Story, StoryblokBridgeV2} from "@johannes-lindgren/storyblok-js";
+import {
+    ContentDeliveryClient,
+    GetStoryOptions, isDraft, isPublished,
+    Story,
+    StoryblokBridgeV2
+} from "@johannes-lindgren/storyblok-js";
 import {StoryData} from "storyblok-js-client";
-import {loadBridge} from "../../../storyblok-js/src";
+import {loadBridge} from "@johannes-lindgren/storyblok-js";
 
 type StoryblokContextData = {
     story: Story | undefined
@@ -61,7 +66,14 @@ const useStoryblok = ({
                           publicToken
                       }: StoryblokContextProps): StoryblokContextData => {
     const [story, setStory] = useState(initialStory);
-    const preview = !!previewToken
+    const preview: boolean = (previewToken !== undefined) && (story !== undefined) && isDraft(story)
+
+    if((previewToken !== undefined) && (story !== undefined) && isPublished(story)){
+        console.warn('A preview token has been supplied together with a published story. If you intend to enable preview, provide a draft story instead. Otherwise, consider omitting the preview token.')
+    }
+    if(previewToken === undefined && (story !== undefined) && isDraft(story)){
+        console.warn('A draft has been supplied without a preview token. If you intend to enable preview, provide a preview token.')
+    }
 
     // Note: This makes it impossible to change the language. But this is ok since storyblok will reload the app when
     // you change the language in editor mode.
@@ -79,7 +91,6 @@ const useStoryblok = ({
 
         // live update the story on input events
         storyblokBridge.on('input', (event: StoryblokEventPayload) => {
-            console.log('on input')
             // check if the ids of the event and the passed story match
             if (story && event.story.content._uid === story.content._uid) {
                 // change the story content through the setStory function

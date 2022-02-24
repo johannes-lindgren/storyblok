@@ -1,20 +1,45 @@
 import {RefObject, useEffect, useRef} from 'react'
 import {Block, EditableData, getEditableData, Story} from "@johannes-lindgren/storyblok-js";
 import {useStory} from "@src/story/storyblok-context";
+import {isDraft} from "../../../storyblok-js/src";
 
 // Constructs the _editable property from the story id in the context
-const makeEditableData = (block: Block, story: Story) => ({
+const makeEditableData = (block: Block, story: Story): EditableData => ({
     uid: block._uid,
     name: block.component,
     id: story.id.toString(),
+    space: getEditableData(story.content)?.space
 })
 
 const useEditableData = (block: Block): EditableData | undefined => {
     const story = useStory()
-    // Blocks that were added since the previous save do not have the _editable field!
-    // But the _editable field can be added as long as we have the block + the story id to which it belong
-    // The story id can be fetched as long as the component is wrapped within a <StoryContext> provider
-    return getEditableData(block) ?? (story && makeEditableData(block, story))
+
+    // If the block has the _editable property -> return immediately
+    const editableFromBlock = getEditableData(block)
+    if(editableFromBlock){
+        return editableFromBlock
+    }
+
+    // If the block doesn't have the _editable property, it could be of one of two reasons:
+    // 1) The story is not a draft, but is published
+    // 2) The block was added by the user, but hasn't been saved. These blocks lack the _editable field!
+
+
+    // If we don' have the story, there's no chance to construct the _editable field
+    if(!story){
+        return
+    }
+
+    if(!isDraft(story)){
+        // Case 1) The story is published -> we should not use the _editable property
+        // TODO The story is not a draft, error!
+        // TODO handle better
+        console.warn(`The story in the current context is not in draft.`)
+        return undefined
+    }
+
+    // Case 1) The story is draft and the block has not yet been saved -> we can reconstruct the _editable field as long as we have the block + the story id to which it belong
+    return makeEditableData(block, story)
 }
 
 const useEditable = <HtmlElementType extends HTMLElement, >(block: Block): RefObject<HtmlElementType> => {
@@ -27,6 +52,8 @@ const useEditable = <HtmlElementType extends HTMLElement, >(block: Block): RefOb
             window.location === window.parent.location ||
             ref.current === null
         ) {
+            // TODO handle better
+            console.warn(`Cannot set element attributes for the Storyblok preview.`)
             return
         }
 
