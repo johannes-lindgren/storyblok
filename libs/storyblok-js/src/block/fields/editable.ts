@@ -1,13 +1,13 @@
-import {Block} from "./index";
+import {Block} from "../index";
 
-export type EditableData = {
+export type Editable = {
     name: string,
     space?: string,
     uid: string, // uid of block
     id: string // Id of story
 }
 
-export const getEditableData = (block: Block): EditableData | undefined => {
+export const getEditable = (block: Block): Editable | undefined => {
     if(typeof block._editable === 'undefined'){
         return undefined
     }
@@ -16,5 +16,5 @@ export const getEditableData = (block: Block): EditableData | undefined => {
     if(typeof optionsJson === 'undefined'){
         return undefined
     }
-    return JSON.parse(optionsJson) as EditableData
+    return JSON.parse(optionsJson) as Editable
 }

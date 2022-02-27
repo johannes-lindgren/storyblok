@@ -1,4 +1,4 @@
-import {Block} from "./index";
+import {Block} from "../index";
 
 export type Table = {
     thead: TableHeaderCell[]

@@ -6,13 +6,12 @@ import {
 } from "@src/rich-text/rich-text-component";
 import { makeStoryComponent, StoryComponent} from "@src/story/story-component";
 import {StoryblokOptionsStatic} from "@src/helpers/storyblok-options";
-import {BlockComponentFactoryOptions, BlockWrapperComponent, makeBlockComponent} from "@src/block";
+import {BlockComponentFactoryOptions, makeDynamicBlockComponent} from "@src/block";
 import {
     makeRichTextComponent,
     RichTextComponentFactoryOptions,
     RichTextComponentMapping
 } from "@src/rich-text/rich-text-component-factory";
-import {DefaultWrapper} from "@src/block/default-wrapper";
 
 type MakeComponentOptions = {
     blockOptions?: BlockComponentFactoryOptions
@@ -23,7 +22,6 @@ type StoryblokComponents = {
     Block: BlockComponent
     RichText: RichTextComponent
     Story: StoryComponent
-    BlockWrapper: BlockWrapperComponent
 }
 
 
@@ -48,7 +46,7 @@ type MakeStoryblokComponents = (options: MakeComponentOptions) => StoryblokCompo
  * @returns a .
  */
 export const makeStoryblokComponents: MakeStoryblokComponents = ({richTextOptions= {}, blockOptions = {}, ...staticOptions}) => {
-    const Block = makeBlockComponent(blockOptions)
+    const Block = makeDynamicBlockComponent(blockOptions)
     const defaultMappingOverride = {
         mappingOverride: makeBlockMapping(Block)
     }
@@ -62,6 +60,5 @@ export const makeStoryblokComponents: MakeStoryblokComponents = ({richTextOption
         Block,
         RichText,
         Story,
-        BlockWrapper: blockOptions.Wrapper ?? DefaultWrapper,
     }
 }
