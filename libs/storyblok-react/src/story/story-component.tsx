@@ -6,6 +6,8 @@ import {
 } from "@src/block/block-component";
 import {Alert} from "@src/helpers/alert";
 
+// TODO deprecate this
+
 type StoryComponentProps = {
     story: StoryData
 } & PreviewOptions

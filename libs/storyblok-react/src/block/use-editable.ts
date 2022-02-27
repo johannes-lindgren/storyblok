@@ -1,7 +1,7 @@
 import {RefObject, useEffect, useRef} from 'react'
 import {Block, EditableData, getEditableData, Story} from "@johannes-lindgren/storyblok-js";
 import {useStory} from "@src/story/storyblok-context";
-import {isDraft} from "../../../storyblok-js/src";
+import {isDraft} from "@johannes-lindgren/storyblok-js";
 
 // Constructs the _editable property from the story id in the context
 const makeEditableData = (block: Block, story: Story): EditableData => ({

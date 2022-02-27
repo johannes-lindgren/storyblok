@@ -1,4 +1,5 @@
 export * from './block-component'
 export * from './use-editable'
 export * from './block-component-factory'
-export * from "@src/block/block-wrapper";
+export * from "./block-wrapper";
+export * from "./experimental-make-component";

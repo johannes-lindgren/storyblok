@@ -11,7 +11,6 @@ export default {
             file: packageJson.module,
             format: 'esm',
             sourcemap: true,
-            name: 'react-lib',
         }, {
             file: packageJson.main,
             format: 'cjs',
@@ -19,7 +18,7 @@ export default {
         }],
         external: [
             'react',
-            'react-proptypes'
+            'react-proptypes',
         ],
         plugins: [
             external(),
@@ -28,3 +27,4 @@ export default {
             typescript(),
         ],
     }
+
