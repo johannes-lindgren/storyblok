@@ -18,7 +18,9 @@ const mountedStyle = {
     transform: 'none',
 } as const
 
-// In preview mode, the content will be editable
+/**
+ * In preview mode, the content will be editable. Provides an error boundary.
+ */
 const DefaultWrapper: BlockWrapperComponent = ({block, children}) => {
     const ref = useEditable<HTMLDivElement>(block)
     const preview = usePreview()

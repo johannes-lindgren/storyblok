@@ -9,35 +9,29 @@ import {
 } from "react";
 import {
     ContentDeliveryClient,
-    GetStoryOptions, isDraft, isPublished,
+    isDraft, isPublished,
     Story,
     StoryblokBridgeV2
 } from "@johannes-lindgren/storyblok-js";
 import {StoryData} from "storyblok-js-client";
 import {loadBridge} from "@johannes-lindgren/storyblok-js";
-import {usePreview} from "@src/context";
-import {usePreviewToken} from "@src/context/preview-context";
+import {usePreview} from "@src/context/index";
+import {
+    usePreviewToken,
+    useResolveRelations,
+    useResolveLinks,
+} from "@src/context/preview-context";
 
-type StoryblokContextData = {
-    story: Story | undefined
-}
-
-const StoryblokContext = createContext<StoryblokContextData>({
-    story: undefined,
-})
+const StoryContext = createContext<Story | undefined>(undefined)
 
 type StoryblokContextProps = {
     story?: StoryData
-} & Pick<GetStoryOptions, 'resolve_links' | 'resolve_relations'>
-
-const useStoryblokContext = () => (
-    useContext(StoryblokContext)
-)
+}
 
 // Returns the story from the context. To set the context, use the <Story> component from makeComponents()
 // or directly set the context with the <StoryblokContextProvider>
 const useStory = () => (
-    useStoryblokContext().story
+    useContext(StoryContext)
 )
 
 /**
@@ -50,17 +44,18 @@ const useStoryblokClient = (accessToken: string | undefined): ContentDeliveryCli
     ), [accessToken])
 )
 
-const useStoryblok = ({
+const usePreviewedStory = ({
                           story: initialStory,
-                          resolve_relations,
-                          resolve_links,
-                      }: StoryblokContextProps): StoryblokContextData => {
+                      }: StoryblokContextProps): Story | undefined => {
     const [story, setStory] = useState(initialStory);
     const preview = usePreview()
     const previewToken = usePreviewToken()
+    const resolve_links = useResolveLinks()
+    const resolve_relations = useResolveRelations()
 
     if((previewToken !== undefined) && (story !== undefined) && isPublished(story)){
-        console.warn('A preview token has been supplied together with a published story. If you intend to enable preview, provide a draft story instead. Otherwise, consider omitting the preview token.')
+        // TODO we can easily just fetch the draft version if the published was supplied by mistake.
+        console.warn('A preview token has been supplied together with a published story. Consider supplying a draft version instead.')
     }
     if(previewToken === undefined && (story !== undefined) && isDraft(story)){
         console.warn('A draft has been supplied without a preview token. If you intend to enable preview, provide a preview token.')
@@ -76,6 +71,7 @@ const useStoryblok = ({
 
     // TODO load bridge once and manage a list of subscribers
     const initEventListeners = (storyblokBridge: StoryblokBridgeV2) => {
+        console.log('initEventListeners()')
         // reload on Next.js page on save or publish event in the Visual Editor
         storyblokBridge.on(['change', 'published'], () => {
             location.reload()
@@ -83,16 +79,17 @@ const useStoryblok = ({
 
         // live update the story on input events
         storyblokBridge.on('input', (event: StoryblokEventPayload) => {
-            console.log(`input from ${event.story?.name}`)
             // check if the ids of the event and the passed story match
             if (story && event.story.content._uid === story.content._uid) {
                 // change the story content through the setStory function
+                console.log(`input from`, event.story?.name)
                 setStory(event.story);
             }
         });
 
+        // TODO this loads the draft, but not unsaved changes. These will only be visible on first input event
         storyblokBridge.on('enterEditmode', (event: StoryblokEventPayload) => {
-            console.log('Entering Edit mode')
+            console.log(`enterEditmode for`, event.storyId)
             if (!event.storyId) {
                 console.error(`Intercepted 'enterEditmode' event that doesn't contain a story`)
                 return
@@ -100,19 +97,23 @@ const useStoryblok = ({
             if (!storyblokClient) {
                 throw new Error('Preview mode was entered without initializing a preview http client first. Most likely, a preview token was not supplied')
             }
-            // TODO this loads the draft, but not unsaved changes. These will only be visible on first input event
-            // loading the draft version on initial enter of editor
+            if(!initialStory){
+                return;
+            }
+            if(event.storyId !== initialStory.id.toString()){
+                // The end-user entered edit mode for a different story
+                return;
+            }
+            // loading the latest draft version on initial enter of editor
             storyblokClient.getStory(event.storyId, {
                 version: 'draft',
                 resolve_relations,
                 resolve_links,
                 language,
             }).then((story) => {
-                if (story && event.story.content._uid === story.content._uid) {
-                    // change the story content through the setStory function
-                    setStory(event.story);
-                }
+                setStory(story);
             }).catch((error) => {
+                // TODO handle differently...
                 console.log(error);
             });
         })
@@ -126,6 +127,7 @@ const useStoryblok = ({
         }
         loadBridge().then(StoryblokBridge => {
             // initialize the bridge with your token
+            // Note: we are creating one bridge for each previewed story
             const storyblokBridge = new StoryblokBridge({
                 resolveRelations: resolve_relations
             });
@@ -137,24 +139,22 @@ const useStoryblok = ({
         setStory(initialStory);
     }, [initialStory?.uuid]);
 
-    return {
-        story: story,
-    };
+    return story
 }
 
 // Enables children to use useStory and usePreview
-const StoryblokContextProvider: FunctionComponent<StoryblokContextProps> = ({
+const StoryContextProvider: FunctionComponent<StoryblokContextProps> = ({
                                                                                 children,
                                                                                 ...props
                                                                             }) => {
-    const storyblokContext = useStoryblok(props)
+    const storyblokContext = usePreviewedStory(props)
     return (
-        <StoryblokContext.Provider
+        <StoryContext.Provider
             value={storyblokContext}
         >
             {children}
-        </StoryblokContext.Provider>
+        </StoryContext.Provider>
     )
 }
 
-export {useStory, StoryblokContextProvider}
+export {useStory, StoryContextProvider}

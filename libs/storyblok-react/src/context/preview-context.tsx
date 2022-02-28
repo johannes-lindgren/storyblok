@@ -1,13 +1,19 @@
 import {createContext, FunctionComponent, useContext} from "react";
+import {GetStoryOptions} from "../../../storyblok-js";
 
 type PreviewProviderProps = {
     previewToken: string | undefined | null
     enabled: boolean | undefined | null
+
+    resolveRelations: GetStoryOptions['resolve_relations']
+    resolveLinks: GetStoryOptions['resolve_links']
 //    TODO resolveRelations resolveLinks
 }
 const PreviewContext = createContext<PreviewProviderProps>({
     previewToken: undefined,
     enabled: false,
+    resolveLinks: undefined,
+    resolveRelations: undefined,
 })
 
 const usePreview = ():boolean => {
@@ -20,6 +26,13 @@ const usePreviewToken = (): string | undefined => {
     return previewContext.previewToken ?? undefined
 }
 
+const useResolveRelations = () => (
+    useContext(PreviewContext).resolveRelations
+)
+const useResolveLinks = () => (
+    useContext(PreviewContext).resolveLinks
+)
+
 const PreviewProvider: FunctionComponent<PreviewProviderProps> = ({children, ...props}) => {
     return (
         <PreviewContext.Provider value={props}>
@@ -28,4 +41,4 @@ const PreviewProvider: FunctionComponent<PreviewProviderProps> = ({children, ...
     )
 }
 
-export {PreviewProvider, usePreview, usePreviewToken}
+export {PreviewProvider, usePreview, usePreviewToken, useResolveLinks, useResolveRelations}
