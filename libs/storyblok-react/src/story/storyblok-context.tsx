@@ -83,6 +83,7 @@ const useStoryblok = ({
 
     const storyblokClient = useStoryblokClient(previewToken ?? publicToken ?? undefined)
 
+    // TODO load bridge once and manage a list of subscribers
     const initEventListeners = (storyblokBridge: StoryblokBridgeV2) => {
         // reload on Next.js page on save or publish event in the Visual Editor
         storyblokBridge.on(['change', 'published'], () => {
@@ -99,6 +100,7 @@ const useStoryblok = ({
         });
 
         storyblokBridge.on('enterEditmode', (event: StoryblokEventPayload) => {
+            console.log('Entering Edit mode')
             if (!event.storyId) {
                 console.error(`Intercepted 'enterEditmode' event that doesn't contain a story`)
                 return
@@ -114,8 +116,9 @@ const useStoryblok = ({
                 resolve_links,
                 language,
             }).then((story) => {
-                if (story) {
-                    setStory(story);
+                if (story && event.story.content._uid === story.content._uid) {
+                    // change the story content through the setStory function
+                    setStory(event.story);
                 }
             }).catch((error) => {
                 console.log(error);
