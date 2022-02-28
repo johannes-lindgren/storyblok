@@ -1,5 +1,5 @@
 import {BlockComponent} from "@src/block/block-component";
-import {usePreview} from "@src/story";
+import {usePreview} from "@src/context";
 import {Alert} from "@src/helpers/alert";
 
 const DefaultFallback: BlockComponent = ({block}) => {

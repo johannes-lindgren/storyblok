@@ -1,5 +1,4 @@
 export * from './components-factory'
-export * from './helpers/storyblok-options'
 export * from './block'
 export * from './rich-text'
 export * from './story'

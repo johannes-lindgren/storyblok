@@ -15,21 +15,19 @@ import {
 } from "@johannes-lindgren/storyblok-js";
 import {StoryData} from "storyblok-js-client";
 import {loadBridge} from "@johannes-lindgren/storyblok-js";
+import {usePreview} from "@src/context";
+import {usePreviewToken} from "@src/context/preview-context";
 
 type StoryblokContextData = {
     story: Story | undefined
-    preview: boolean
 }
 
 const StoryblokContext = createContext<StoryblokContextData>({
     story: undefined,
-    preview: false,
 })
 
 type StoryblokContextProps = {
     story?: StoryData
-    previewToken?: string | null
-    publicToken?: string | null
 } & Pick<GetStoryOptions, 'resolve_links' | 'resolve_relations'>
 
 const useStoryblokContext = () => (
@@ -40,12 +38,6 @@ const useStoryblokContext = () => (
 // or directly set the context with the <StoryblokContextProvider>
 const useStory = () => (
     useStoryblokContext().story
-)
-
-// Returns the story from the context. To set the context, use the <Story> component from makeComponents()
-// or directly set the context with the <StoryblokContextProvider>.
-const usePreview = () => (
-    useStoryblokContext().preview
 )
 
 /**
@@ -60,13 +52,12 @@ const useStoryblokClient = (accessToken: string | undefined): ContentDeliveryCli
 
 const useStoryblok = ({
                           story: initialStory,
-                          previewToken,
                           resolve_relations,
                           resolve_links,
-                          publicToken
                       }: StoryblokContextProps): StoryblokContextData => {
     const [story, setStory] = useState(initialStory);
-    const preview: boolean = (previewToken !== undefined) && (story !== undefined) && isDraft(story)
+    const preview = usePreview()
+    const previewToken = usePreviewToken()
 
     if((previewToken !== undefined) && (story !== undefined) && isPublished(story)){
         console.warn('A preview token has been supplied together with a published story. If you intend to enable preview, provide a draft story instead. Otherwise, consider omitting the preview token.')
@@ -81,7 +72,7 @@ const useStoryblok = ({
     //  Although this should rather be done in the Storyblok editor, and not in-app
     const {current: language} = useRef(initialStory?.lang)
 
-    const storyblokClient = useStoryblokClient(previewToken ?? publicToken ?? undefined)
+    const storyblokClient = useStoryblokClient(previewToken ?? undefined)
 
     // TODO load bridge once and manage a list of subscribers
     const initEventListeners = (storyblokBridge: StoryblokBridgeV2) => {
@@ -92,6 +83,7 @@ const useStoryblok = ({
 
         // live update the story on input events
         storyblokBridge.on('input', (event: StoryblokEventPayload) => {
+            console.log(`input from ${event.story?.name}`)
             // check if the ids of the event and the passed story match
             if (story && event.story.content._uid === story.content._uid) {
                 // change the story content through the setStory function
@@ -147,7 +139,6 @@ const useStoryblok = ({
 
     return {
         story: story,
-        preview,
     };
 }
 
@@ -166,4 +157,4 @@ const StoryblokContextProvider: FunctionComponent<StoryblokContextProps> = ({
     )
 }
 
-export {useStory, usePreview, StoryblokContextProvider}
+export {useStory, StoryblokContextProvider}

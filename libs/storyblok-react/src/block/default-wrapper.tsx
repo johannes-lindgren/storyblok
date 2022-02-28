@@ -1,6 +1,6 @@
 import {useEffect, useState} from "react";
 import {useEditable} from "@src/block/use-editable";
-import {usePreview} from "@src/story";
+import {usePreview} from "@src/context";
 import ErrorBoundary from "@src/helpers/error-boundary";
 import {BlockWrapperComponent} from "@src/block/block-wrapper";
 

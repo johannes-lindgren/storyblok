@@ -1,7 +1,7 @@
 // TODO only render in preview mode: we don't want a huge red error box be displayed on the site
 import {RichTextNodeComponent} from "@src/rich-text/rich-text-node-component";
 import {Alert} from "@src/helpers/alert";
-import {usePreview} from "@src/story";
+import {usePreview} from "@src/context";
 
 export const DefaultFallback: RichTextNodeComponent = ({node}) => {
     const preview = usePreview()

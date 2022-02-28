@@ -4,8 +4,7 @@ import {
 import {
     RichTextComponent,
 } from "@src/rich-text/rich-text-component";
-import { makeStoryComponent, StoryComponent} from "@src/story/story-component";
-import {StoryblokOptionsStatic} from "@src/helpers/storyblok-options";
+import {makeStoryComponent, StoryComponent} from "@src/story/story-component";
 import {BlockComponentFactoryOptions, makeDynamicBlockComponent} from "@src/block";
 import {
     makeRichTextComponent,
@@ -16,7 +15,7 @@ import {
 type MakeComponentOptions = {
     blockOptions?: BlockComponentFactoryOptions
     richTextOptions?: RichTextComponentFactoryOptions
-} & StoryblokOptionsStatic
+}
 
 type StoryblokComponents = {
     Block: BlockComponent
@@ -42,10 +41,9 @@ type MakeStoryblokComponents = (options: MakeComponentOptions) => StoryblokCompo
  * export {} = makeStoryblokComponents({ blockOptions: { mapping: { page: (props) => <div>{props.block.title}</div>}}})
  * @param richTextOptions
  * @param blockOptions
- * @param staticOptions
  * @returns a .
  */
-export const makeStoryblokComponents: MakeStoryblokComponents = ({richTextOptions= {}, blockOptions = {}, ...staticOptions}) => {
+export const makeStoryblokComponents: MakeStoryblokComponents = ({richTextOptions= {}, blockOptions = {}}) => {
     const Block = makeDynamicBlockComponent(blockOptions)
     const defaultMappingOverride = {
         mappingOverride: makeBlockMapping(Block)
@@ -55,10 +53,12 @@ export const makeStoryblokComponents: MakeStoryblokComponents = ({richTextOption
         ...(richTextOptions.mappingOverride ?? {}),
     }
     const RichText = makeRichTextComponent(richTextOptionsOther)
-    const Story = makeStoryComponent(Block, staticOptions)
+    const DynamicStory = makeStoryComponent(({story}) => (
+        <Block block={story.content} />
+    ))
     return {
         Block,
         RichText,
-        Story,
+        Story: DynamicStory,
     }
 }
