@@ -18,9 +18,9 @@ type MakeComponentOptions = {
 }
 
 type StoryblokComponents = {
-    Block: BlockComponent
+    DynamicBlock: BlockComponent
     RichText: RichTextComponent
-    Story: StoryComponent
+    DynamicStory: StoryComponent
 }
 
 
@@ -44,21 +44,22 @@ type MakeStoryblokComponents = (options: MakeComponentOptions) => StoryblokCompo
  * @returns a .
  */
 export const makeStoryblokComponents: MakeStoryblokComponents = ({richTextOptions= {}, blockOptions = {}}) => {
-    const Block = makeDynamicBlockComponent(blockOptions)
-    const defaultMappingOverride = {
-        mappingOverride: makeBlockMapping(Block)
+    const DynamicBlock = makeDynamicBlockComponent(blockOptions)
+    // Use the dynamic block component to render blocks within Rich Text
+    const defaultRichTextMappingOverride = {
+        mappingOverride: makeBlockMapping(DynamicBlock)
     }
     const richTextOptionsOther: RichTextComponentFactoryOptions = {
-        ...defaultMappingOverride,
+        ...defaultRichTextMappingOverride,
         ...(richTextOptions.mappingOverride ?? {}),
     }
     const RichText = makeRichTextComponent(richTextOptionsOther)
     const DynamicStory = makeStoryComponent(({story}) => (
-        <Block block={story.content} />
+        <DynamicBlock block={story.content} />
     ))
     return {
-        Block,
+        DynamicBlock,
         RichText,
-        Story: DynamicStory,
+        DynamicStory,
     }
 }

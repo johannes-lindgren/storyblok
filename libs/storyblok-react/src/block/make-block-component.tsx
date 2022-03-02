@@ -4,10 +4,10 @@ import {Block} from "@johannes-lindgren/storyblok-js";
 
 type R = Record<string, unknown>
 
-type BlockComponentProps<BlockData extends R = R> = { block: Block<BlockData> }
-type BlockComponent<BlockData extends R = R, OtherProps extends R = R> = (props: OtherProps & BlockComponentProps<BlockData>) => JSX.Element
+type BlockComponentProps<BlockData extends R = {}> = { block: Block<BlockData> }
+type BlockComponent<BlockData extends R = {}, OtherProps extends R = {}> = (props: OtherProps & BlockComponentProps<BlockData>) => JSX.Element
 
-type BlockComponentFactory = <BlockData extends R = R, OtherProps extends R = R, >(Component: BlockComponent<BlockData, OtherProps>) => BlockComponent<BlockData, OtherProps>
+type BlockComponentFactory = <BlockData extends R = {}, OtherProps extends R = {}, >(Component: BlockComponent<BlockData, OtherProps>) => BlockComponent<BlockData, OtherProps>
 
 const makeBlockComponent: BlockComponentFactory = (BlockComponent) => (
     (props) => (

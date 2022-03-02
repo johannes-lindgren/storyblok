@@ -30,7 +30,12 @@ const makeDynamicBlockComponent: BlockComponentFactory = ({
                                                        Fallback = DefaultFallback,
                                                    }) => (
     function DynamicBlockComponent({block}) {
+        if(!block){
+            return <></>
+        }
         const BlockComponent = mapping[block.component]
+        console.log('looking for ', block.component)
+        console.log('from', mapping)
         const Component = BlockComponent ?? Fallback
         return (
             <Component block={block}/>
