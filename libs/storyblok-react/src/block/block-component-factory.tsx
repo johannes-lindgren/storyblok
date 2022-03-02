@@ -1,4 +1,4 @@
-import type {BlockComponent} from "@src/block/block-component";
+import type {BlockComponent} from "@src/block";
 import {DefaultFallback} from "@src/block/default-fallback";
 
 /**

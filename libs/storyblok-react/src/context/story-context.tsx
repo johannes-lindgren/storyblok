@@ -82,14 +82,15 @@ const usePreviewedStory = ({
             // check if the ids of the event and the passed story match
             if (story && event.story.content._uid === story.content._uid) {
                 // change the story content through the setStory function
-                console.log(`input from`, event.story?.name)
+                console.log(`input from story ${event.story?.name}`)
                 setStory(event.story);
             }
         });
 
         // TODO this loads the draft, but not unsaved changes. These will only be visible on first input event
+        // TODO why is this callback invoked twice for each bridge? (the bridge is subscribed to the correct # times)
         storyblokBridge.on('enterEditmode', (event: StoryblokEventPayload) => {
-            console.log(`enterEditmode for`, event.storyId)
+            console.log(`enter editmode for story id=${event.storyId}`)
             if (!event.storyId) {
                 console.error(`Intercepted 'enterEditmode' event that doesn't contain a story`)
                 return

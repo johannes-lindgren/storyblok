@@ -3,29 +3,31 @@ import {StoryContextProvider, useStory} from "@src/context/story-context";
 import {Alert} from "@src/helpers/alert";
 import {usePreview} from "@src/context";
 
-// TODO deprecate this
-
 type StoryComponentProps<C extends Record<string, unknown> = Record<string, unknown>> = {
     story: StoryData<C>
 }
-type StoryComponent<C extends Record<string, unknown> = Record<string, unknown>> = (props: StoryComponentProps<C>) => JSX.Element
 
-type StoryComponentFactory = <C extends Record<string, unknown> = Record<string, unknown>, >(Component: StoryComponent<C>) => StoryComponent<C>
+type R = Record<string, unknown>
+type StoryComponent<BlockData extends R = R, OtherProps extends R = R> = (props: OtherProps & StoryComponentProps<BlockData>) => JSX.Element
+
+type StoryComponentFactory = <BlockData extends R = R, OtherProps extends R =R, >(Component:  StoryComponent<BlockData, OtherProps>) => StoryComponent<BlockData, OtherProps>
 
 const makeStoryComponent: StoryComponentFactory = (Story) => (
     ({story, ...props}) => {
         return (
             <StoryContextProvider story={story}>
-                <ContextualStory Story={Story as StoryComponent} {...props}/>
+                <ContextualStory Story={Story as StoryComponent} props={props}/>
             </StoryContextProvider>
         )
     }
 )
 
-const ContextualStory = ({Story, ...props}: {
+
+const ContextualStory = ({Story, props}: {
     Story: StoryComponent
+    props: any
 }): JSX.Element => {
-    const story = useStory() // TODO cheating ;)
+    const story = useStory()
     const preview = usePreview()
     if (!story) {
         // Should not happen, since this component is not exported and is only used by the factory method above

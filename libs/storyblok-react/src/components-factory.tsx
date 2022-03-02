@@ -1,10 +1,10 @@
 import {
     BlockComponent
-} from "@src/block/block-component";
+} from "@src/block";
 import {
     RichTextComponent,
 } from "@src/rich-text/rich-text-component";
-import {makeStoryComponent, StoryComponent} from "@src/story/story-component";
+import {makeStoryComponent, StoryComponent} from "@src/story/story-component-factory";
 import {BlockComponentFactoryOptions, makeDynamicBlockComponent} from "@src/block";
 import {
     makeRichTextComponent,
