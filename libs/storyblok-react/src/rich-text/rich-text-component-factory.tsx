@@ -1,5 +1,5 @@
 import {RichTextNodeComponent} from "@src/rich-text/rich-text-node-component";
-import {DefaultFallback} from "@src/rich-text/default-fallback";
+import {DefaultRichTextFallback} from "@src/rich-text/default-rich-text-fallback";
 import {
     BlockNode,
     BlockquoteNode,
@@ -47,8 +47,8 @@ type RichTextComponentMapping = Record<string, RichTextNodeComponent<any>> & {
 }
 
 type RichTextComponentFactoryOptions = {
-    mappingOverride?: Partial<RichTextComponentMapping>,
-    Fallback?: RichTextNodeComponent,
+    richTextComponentMapping?: Partial<RichTextComponentMapping>,
+    RichTextFallback?: RichTextNodeComponent,
 }
 
 type RichTextTextComponentFactory = (options?: RichTextComponentFactoryOptions) => RichTextComponent
@@ -57,8 +57,8 @@ type RichTextTextComponentFactory = (options?: RichTextComponentFactoryOptions) 
  * Creates a component for rendering rich text. Use this if you need to render blocks within rich text content.
  */
 const makeRichTextComponent: RichTextTextComponentFactory = ({
-                                                                 mappingOverride = {},
-                                                                 Fallback = DefaultFallback
+                                                                 richTextComponentMapping = {},
+                                                                 RichTextFallback = DefaultRichTextFallback
                                                              } = {}) => {
     const DefaultMapping = {
         doc: Doc,
@@ -73,16 +73,16 @@ const makeRichTextComponent: RichTextTextComponentFactory = ({
         horizontal_rule: HorizontalRule,
         hard_break: HeardBreakRule,
         image: Image,
-        blok: Fallback,
+        blok: RichTextFallback,
     }
 
     const Mapping: RichTextComponentMapping = {
         ...DefaultMapping,
-        ...mappingOverride,
+        ...richTextComponentMapping,
     }
 
     const DynamicRichTextNode: RichTextNodeComponent = ({node, RichTextNode}) => {
-        const Component = (node && Mapping[node.type]) ?? Fallback
+        const Component = (node && Mapping[node.type]) ?? RichTextFallback
         return (
             <Component node={node} RichTextNode={RichTextNode}/>
         )

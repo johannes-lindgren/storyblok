@@ -2,7 +2,7 @@ import {BlockComponent} from "@src/block";
 import {usePreview} from "@src/context";
 import {Alert} from "@src/helpers/alert";
 
-const DefaultFallback: BlockComponent = ({block}) => {
+const DefaultBlockFallback: BlockComponent = ({block}) => {
     const preview = usePreview()
     return (
         <Alert level={preview ? 'error' : 'warning'}>
@@ -12,4 +12,4 @@ const DefaultFallback: BlockComponent = ({block}) => {
     )
 }
 
-export {DefaultFallback}
+export {DefaultBlockFallback}

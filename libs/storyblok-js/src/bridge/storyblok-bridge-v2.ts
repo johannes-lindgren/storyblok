@@ -18,7 +18,7 @@ type StoryblokBridgeV2 = {
 // appends the bridge script tag to our document
 // see https://www.storyblok.com/docs/guide/essentials/visual-editor#installing-the-storyblok-js-bridge
 // TODO figure out a way to load the script without polluting the global namespace
-const loadBridge = async (resolveRelations: string[]): Promise<StoryblokBridgeV2> => {
+const loadBridge = async (): Promise<StoryblokBridgeV2> => {
     if(typeof document === 'undefined' || typeof window === 'undefined'){
         return Promise.reject(new Error('This function should only be called in the browser'))
     }

@@ -3,7 +3,7 @@ import {RichTextNodeComponent} from "@src/rich-text/rich-text-node-component";
 import {Alert} from "@src/helpers/alert";
 import {usePreview} from "@src/context";
 
-export const DefaultFallback: RichTextNodeComponent = ({node}) => {
+export const DefaultRichTextFallback: RichTextNodeComponent = ({node}) => {
     const preview = usePreview()
     return (
         <Alert level={preview ? 'error' : 'warning'}>

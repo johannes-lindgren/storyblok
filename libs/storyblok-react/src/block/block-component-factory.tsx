@@ -1,5 +1,5 @@
-import type {BlockComponent} from "@src/block";
-import {DefaultFallback} from "@src/block/default-fallback";
+import type {BlockComponent, WithComponentName} from "@src/block";
+import {DefaultBlockFallback} from "@src/block/default-block-fallback";
 
 /**
  * maps Storyblok component names to React components
@@ -13,30 +13,37 @@ type BlockComponentMapping = Record<string, BlockComponent | undefined>
  * @prop Wrapper A component that will wrap
  */
 type BlockComponentFactoryOptions = {
-    mapping?: BlockComponentMapping
-    Fallback?: BlockComponent
+    blockComponents?: WithComponentName<BlockComponent>[]
+    BlockFallback?: BlockComponent
 }
 
 type BlockComponentFactory = (options: BlockComponentFactoryOptions) => BlockComponent
 
+const makeComponentMapping = (components: WithComponentName<BlockComponent>[]): BlockComponentMapping => (
+    components?.reduce((mapping, Component) => {
+        return Object.assign(
+            mapping,
+            {
+                [Component.componentName]: Component
+            }
+        )
+    }, {})
+)
+
 /**
- * @param mapping
- * @param Fallback
- * @param Wrapper
  * @returns A React component for rendering Storyblok blocks dynamically
  */
 const makeDynamicBlockComponent: BlockComponentFactory = ({
-                                                       mapping = {},
-                                                       Fallback = DefaultFallback,
+                                                       blockComponents = [],
+                                                       BlockFallback = DefaultBlockFallback,
                                                    }) => (
     function DynamicBlockComponent({block}) {
         if(!block){
             return <></>
         }
+        const mapping = makeComponentMapping(blockComponents)
         const BlockComponent = mapping[block.component]
-        console.log('looking for ', block.component)
-        console.log('from', mapping)
-        const Component = BlockComponent ?? Fallback
+        const Component = BlockComponent ?? BlockFallback
         return (
             <Component block={block}/>
         )
