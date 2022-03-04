@@ -5,14 +5,14 @@ export type Table = {
     tbody: TableRow[]
 } | "" // NOTE: The field value can be an empty string
 
-export type TableHeaderCell = Block<{}, '_table_head'> & {
-    value: string
+export type TableHeaderCell = Block<{component: '_table_head'}> & {
+    value: string // Value is non-nullable
 }
 
-export type TableRow = Block<{}, '_table_row'> & {
-    body: TableCell[]
+export type TableRow = Block<{component: '_table_row'}> & {
+    body: TableCell[] // Body  is non-nullable
 }
 
-export type TableCell = Block<{}, '_table_col'> & {
-    value: string
+export type TableCell = Block<{component: '_table_col'}> & {
+    value: string // Value is non-nullable
 }
