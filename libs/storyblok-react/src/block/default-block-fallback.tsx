@@ -1,8 +1,8 @@
-import {BlockComponent} from "@src/block";
+import {makeBlockComponent} from "@src/block";
 import {usePreview} from "@src/context";
 import {Alert} from "@src/helpers/alert";
 
-const DefaultBlockFallback: BlockComponent = ({block}) => {
+const DefaultBlockFallback = makeBlockComponent( ({block}) => {
     const preview = usePreview()
     return (
         <Alert level={preview ? 'error' : 'warning'}>
@@ -10,6 +10,6 @@ const DefaultBlockFallback: BlockComponent = ({block}) => {
             component has been defined.</>}
         </Alert>
     )
-}
+})
 
-export {DefaultBlockFallback}
+export { DefaultBlockFallback }

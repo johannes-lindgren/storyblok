@@ -63,7 +63,7 @@ export type FeatureData = {
 }
 ```
 
-More [information in the section below](#typescript).
+More [details below](#typescript).
 
 ### Content Components
 
@@ -72,14 +72,19 @@ Create your React components for rendering content with `createBlockComponent()`
 ```typescript jsx
 import {makeBlockComponent} from "@johannes-lindgren/storyblok-react";
 
-export const Feature = makeBlockComponent<FeatureData>('feature', ({block}) => (
+export const Feature = makeBlockComponent<FeatureData>(({block}) => (
     <div className="feature">
         <h2>{block.headline}</h2>
     </div>
-))
+), 'feature')
 ```
 
-Use the component as such
+This will ensure that your app is nicely integrated with the Storyblok visual editor. The type of the `block` attribute is of the same type of the generic argument to `makeBlockComponent()`, with a few changes:
+
+* The `_uid` and `component` properties are automatically added.
+* All properties of the type argument are made optional. (Even if you define your your component fields to be mandatory, they can still be missing during the preview.)
+
+Use the component as such:
 
 ```typescript jsx
 <Feature block={story.content as Feature}/>
@@ -87,7 +92,7 @@ Use the component as such
 
 ### Render Dynamically
 
-By creating your block components with `makeBlockComponent()`, you can access the `<DynamicBlock/>` API:
+By creating your block components with `makeBlockComponent()`, you unlock the dynamic Storyblok components:
 
 ```typescript jsx
 export const { DynamicBlock } = makeStoryblokComponents({
@@ -95,7 +100,7 @@ export const { DynamicBlock } = makeStoryblokComponents({
 })
 ```
 
-Now you can render your content dynamically as such:
+Now you can render your content dynamically with:
 
 ```typescript jsx
 <DynamicBlock block={story.content}/>
@@ -107,7 +112,7 @@ If no corresponding component has been registered in `makeStoryblokComponents()`
 `makeStoryblokComponents()` also returns the `<DynamicStory/>` component:
 
 ```typescript jsx
-export const {DynamicStory} = makeStoryblokComponents({
+export const { DynamicStory } = makeStoryblokComponents({
     blockComponents: [Feature],
 })
 ```
@@ -164,37 +169,7 @@ export const Section = makeBlockComponent<SectionData>(
 )
 ```
 
-If the rich text contain embedded blocks, these will be rendered within the rich text, presuming that corresponding block components have been registered within `makeStoryblokComponents()`.
-
-### Layouts
-
-If you want to define your layouts with stories, you will typically need to pass a child prop to the story component.
-
-```typescript jsx
-export type LayoutData = {
-    header: HeaderBlock[]
-    footer: FooterBlock[]
-}
-
-export const LayoutStory = makeStoryComponent<LayoutData, { children?: ReactNode }>(({story, children}) => (
-    <Layout block={story.content}>
-        {children}
-    </Layout>
-))
-
-export const Layout = makeBlockComponent<LayoutData, { children?: ReactNode }>(({block, children}) => (
-    <>
-        <DynamicBlock block={block?.header?.[0]}/>
-        <Toolbar/>
-        <Main>
-            {children}
-        </Main>
-        <DynamicBlock block={block?.footer?.[0]}/>
-    </>
-))
-```
-
-Use the story component instead of the Layout block, or the preview will not work!
+If the end-user adds blocks to the rich text, these will be rendered within the rich text, presuming that corresponding block components have been registered within `makeStoryblokComponents()`.
 
 ## Details
 
@@ -243,6 +218,31 @@ const preview = usePreview()
 
 This can be useful to display different information depending on the end-user. For example, components that renders with error can be hidden in non-preview mode, but indicate the error with bright colors in preview mode. This is what the default fallback component does.
 
+### Custom Fallback Components
+
+You can substitute the built-in default fallback components to your own.
+
+Create a component as such:
+
+```typescript jsx
+export const MyBlockFallback = makeBlockComponent(({block}) => (
+    <Alert severity='error'>Unknown component type `{block.component}`</Alert>
+))
+```
+
+We can omit the second argument, as this React component does not correspond to a specific Storyblok component.
+
+Use the fallback in your dynamic components as such:
+
+```typescript jsx
+export const {DynamicStory, DynamicBlock, RichText} = makeStoryblokComponents({
+    blockComponents: [],
+    BlockFallback: MyBlockFallback
+})
+```
+
+Similarly, you can create your own fallbacks for Rich Text nodes. 
+
 ### Story Components
 
 `makeStoryComponent()` works similar to `makeBlockComponent()`, but it also enables live-updates when the end-user is in preview.
@@ -253,13 +253,28 @@ Any components that are rendered within a story components can access the story 
 const story = useStory()
 ```
 
+If you want to render story properties other than `content` - for example the `name`, then create your own custom story component with `makeStoryComponent()`:
+
+```typescript jsx
+export const DynamicStory = makeStoryComponent(({story, children}) => (
+    <article>
+      <h1>{story.name}</h1>
+      <DynamicBlock block={story.content}/>
+    </article>
+))
+```
+
+Now you can use this component instead of the one from `makeStoryblokComponents()`.
+
 ## TypeScript
 
 See `@johannes-lindgren/storyblok-js` for the various Storyblok types.
 
-## Examples
+## Examples & Use Cases
 
-### Nested Blocs
+Some common use cases are outlined in these subsections.
+
+### Nested Blocks
 
 If you need to render a block within a dynamic block, use `<DynamicBlock/>` (from `makeStoryblokComponents()`):
 
@@ -276,3 +291,33 @@ export const Grid = makeBlockComponent<GridData>(({block}) => (
     </>
 ))
 ```
+
+### Layouts
+
+If you want to define your layouts with stories, you will typically need to pass a child prop to the story component.
+
+```typescript jsx
+export type LayoutData = {
+    header: HeaderBlock[]
+    footer: FooterBlock[]
+}
+
+export const LayoutStory = makeStoryComponent<LayoutData, { children?: ReactNode }>(({story, children}) => (
+    <Layout block={story.content}>
+        {children}
+    </Layout>
+))
+
+export const Layout = makeBlockComponent<LayoutData, { children?: ReactNode }>(({block, children}) => (
+    <>
+        <DynamicBlock block={block?.header?.[0]}/>
+        <Toolbar/>
+        <Main>
+            {children}
+        </Main>
+        <DynamicBlock block={block?.footer?.[0]}/>
+    </>
+))
+```
+
+Use the story component instead of the Layout block, or the preview will not work!
