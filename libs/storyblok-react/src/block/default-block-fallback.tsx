@@ -1,4 +1,4 @@
-import {makeBlockComponent} from "@src/block";
+import {makeBlockComponent} from "@src/block/make-block-component";
 import {usePreview} from "@src/context";
 import {Alert} from "@src/helpers/alert";
 

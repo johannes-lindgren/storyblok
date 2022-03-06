@@ -1,7 +1,7 @@
-import {StoryComponent} from "@src/story/story-component-factory";
 import {StoryContextProvider, usePreview, useStory} from "@src/context";
 import {Alert} from "@src/helpers/alert";
 import {Story} from "@johannes-lindgren/storyblok-js";
+import {StoryComponent} from "@src/story/make-story-component";
 
 // TODO decide whether this experimental feature should be included
 

@@ -15,7 +15,7 @@ import {
 } from "@johannes-lindgren/storyblok-js";
 import {StoryData} from "storyblok-js-client";
 import {loadBridge} from "@johannes-lindgren/storyblok-js";
-import {usePreview} from "@src/context/index";
+import {usePreview} from "@src/context/preview-context";
 import {
     usePreviewToken,
     useResolveRelations,

@@ -10,7 +10,7 @@ import {
     OrderedListNode,
     ParagraphNode,
     RichTextNode,
-    TextNode
+    TextNode,
 } from "@johannes-lindgren/storyblok-js";
 import {createElement} from "react";
 import {RichTextNodeComponent} from "@src/rich-text/rich-text-node-component";

@@ -4,15 +4,16 @@ import {
 import {
     RichTextComponent,
 } from "@src/rich-text/rich-text-component";
-import {makeStoryComponent, StoryComponent} from "@src/story/story-component-factory";
 import {BlockComponentFactoryOptions, makeDynamicBlockComponent} from "@src/block";
 import {
     makeRichTextComponent,
     RichTextComponentFactoryOptions,
     RichTextComponentMapping
 } from "@src/rich-text/rich-text-component-factory";
+import {StoryComponent} from "@src/story/make-story-component";
+import {makeDynamicStoryComponent, StoryComponentFactoryOptions} from "@src/story/dynamic-story-component";
 
-type MakeComponentOptions = BlockComponentFactoryOptions & RichTextComponentFactoryOptions
+type MakeComponentOptions = BlockComponentFactoryOptions & RichTextComponentFactoryOptions & StoryComponentFactoryOptions
 
 type StoryblokComponents = {
     DynamicBlock: BlockComponent
@@ -37,7 +38,7 @@ type MakeStoryblokComponents = (options: MakeComponentOptions) => StoryblokCompo
  * Invoke this function once to build your React components for Storyblok. Use like:
  */
 export const makeStoryblokComponents: MakeStoryblokComponents = (options) => {
-    const {blockComponents, BlockFallback, RichTextFallback, richTextComponentMapping} = options
+    const {blockComponents, BlockFallback, storyComponents, StoryFallback, RichTextFallback, richTextComponentMapping} = options
     const blockOptions: BlockComponentFactoryOptions = {blockComponents, BlockFallback}
 
     const DynamicBlock = makeDynamicBlockComponent(blockOptions)
@@ -52,9 +53,11 @@ export const makeStoryblokComponents: MakeStoryblokComponents = (options) => {
         RichTextFallback,
     }
     const RichText = makeRichTextComponent(richTextOptions)
-    const DynamicStory = makeStoryComponent(({story}) => (
-        <DynamicBlock block={story.content} />
-    ))
+    const DynamicStory = makeDynamicStoryComponent({
+        storyComponents,
+        blockComponents,
+        StoryFallback,
+    })
     return {
         DynamicBlock,
         RichText,

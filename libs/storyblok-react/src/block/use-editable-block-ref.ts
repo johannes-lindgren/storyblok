@@ -42,7 +42,8 @@ const useEditableData = (block: Block): EditableData | undefined => {
     return makeEditableData(block, story)
 }
 
-const useEditable = <HtmlElementType extends HTMLElement, >(block: Block): RefObject<HtmlElementType> => {
+// TODO rename to useClickableBlockRef
+const useEditableBlockRef = <HtmlElementType extends HTMLElement, >(block: Block): RefObject<HtmlElementType> => {
     const ref = useRef<HtmlElementType>(null)
     const editableData = useEditableData(block)
 
@@ -74,4 +75,4 @@ const useEditable = <HtmlElementType extends HTMLElement, >(block: Block): RefOb
     return ref
 }
 
-export {useEditable}
+export {useEditableBlockRef}

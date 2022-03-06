@@ -1,1 +1,1 @@
-export * from './story-component-factory'
+export * from "@src/story/make-story-component";

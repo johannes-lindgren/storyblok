@@ -1,5 +1,5 @@
 import {useEffect, useState} from "react";
-import {useEditable} from "@src/block/use-editable";
+import {useEditableBlockRef} from "@src/block/use-editable-block-ref";
 import {usePreview} from "@src/context";
 import ErrorBoundary from "@src/helpers/error-boundary";
 import {BlockWrapperComponent} from "@src/block/block-wrapper";
@@ -22,7 +22,7 @@ const mountedStyle = {
  * In preview mode, the content will be editable. Provides an error boundary.
  */
 const DefaultWrapper: BlockWrapperComponent = ({block, children}) => {
-    const ref = useEditable<HTMLDivElement>(block)
+    const ref = useEditableBlockRef<HTMLDivElement>(block)
     const preview = usePreview()
 
     // Include a "grow" transition when the component is added to the DOM

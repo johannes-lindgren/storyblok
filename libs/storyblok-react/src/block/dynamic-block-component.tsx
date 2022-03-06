@@ -1,4 +1,5 @@
-import type {BlockComponent, WithComponentName} from "@src/block";
+import type {BlockComponent} from "@src/block";
+import type {WithComponentName} from "@src/with-component-name";
 import {DefaultBlockFallback} from "@src/block/default-block-fallback";
 
 /**
