@@ -4,7 +4,7 @@ import {
 import {
     RichTextComponent,
 } from "@src/rich-text/rich-text-component";
-import {BlockComponentFactoryOptions, makeDynamicBlockComponent} from "@src/block";
+import {BlockComponentFactoryOptions, makeDynamicBlockComponent} from "@src/block/dynamic-block-component";
 import {
     makeRichTextComponent,
     RichTextComponentFactoryOptions,
