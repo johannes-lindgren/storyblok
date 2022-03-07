@@ -7,18 +7,18 @@ import {Email, LocalPhone, LocationOn} from "@mui/icons-material";
 import Paper from "@mui/material/Paper";
 import {BlockComponent, makeBlockComponent} from "@johannes-lindgren/storyblok-react";
 import {DynamicBlock, RichText} from "@src/components/dynamic-components";
-import {ImageAsset, Block as BlockData, RichText as RichTextData} from "@johannes-lindgren/storyblok-js";
+import {ImageAssetData, Block, RichTextData} from "@johannes-lindgren/storyblok-js";
 import {FunctionComponent} from "react";
 
 type ResumeData = {
-    profilePicture: ImageAsset
+    profilePicture: ImageAssetData
     fullName: string
     jobTitle: string
     phoneNumber: string
     emailAddress: string
     location: string
     summary: RichTextData
-    employmentHistory: BlockData    []
+    employmentHistory: Block    []
 }
 
 export const Resume = makeBlockComponent<ResumeData>( ({block}) => (

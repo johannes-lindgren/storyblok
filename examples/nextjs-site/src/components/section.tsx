@@ -1,6 +1,6 @@
 import { makeBlockComponent} from "@johannes-lindgren/storyblok-react";
 import Typography from "@mui/material/Typography";
-import {RichText as RichTextData} from "@johannes-lindgren/storyblok-js";
+import {RichTextData} from "@johannes-lindgren/storyblok-js";
 import {RichText} from "@src/components/dynamic-components";
 
 export type SectionData = {

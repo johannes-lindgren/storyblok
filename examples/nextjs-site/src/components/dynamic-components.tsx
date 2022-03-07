@@ -9,10 +9,11 @@ import {Footer} from "@src/components/footer";
 import {Fallback} from "@src/components/fallback";
 import {NavItem} from "@src/components/navItem";
 import {Article} from "@src/components/article";
+import {AuthorStory} from "@src/components/author";
 // import {Layout} from "@resume-builder/components/layout";
 
 export const resolve_links = 'story'
-export const resolve_relations = ['page.linkedSingleOption', 'page.linkedMultiOptions']
+export const resolve_relations = ['article.authors']
 
 // console.log('Layout', Layout) // TODO why is Layout undefined on the client??? Other components are not. SSR works as expected.
 
@@ -32,6 +33,7 @@ export const {DynamicStory, DynamicBlock, RichText} = makeStoryblokComponents({
     ],
     storyComponents: [
         Article,
+        AuthorStory,
     ],
     BlockFallback: Fallback
 })

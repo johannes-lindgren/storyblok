@@ -5,7 +5,7 @@ import {WithComponentName} from "@src/with-component-name"
 
 type R = Record<string, unknown>
 type BlockComponentProps<BlockData extends R = {}> = { block: Block<BlockData> }
-type BlockComponent<BlockData extends R = {}, OtherProps extends R = {}> = (props: OtherProps & BlockComponentProps<BlockData>) => JSX.Element
+type BlockComponent<BlockData extends R = {}, OtherProps extends R = {}> = (props: Partial<OtherProps> & BlockComponentProps<BlockData>) => JSX.Element
 
 function makeBlockComponent<BlockData extends R = {}, OtherProps extends R = {}, >(Component: BlockComponent<BlockData, OtherProps>, componentName: string): WithComponentName<BlockComponent<BlockData, OtherProps>>;
 function makeBlockComponent<BlockData extends R = {}, OtherProps extends R = {}, >(Component: BlockComponent<BlockData, OtherProps>): BlockComponent<BlockData, OtherProps>;
@@ -18,6 +18,7 @@ function makeBlockComponent<BlockData extends R = {}, OtherProps extends R = {},
  */
 function makeBlockComponent<BlockData extends R = {}, OtherProps extends R = {}, >(BlockComponent: BlockComponent<BlockData, OtherProps>, componentName?: string) {
     const BlockWithWrapper = (props: Parameters<typeof BlockComponent>[0]) => (
+        // TODO show fallback and log error when componentName !== block.component
         <DefaultWrapper block={props.block}>
             <BlockComponent {...props}/>
         </DefaultWrapper>

@@ -1,4 +1,4 @@
-import {Story} from "storyblok-js-client";
+import {Story} from "../story";
 
 type LinkData = UrlLinkData | StoryLinkData | EmailLinkData | AssetLinkData
 
@@ -10,13 +10,13 @@ type UrlLinkData = {
     cached_url: string
 }
 
-type StoryLinkData = {
+type StoryLinkData<D extends Record<string, unknown> = Record<string, unknown>> = {
     id: string
     url: string
     linktype: 'story'
     fieldtype: 'multilink'
     cached_url: string
-    story?: Story
+    story?: Story<D>
 }
 
 type EmailLinkData = {

@@ -1,7 +1,7 @@
 import {makeBlockComponent} from "@johannes-lindgren/storyblok-react";
 import {Alert, AlertColor, AlertTitle} from "@mui/material";
 import {RichText} from "@src/components/dynamic-components";
-import {RichText as RichTextData} from "@johannes-lindgren/storyblok-js"
+import {RichTextData} from "@johannes-lindgren/storyblok-js"
 
 export type AdmonitionType = 'tip' | 'note' | 'warning' | 'important'
 

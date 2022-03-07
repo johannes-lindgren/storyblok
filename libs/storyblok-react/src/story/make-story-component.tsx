@@ -3,6 +3,7 @@ import {Story as StoryData} from "@johannes-lindgren/storyblok-js";
 import {WithComponentName} from "@src/with-component-name"
 import {StoryContextProvider, usePreview, useStory} from "@src/context";
 import {Alert} from "@src/helpers/alert";
+import {DefaultWrapper} from "@src/block/default-wrapper";
 
 type R = Record<string, unknown>
 type StoryComponentProps<C extends Record<string, unknown> = Record<string, unknown>> = {
@@ -20,7 +21,9 @@ function makeStoryComponent<BlockData extends R = {}, OtherProps extends R = {},
  *
  */
 function makeStoryComponent<BlockData extends R = {}, OtherProps extends R = {}, >(StoryComponent: StoryComponent<BlockData, OtherProps>, componentName?: string) {
+    // TODO re-suse logic in makeStoryComponent and makeBlockComponent
     const StoryWithWrapper = ({story, ...props}: Parameters<typeof StoryComponent>[0]) => (
+        // TODO show fallback and log error when componentName !== story.content.component
         <StoryContextProvider story={story}>
             <ContextualStory Story={StoryComponent as StoryComponent} props={props}/>
         </StoryContextProvider>
@@ -54,7 +57,9 @@ const ContextualStory = ({Story, props}: {
         )
     }
     return (
-        <Story story={story} {...props}/>
+        <DefaultWrapper block={story.content}>
+            <Story story={story} {...props}/>
+        </DefaultWrapper>
     )
 }
 
