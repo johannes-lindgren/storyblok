@@ -4,6 +4,15 @@ import { red } from '@mui/material/colors';
 const STORYBLOK_DARK = '#1b243f'
 const STORYBLOK_GREEN = '#09b3af'
 
+const typography = {
+      subtitle1: {
+        fontSize: '2rem',
+      },
+      subtitle2: {
+        fontSize: '2rem',
+      },
+  } as const
+
 // Create a theme instance.
 const theme = createTheme({
   palette: {
@@ -18,6 +27,7 @@ const theme = createTheme({
       main: red.A400,
     },
   },
+  ...typography,
   components: {
     MuiLink: {
       styleOverrides: {
@@ -46,6 +56,7 @@ export const darkTheme = createTheme({
       paper: STORYBLOK_DARK,
     }
   },
+  ...typography,
   components: {
     MuiLink: {
       styleOverrides: {

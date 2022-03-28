@@ -1,5 +1,6 @@
 import Container from "@mui/material/Container";
 import {
+    Block,
     getImageSrc,
     RichTextData, StoryOptionData
 } from "@johannes-lindgren/storyblok-js";
@@ -10,15 +11,28 @@ import Typography from "@mui/material/Typography";
 import Paper from "@mui/material/Paper";
 import {AuthorData} from "@src/components/author";
 import {Story} from "@johannes-lindgren/storyblok-js";
-import {Avatar, AvatarGroup, Card, CardActions, CardHeader, IconButton, ThemeProvider, Tooltip} from "@mui/material";
-import {Edit, Facebook, Link, Mail, Twitter} from "@mui/icons-material";
+import {
+    Alert,
+    Avatar,
+    AvatarGroup,
+    Card,
+    CardActions,
+    CardHeader,
+    IconButton,
+    ThemeProvider,
+    Tooltip
+} from "@mui/material";
+import {Edit, Facebook, Link, Mail, PlayArrow, PlayCircle, Twitter} from "@mui/icons-material";
 import Box from "@mui/material/Box";
+import {darkTheme} from "@src/theme";
+import {DynamicBlock} from "@src/components/dynamic-components";
 
 export type ArticleData = {
     title: string
     subtitle: string
     body: RichTextData
     authors: StoryOptionData<AuthorData>[]
+    header: Block[]
 }
 
 export const Article = makeStoryComponent<ArticleData>(({story}) => {
@@ -28,20 +42,29 @@ export const Article = makeStoryComponent<ArticleData>(({story}) => {
         const authors = (article.authors?.filter(author => typeof author !== 'string') ?? []) as Story<AuthorData>[]
         const title = article.title ? article.title : story.name
         return (
-            <Container maxWidth='md'>
-                <Paper elevation={0} sx={{px: 6, py: 6, my: 6}}>
-                    {/* TODO navigate to category... Breadcrumbs? */}
-                    {/*<Hero title={title} />*/}
-                    <Typography variant='h2'>{title}</Typography>
-                    <Typography variant='subtitle1'>{article.subtitle}</Typography>
-                    <Header authors={authors} published={created}/>
-                    {/*<Typography variant='caption'>Published on {created.toLocaleString()}</Typography>*/}
-                    <RichText richText={article.body}/>
-                    <Typography variant='caption'>Last updated
-                        on {lastUpdate.toLocaleString()}
-                    </Typography>
-                </Paper>
-            </Container>
+            <Paper elevation={0} sx={{borderRadius: 0}}>
+                <ThemeProvider theme={darkTheme}>
+                    <Paper elevation={0} sx={{borderRadius: 0, pt: 8, pb: 24}}>
+                        <Container maxWidth='md'>
+                            {/* TODO navigate to category... Breadcrumbs? */}
+                            {/*<Hero title={title} />*/}
+                            <Typography variant='h2'>{title}</Typography>
+                            <Typography variant='subtitle1'>{article.subtitle}</Typography>
+                        </Container>
+                    </Paper>
+                </ThemeProvider>
+                <Container maxWidth='md' sx={{position: 'relative', marginTop: -20}}>
+                    {article.header?.map((h) => <DynamicBlock block={h} key={h._uid}/>)}
+                    <Paper elevation={0} sx={{py: 4, px: {xs: 0, sm: 4}}}>
+                        <Header authors={authors} published={created}/>
+                        {/*<Typography variant='caption'>Published on {created.toLocaleString()}</Typography>*/}
+                        <RichText richText={article.body}/>
+                        <Typography variant='caption'>Last updated
+                            on {lastUpdate.toLocaleString()}
+                        </Typography>
+                    </Paper>
+                </Container>
+            </Paper>
         )
     },
     'article'
@@ -55,13 +78,16 @@ const Header = ({authors, published}: { authors: Story<AuthorData>[], published:
     const publishedOn = published.toLocaleDateString(undefined, {day: 'numeric', month: 'long', year: 'numeric'})
     return (
         <Card elevation={0}>
+            <CardActions disableSpacing>
+                <Share/>
+            </CardActions>
             <CardHeader
                 avatar={
                     <Avatars authors={authors}/>
                 }
                 action={
                     <IconButton aria-label="settings">
-                        {/* TODO */}
+                        {/* TODO link to storyblok editor */}
                         <Tooltip title='Edit this article'>
                             <Edit/>
                         </Tooltip>
@@ -70,9 +96,6 @@ const Header = ({authors, published}: { authors: Story<AuthorData>[], published:
                 title={joinNames(authors.map(it => it.name))}
                 subheader={publishedOn}
             />
-            <CardActions disableSpacing>
-                <Share/>
-            </CardActions>
         </Card>
         // <Box my={2} display='flex' >
         //     <Avatars authors={authors}/>
@@ -108,10 +131,10 @@ const Share = () => (
     </Box>
 )
 
-const Avatars = ({authors}: { authors: StoryOptionsData<AuthorData> }) => {
+const Avatars = ({authors}: { authors: StoryOptionData<AuthorData>[] }) => {
     const authorStories = authors.filter(it => typeof it !== 'string') as Story<AuthorData>[]
     return (
-        <AvatarGroup max={10} sx={{justifyContent: 'flex-end'}}>
+        <AvatarGroup max={5} sx={{justifyContent: 'flex-end'}}>
             {authorStories.map(author => (
                 <AuthorAvatar story={author} key={author.uuid}/>
             ))}
@@ -129,7 +152,6 @@ export const AuthorAvatar = makeStoryComponent<AuthorData>(({story}) => (
             aria-label="author-photo"
             alt={story.content.photo?.alt ?? undefined}
             title={story.content.photo?.title}
-
             src={story.content.photo && getImageSrc(story.content.photo, {width: 100, height: 100, focal: 'smart'})}
         >
             {getInitials(story.name)}

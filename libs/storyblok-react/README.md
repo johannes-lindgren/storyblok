@@ -57,7 +57,7 @@ const story = await client.getStory('/dir/subdir/my-feature')
 If you use TypeScript, define your content types as such:
 
 ```typescript jsx
-export type FeatureData = {
+type FeatureData = {
     type: 'info' | 'error'
     body: string
 }
@@ -92,7 +92,7 @@ Use the component as such:
 
 ### Render Dynamically
 
-By creating your block components with `makeBlockComponent()`, you unlock the dynamic Storyblok components:
+Often you want to render a component of an unknown type. I.e. the `component` property of the given block is dynamic. By creating your block components with `makeBlockComponent()`, you unlock the dynamic Storyblok components:
 
 ```typescript jsx
 export const { DynamicBlock } = makeStoryblokComponents({
@@ -106,6 +106,8 @@ Now you can render your content dynamically with:
 <DynamicBlock block={story.content}/>
 ```
 If no corresponding component has been registered in `makeStoryblokComponents()`, a Fallback component will be displayed.
+
+Note that `makeBlockComponent()` has to be called with a second component for the mapping to work.
 
 ### Preview Mode
 

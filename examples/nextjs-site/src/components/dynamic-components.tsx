@@ -9,7 +9,11 @@ import {Footer} from "@src/components/footer";
 import {Fallback} from "@src/components/fallback";
 import {NavItem} from "@src/components/navItem";
 import {Article} from "@src/components/article";
-import {AuthorStory} from "@src/components/author";
+import {AuthorPreview} from "@src/components/author";
+import {Page} from "@src/components/page";
+import {Hero} from "@src/components/hero";
+import {Video} from "@src/components/video";
+import {Image} from "@src/components/image";
 // import {Layout} from "@resume-builder/components/layout";
 
 export const resolve_links = 'story'
@@ -30,10 +34,14 @@ export const {DynamicStory, DynamicBlock, RichText} = makeStoryblokComponents({
         // Layout,
         Footer,
         NavItem,
+        Hero,
+        Video,
+        Image,
     ],
     storyComponents: [
         Article,
-        AuthorStory,
+        AuthorPreview,
+        Page,
     ],
     BlockFallback: Fallback
 })

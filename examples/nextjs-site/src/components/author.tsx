@@ -9,20 +9,20 @@ export type AuthorData = {
     photo: ImageAssetData
 }
 
-export const AuthorStory = makeStoryComponent<AuthorData>(({story}) => (
+export const AuthorPreview = makeStoryComponent<AuthorData>(({story}) => (
     <Container maxWidth={'md'} sx={{my:8}}>
-        <AuthorBlock name={story.name} block={story.content} />
+        <AuthorCard name={story.name} block={story.content} />
     </Container>
 ), 'author')
 
-const AuthorBlock = makeBlockComponent<AuthorData, {name: string}>(({block, name}) => (
+const AuthorCard = makeBlockComponent<AuthorData, {name: string}>(({block, name}) => (
     <Card sx={{maxWidth: 'xs'}}>
         <CardHeader
             avatar={
                 <Avatar
                     sx={{bgcolor: red[500]}}
                     aria-label="author-photo"
-                    alt={block.photo?.alt ?? undefined}
+                    alt={block.photo?.alt || undefined}
                     title={block.photo?.title}
                     src={block.photo && getImageSrc(block.photo, {width: 100, height: 100, focal: 'smart'})}
                 >

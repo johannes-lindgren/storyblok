@@ -18,7 +18,7 @@ export type HeaderData = {
 }
 
 export const Header = makeBlockComponent<HeaderData>(({block}) => (
-        <AppBar>
+        <AppBar elevation={0}>
             <ThemeProvider theme={darkTheme}>
                 <Container maxWidth="xl">
                     <Toolbar>

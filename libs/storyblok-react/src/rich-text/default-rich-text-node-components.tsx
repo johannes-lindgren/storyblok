@@ -55,6 +55,7 @@ export const OrderedList: RichTextNodeComponent<OrderedListNode> = ({node, RichT
 export const Blockquote: RichTextNodeComponent<BlockquoteNode> = ({node, RichTextNode}) => (
     <blockquote><RichTextNodes nodes={node.content} RichTextNode={RichTextNode}/></blockquote>
 )
+// TODO add title that specifies the language
 export const CodeBlock: RichTextNodeComponent<CodeBlockNode> = ({node, RichTextNode}) => (
     <pre><code className={node.attrs.class}><RichTextNodes nodes={node.content} RichTextNode={RichTextNode}/></code></pre>
 )
