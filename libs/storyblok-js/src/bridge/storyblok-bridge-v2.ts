@@ -1,8 +1,8 @@
-declare global {
-    interface Window {
-        StoryblokBridge?: unknown
-    }
+
+declare const window: Window & typeof globalThis & {
+    StoryblokBridge?: unknown
 }
+
 type StoryblokBridgeEventType = 'customEvent' | 'published' | 'input' | 'change' | 'unpublished' | 'enterEditmode'
 type StoryblokBridgeEventCallback = (event: StoryblokEventPayload) => void
 type StoryblokBridgeOptions = {
@@ -19,7 +19,7 @@ type StoryblokBridgeV2 = {
 // see https://www.storyblok.com/docs/guide/essentials/visual-editor#installing-the-storyblok-js-bridge
 // TODO figure out a way to load the script without polluting the global namespace
 const loadBridge = async (): Promise<StoryblokBridgeV2> => {
-    if(typeof document === 'undefined' || typeof window === 'undefined'){
+    if (typeof document === 'undefined' || typeof window === 'undefined') {
         return Promise.reject(new Error('This function should only be called in the browser'))
     }
     const storyblokBridgeId = 'storyblokBridge'
@@ -29,8 +29,8 @@ const loadBridge = async (): Promise<StoryblokBridgeV2> => {
     //  In such scenario, the script would be loaded twice
     // TODO verify that the below works
     const existingScript = document.getElementById(storyblokBridgeId)
-    if(existingScript && !isBridgeInitialized()){
-        console.warn(`script#${storyblokBridgeId} already exists but it hasn't been loaded.` )
+    if (existingScript && !isBridgeInitialized()) {
+        console.warn(`script#${storyblokBridgeId} already exists but it hasn't been loaded.`)
         return new Promise((resolve) => {
             existingScript.addEventListener('load', () => {
                 return resolve(getBridgeClassFromWindow())
@@ -56,7 +56,6 @@ const loadBridge = async (): Promise<StoryblokBridgeV2> => {
 const isBridgeInitialized = (): boolean => (
     'StoryblokBridge' in window
 )
-
 const getBridgeClassFromWindow = (): StoryblokBridgeV2 => {
     if (typeof window.StoryblokBridge === 'undefined') {
         throw new Error("Failed to load StoryblokBridge")
@@ -64,4 +63,4 @@ const getBridgeClassFromWindow = (): StoryblokBridgeV2 => {
     return window.StoryblokBridge as StoryblokBridgeV2
 }
 
-export {StoryblokBridgeV2, StoryblokBridgeEventType, StoryblokBridgeOptions, loadBridge}
+export { StoryblokBridgeV2, StoryblokBridgeEventType, StoryblokBridgeOptions, loadBridge }
