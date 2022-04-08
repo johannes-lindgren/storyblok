@@ -1,37 +1,53 @@
 # Next.js with TypeScript example
 
-## Run in dev mode
+## Run Locally
 
-Run
+Clone the project
+
+```shell
+git clone https://github.com/johannes-lindgren/storyblok.git
+```
+
+Enter the directory
+
+```shell
+cd nextjs-site
+```
+
+Install dependencies
+
+```shell
+yarn install
+```
+
+Create the `.env.local` and set the variables 
+
+```shell
+cp .env.example .env.local
+```
+
+Start the server
 
 ```shell
 yarn dev
 ```
 
-## Run with Preview
+### Run with Live Preview
 
-Storyblok requires https for live preview. Start a local http proxy with 
+To preview within storyblok, run a https proxy:
+
+Install with
+
+Run in a second terminal 
 
 ```shell
-local-ssl-proxy --source 3010 --target 3000 --cert localhost.pem --key localhost-key.pem
+yarn proxy
 ```
 
-### Install local SSL proxy
+### Install mkcert on Windows
 
-Install on Windows with choco:
+Install on Windows with [chocolatey](https://chocolatey.org/):
 
 ```shell
 choco install mkcert
 ```
-
-Set up with
-
-```shell
-mkcert -install
-mkcert localhost
-npm install -g local-ssl-proxy
-```
-
-## Install local ssl proxy
-
-This step is needed to 
