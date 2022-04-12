@@ -1,5 +1,5 @@
 import {RefObject, useEffect, useRef} from 'react'
-import {Block, Editable as EditableData, getEditable as getEditableData, Story} from "@johannes-lindgren/storyblok-js";
+import {Block, EditableData, getEditable as getEditableData, Story} from "@johannes-lindgren/storyblok-js";
 import {useStory} from "@src/context/story-context";
 import {isDraft} from "@johannes-lindgren/storyblok-js";
 
