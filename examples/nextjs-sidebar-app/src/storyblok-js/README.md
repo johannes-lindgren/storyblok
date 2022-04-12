@@ -1,0 +1,1 @@
+Merge this folder with @johannes-lindgren/storyblok-js 

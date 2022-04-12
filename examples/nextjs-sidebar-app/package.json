@@ -1,0 +1,49 @@
+{
+  "name": "johannes-lindgren-portfolio",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "lint": "next lint",
+    "build": "next build",
+    "start": "next start",
+    "proxy": "mkcert -install && mkcert localhost && local-ssl-proxy --source 3010 --target 3000 --cert localhost.pem --key localhost-key.pem",
+    "dev": "next",
+    "post-update": "echo \"codesandbox preview only, need an update\" && yarn upgrade --latest",
+    "ngrok": "ngrok http 3000"
+  },
+  "dependencies": {
+    "@emotion/cache": "latest",
+    "@emotion/react": "latest",
+    "@emotion/server": "latest",
+    "@emotion/styled": "latest",
+    "@johannes-lindgren/storyblok-js": "../../libs/storyblok-js",
+    "@johannes-lindgren/storyblok-react": "../../libs/storyblok-react",
+    "@mui/icons-material": "5.3.1",
+    "@mui/material": "latest",
+    "clsx": "latest",
+    "crypto-js": "4.1.1",
+    "grant": "5.4.21",
+    "highlight.js": "11.4.0",
+    "joi": "17.5.0",
+    "next": "latest",
+    "next-auth": "4.3.1",
+    "react": "latest",
+    "react-dom": "latest",
+    "react-player": "2.9.0",
+    "uuid": "8.3.2"
+  },
+  "devDependencies": {
+    "@next/eslint-plugin-next": "^12.0.8",
+    "@types/cookie": "0.4.1",
+    "@types/crypto-js": "4.1.1",
+    "@types/node": "latest",
+    "@types/react": "latest",
+    "@types/react-dom": "latest",
+    "@types/uuid": "8.3.4",
+    "eslint": "^8.6.0",
+    "eslint-config-next": "^12.0.8",
+    "eslint-config-prettier": "^8.3.0",
+    "local-ssl-proxy": "latest",
+    "typescript": "latest"
+  }
+}
