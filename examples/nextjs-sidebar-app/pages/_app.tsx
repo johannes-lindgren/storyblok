@@ -7,7 +7,8 @@ import {CacheProvider, EmotionCache} from '@emotion/react';
 import theme from '@src/theme';
 import createEmotionCache from '@src/create-emotion-cache';
 import {Layout} from "@src/layout/layout";
-import {SessionProvider} from "next-auth/react"
+import {CustomAppProvider} from "@src/custom-app/custom-app-provider";
+import {CircularProgress} from "@mui/material";
 
 // Client-side cache, shared for the whole session of the user in the browser.
 const clientSideEmotionCache = createEmotionCache();
@@ -18,6 +19,7 @@ interface MyAppProps extends AppProps {
 
 export default function MyApp(props: MyAppProps) {
     const {Component, emotionCache = clientSideEmotionCache, pageProps} = props;
+
     return (
         <CacheProvider value={emotionCache}>
             <Head>
@@ -27,12 +29,13 @@ export default function MyApp(props: MyAppProps) {
             <ThemeProvider theme={theme}>
                 {/* CssBaseline kickstart an elegant, consistent, and simple baseline to build upon. */}
                 <CssBaseline/>
-                <SessionProvider session={props.pageProps.session}>
-                    <Layout>
-                        <Component {...pageProps} />
-                    </Layout>
-                </SessionProvider>
+                <Layout>
+                    <CustomAppProvider fallback={<CircularProgress />}>
+                            <Component {...pageProps} />
+                    </CustomAppProvider>
+                </Layout>
             </ThemeProvider>
         </CacheProvider>
     );
 }
+
