@@ -17,15 +17,13 @@ export const StoryblokProvider = (options: OAuthUserConfig<UserInfo>): OAuthConf
         url: "https://app.storyblok.com/oauth/token",
         async request(context) {
             console.log('request')
-            const client_secret = process.env.STORYBLOK_CLIENT_SECRET as string
-            const client_id = process.env.STORYBLOK_CLIENT_ID as string
-            const redirect_uri = process.env.STORYBLOK_CLIENT_REDIRECT_URI as string
+            const client_secret = options.clientSecret
+            const client_id = options.clientId
 
             const tokenRes = await grantToken({
                 code: context.params.code as string,
                 client_secret,
                 client_id,
-                redirect_uri,
             })
             return {tokens: new TokenSet(tokenRes)}
         }

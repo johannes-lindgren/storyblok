@@ -32,14 +32,12 @@ type TokenGrantRequest = {
     code: string
     client_secret: string
     client_id: string
-    redirect_uri: string
 }
 
 type TokenRefreshRequest = {
     refresh_token: string
     client_secret: string
     client_id: string
-    redirect_uri: string
 }
 const tokenRequest = async <T extends 'authorization_code' | 'refresh_token', >(grant_type: T, requestData: T extends 'authorization_code' ? TokenGrantRequest : TokenRefreshRequest): Promise<T extends 'authorization_code' ? TokenGrantResponse : TokenRefreshResponse> => {
     const body = new URLSearchParams({
@@ -65,7 +63,7 @@ const tokenRequest = async <T extends 'authorization_code' | 'refresh_token', >(
     return await response.json() as unknown as (T extends 'authorization_code' ? TokenGrantResponse : TokenRefreshResponse)
 }
 
-const refreshToken = (props: TokenRefreshRequest) => tokenRequest('refresh_token', props)
+export const refreshToken = (props: TokenRefreshRequest) => tokenRequest('refresh_token', props)
 export const grantToken = (props: TokenGrantRequest) => tokenRequest('authorization_code', props)
 
 export const getUser = async (accessToken: string): Promise<UserInfo> => {

@@ -46,3 +46,13 @@ npm install -g local-ssl-proxy
 ## Install local ssl proxy
 
 This step is needed to 
+
+## TODO
+
+You can generate a JWT secret with:
+
+```shell
+openssl rand -base64 32
+```
+
+Save in environmental variable `STORYBLOK_JWT_SECRET`
