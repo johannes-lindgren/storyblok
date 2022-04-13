@@ -1,13 +1,17 @@
 import StoryblokClient from "storyblok-js-client";
-import {Space} from "@johannes-lindgren/storyblok-js";
+import {Space, Story} from "@johannes-lindgren/storyblok-js";
+
+// TODO remove
+const tmpDevSpace = 152949
 
 export class ContentManagementClient {
 
-    client: StoryblokClient
+    private client: StoryblokClient
 
-    constructor(accessToken: string) {
+    constructor(oauthToken: string) {
+        console.log('Init new ConentManagementClient') // TODO remove
         this.client = new StoryblokClient({
-            accessToken: accessToken,
+            oauthToken: 'Bearer ' + oauthToken,
             cache: {
                 clear: "auto",
                 type: "memory",
@@ -16,19 +20,26 @@ export class ContentManagementClient {
     }
 
     setToken(token: string){
-        this.client.setToken(token)
+        this.client.setToken('Bearer ' + token)
     }
 
-    // TODO type
-    async getSpace(id: number | string): Promise<object | undefined> {
+    // // TODO type
+    async getSpace(): Promise<Space | undefined> {
         return this.client
-            .get(`spaces/${id}`)
+            .get(`spaces/${tmpDevSpace}`)
             .then(res => {
                 return res.data.space as unknown as Space
             })
     }
+
+    async getStories(): Promise<Story[]> {
+        console.log(this.client.getToken())
+        return this.client
+            .get(`spaces/${tmpDevSpace}/stories`)
+            .then(res => res.data.stories as unknown as Story[])
+    }
 //    TODO implement
-//    Stories
+// Stories
 // Components
 // Components Groups
 // Assets

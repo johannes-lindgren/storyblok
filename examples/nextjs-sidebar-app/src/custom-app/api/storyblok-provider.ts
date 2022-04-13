@@ -16,8 +16,6 @@ export const StoryblokProvider = (options: OAuthUserConfig<UserInfo>): OAuthConf
     token: {
         url: "https://app.storyblok.com/oauth/token",
         async request(context) {
-            console.log(context.provider)
-
             // NOTE: Storyblok implementation does not adhere to the standard specified in https://datatracker.ietf.org/doc/html/rfc6749#section-4.1.3
             // An additional parameter 'client_secret' is required
             const tokenRes = await requestToken({
@@ -32,12 +30,14 @@ export const StoryblokProvider = (options: OAuthUserConfig<UserInfo>): OAuthConf
     },
     userinfo: 'https://app.storyblok.com/oauth/user_info',
     // profileUrl: "https://app.storyblok.com/oauth/user_info",
-    async profile(profile: UserInfo) {
+    async profile(userInfo: UserInfo) {
+        console.log({userInfo})
         return ({
-            id: profile.user.id.toString(),
-            name: profile.user.friendly_name,
-            roles: profile.roles,
-            space: profile.space,
+            id: userInfo.user.id.toString(),
+            name: userInfo.user.friendly_name,
+            // TODO not working...
+            // roles: userInfo.roles,
+            // space: userInfo.space,
         })
     },
     checks: ['state'],
