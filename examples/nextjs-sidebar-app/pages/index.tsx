@@ -1,6 +1,8 @@
 import * as React from 'react';
 import { GetServerSideProps, NextPage } from "next";
-import {useSession} from "next-auth/react";
+import {useClient, useUser} from "@src/custom-app/custom-app-provider";
+import {useEffect, useState} from "react";
+import {Space, Story} from "@johannes-lindgren/storyblok-js";
 
 type PageProps = {
     // storyblokToken: string
@@ -56,14 +58,26 @@ const HomePage: NextPage<PageProps> = ({  }) => {
     //     // })
     // }, [])
 
-    const {data, status} = useSession()
+    const user = useUser()
+    const client = useClient()
 
+    const [stories, setStories] = useState<Story[] | undefined>(undefined)
+    const [space, setSpace] = useState<Space | undefined>(undefined)
+    useEffect(() => {
+        (async () => {
+            const strs = await client.getStories()
+            const sp = await client.getSpace()
+            setStories(strs)
+            setSpace(sp)
+        })()
+    }, [])
+
+    console.log({stories})
+    console.log({space})
 
     // if(!session){
         return <div>
-            <p>{status}</p>
-            <p>Signed in as {data?.user?.name}</p>
-            <p>{JSON.stringify(data)}</p>
+            <p>Signed in as {user.name}</p>
             {/*<p>Space: <i>{JSON.stringify(space)}</i></p>*/}
             {/*<p>Session: <i>{JSON.stringify(app.session ?? null)}</i></p>*/}
             {/*<Button onClick={() => signIn('storyblok')} variant="contained">*/}
