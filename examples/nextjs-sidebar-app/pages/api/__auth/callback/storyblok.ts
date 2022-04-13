@@ -1,5 +1,5 @@
 import {NextApiRequest, NextApiResponse} from "next";
-import {getUser, grantToken, setStoryblokSessionCookie} from "@src/custom-app";
+import {getUser, requestToken, setStoryblokSessionCookie} from "@src/custom-app";
 import {getState} from "@src/custom-app/api";
 
 export default async function handler(
@@ -33,7 +33,7 @@ export default async function handler(
     return
   }
 
-  const tokenResponse = await grantToken({
+  const tokenResponse = await requestToken({
     code,
     client_secret: clientSecret,
     client_id: clientId,

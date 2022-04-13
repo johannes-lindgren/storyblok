@@ -29,21 +29,21 @@ export type TokenGrantResponse = {
 export type TokenRefreshResponse = Omit<TokenGrantResponse, 'refresh_token'>
 
 type TokenGrantRequest = {
+    grant_type: 'authorization_code',
     code: string
     client_secret: string
     client_id: string
+    redirect_uri: string
 }
 
 type TokenRefreshRequest = {
+    grant_type: 'refresh_token',
     refresh_token: string
     client_secret: string
     client_id: string
 }
-const tokenRequest = async <T extends 'authorization_code' | 'refresh_token', >(grant_type: T, requestData: T extends 'authorization_code' ? TokenGrantRequest : TokenRefreshRequest): Promise<T extends 'authorization_code' ? TokenGrantResponse : TokenRefreshResponse> => {
-    const body = new URLSearchParams({
-        grant_type,
-        ...requestData,
-    }).toString()
+const sendTokenRequest = async <T extends TokenGrantRequest | TokenRefreshRequest, >(requestData: T extends TokenGrantRequest ? TokenGrantRequest : TokenRefreshRequest): Promise<T extends TokenGrantRequest ? TokenGrantResponse : TokenRefreshResponse> => {
+    const body = new URLSearchParams(requestData).toString()
 
     const headers = {
         'Content-Type': 'application/x-www-form-urlencoded'
@@ -60,11 +60,11 @@ const tokenRequest = async <T extends 'authorization_code' | 'refresh_token', >(
         throw new Error('Unauthorized')
     }
 
-    return await response.json() as unknown as (T extends 'authorization_code' ? TokenGrantResponse : TokenRefreshResponse)
+    return await response.json() as unknown as (T extends TokenGrantRequest ? TokenGrantResponse : TokenRefreshResponse)
 }
 
-export const refreshToken = (props: TokenRefreshRequest) => tokenRequest('refresh_token', props)
-export const grantToken = (props: TokenGrantRequest) => tokenRequest('authorization_code', props)
+export const refreshToken = (props: TokenRefreshRequest) => sendTokenRequest(props)
+export const requestToken = (props: TokenGrantRequest) => sendTokenRequest(props)
 
 export const getUser = async (accessToken: string): Promise<UserInfo> => {
     const response = await fetch('https://api.storyblok.com/oauth/user_info', {

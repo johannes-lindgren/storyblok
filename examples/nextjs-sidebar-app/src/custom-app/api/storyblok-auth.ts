@@ -20,7 +20,6 @@ type StoryblokAuthOptions = {
 }
 
 export const StoryblokAuth: (options?: StoryblokAuthOptions) => NextApiHandler = (options) => {
-
     const {
         jwtSecret = process.env.STORYBLOK_JWT_SECRET,
         clientSecret = process.env.STORYBLOK_CLIENT_SECRET,
