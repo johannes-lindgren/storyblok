@@ -1,4 +1,4 @@
-import {StoryblokAuth} from "@src/custom-app/auth-api/storyblok-auth";
+import {StoryblokAuth} from "@src/storyblok-next-sidebar-app/auth-api/storyblok-auth";
 
 export default StoryblokAuth({
     clientId: process.env.STORYBLOK_CLIENT_ID,

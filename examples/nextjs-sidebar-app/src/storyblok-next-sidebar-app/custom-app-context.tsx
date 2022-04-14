@@ -11,7 +11,7 @@ import {
 import {useRouter} from "next/router";
 import {ContentManagementClient} from "@src/storyblok-js/content-management-client";
 import {Session, User} from "next-auth";
-import {Role, Space} from "@src/custom-app/auth-api/types";
+import {Role, Space} from "@src/storyblok-next-sidebar-app/auth-api/types";
 
 const ClientContext = React.createContext<ContentManagementClient | undefined>(undefined);
 

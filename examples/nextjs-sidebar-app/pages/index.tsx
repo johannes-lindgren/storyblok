@@ -1,6 +1,6 @@
 import * as React from 'react';
 import {GetServerSideProps, NextPage} from "next";
-import {useClient, useRoles, useSpace, useUser} from "@src/custom-app/custom-app-context";
+import {useClient, useRoles, useSpace, useUser} from "@src/storyblok-next-sidebar-app/custom-app-context";
 import {useEffect, useState} from "react";
 // import {Space, Story} from "@johannes-lindgren/storyblok-js";
 
@@ -44,7 +44,7 @@ const HomePage: NextPage<PageProps> = ({}) => {
             {roles.map(role => (<li key={role.name}>{role.name}</li>))}
         </ul>
         <p>Time since login: <em>{seconds} seconds</em></p>
-        <p>Oauth token is: <em>{isError ? 'expired!' : 'valid'}</em></p>
+        <p>The access token is: <em>{isError ? 'expired!' : 'valid'}</em></p>
     </div>
 }
 

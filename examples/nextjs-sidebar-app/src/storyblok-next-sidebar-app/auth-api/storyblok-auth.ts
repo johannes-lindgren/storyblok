@@ -1,8 +1,8 @@
 import {NextApiHandler} from "next";
 import NextAuth, {Session, JWT, Account, Profile, CallbacksOptions} from "next-auth";
-import {StoryblokAuthProvider} from "@src/custom-app/next-auth-storyblok/storyblok-auth-provider";
+import {StoryblokAuthProvider} from "@src/storyblok-next-sidebar-app/next-auth-storyblok/storyblok-auth-provider";
 import {CookieOption} from "next-auth/core/types";
-import {refreshToken, refreshToken2} from "@src/custom-app/next-auth-storyblok/storyblok-oauth-api";
+import {refreshToken, refreshToken2} from "@src/storyblok-next-sidebar-app/next-auth-storyblok/storyblok-oauth-api";
 
 const makeCookieOption = (name: string): CookieOption => ({
     name,

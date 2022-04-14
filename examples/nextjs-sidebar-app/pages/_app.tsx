@@ -6,7 +6,7 @@ import CssBaseline from '@mui/material/CssBaseline';
 import {CacheProvider, EmotionCache} from '@emotion/react';
 import theme from '@src/theme';
 import createEmotionCache from '@src/create-emotion-cache';
-import {CustomAppContext} from "@src/custom-app/custom-app-context";
+import {CustomAppContext} from "@src/storyblok-next-sidebar-app/custom-app-context";
 import {CircularProgress} from "@mui/material";
 
 // Client-side cache, shared for the whole session of the user in the browser.

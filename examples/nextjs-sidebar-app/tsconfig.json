@@ -27,7 +27,6 @@
     "paths": {
       "@src/*": ["./src/*"],
       "@api/*": ["./src/api/*"],
-      "@storyblok-nextjs/*": ["src/storyblok-nextjs/*"],
     }
   },
   "exclude": [
