@@ -15,7 +15,7 @@ import {Role, Space} from "@src/storyblok-next-sidebar-app/auth-api/types";
 
 const ClientContext = React.createContext<ContentManagementClient | undefined>(undefined);
 
-const CustomAppContext: FunctionComponent<SuspenseProps> = (props) => (
+const CustomAppProvider: FunctionComponent<SuspenseProps> = (props) => (
     <SessionProvider>
         <WithSessionContext {...props} />
     </SessionProvider>
@@ -55,7 +55,8 @@ const ClientContextProvider: FunctionComponent<PropsWithChildren<{}>> = ({childr
     // We want to keep the dependency array empty, becuase we are going to mutate the client's token, in order to
     // preserve the state of the built-in throttling mechanism
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    const client = useMemo(() => new ContentManagementClient(session.data.accessToken), []) // Only initialize once
+    // const client = useMemo(() => new ContentManagementClient(session.data.accessToken), []) // Only initialize once
+    const client = useMemo(() => new ContentManagementClient(session.data.accessToken), [session.data.accessToken]) // Only initialize once
 
     function updateSession() {
         getSession()
@@ -67,7 +68,7 @@ const ClientContextProvider: FunctionComponent<PropsWithChildren<{}>> = ({childr
                 console.log('Fetched new session', newSession)
                 console.log('New timeout', session.data?.expiresIn)
 
-                client.setToken(newSession?.accessToken)
+                // client.setToken(newSession.accessToken) // storyblok-js-client doesn't allow us to update tokens for the content management API; only content delivery token
                 timer.current = setTimeout(updateSession, newSession?.expiresIn * 1000)
             })
             .catch(() => {
@@ -130,4 +131,4 @@ const useRoles = (): Role[] => {
 
 const isAuthenticated = (session: SessionContextValue): session is {data: Session, status: "authenticated"} => session.status === 'authenticated'
 
-export {CustomAppContext, useClient, useUser, useSpace, useRoles}
+export {CustomAppProvider, useClient, useUser, useSpace, useRoles}

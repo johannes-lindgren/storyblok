@@ -1,0 +1,1 @@
+export {StoryblokAuth} from '@src/storyblok-next-sidebar-app/auth-api/storyblok-auth'

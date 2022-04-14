@@ -6,6 +6,7 @@ const tmpDevSpace = 152949
 
 export class ContentManagementClient {
 
+    // TODO need to replace the client, because the storyblok-js-client doesn't let us update the oauth tokens
     private client: StoryblokClient
 
     constructor(accessToken: string) {
@@ -17,10 +18,6 @@ export class ContentManagementClient {
                 type: "memory",
             }
         })
-    }
-
-    setToken(accessToken: string){
-        this.client.setToken('Bearer ' + accessToken)
     }
 
     // // TODO type
@@ -37,7 +34,9 @@ export class ContentManagementClient {
             .get(`spaces/${tmpDevSpace}/stories`)
             .then(res => res.data.stories as unknown as Story[])
     }
+
 //    TODO implement
+// These are the available endpoints for custom app access tokens
 // Stories
 // Components
 // Components Groups
