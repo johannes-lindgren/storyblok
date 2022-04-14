@@ -1,8 +1,8 @@
 import {OAuthConfig, OAuthUserConfig} from "next-auth/providers";
 import {requestToken, UserInfo} from "@src/custom-app";
-import {TokenSet} from "openid-client";
+import {Profile} from "next-auth";
 
-export const StoryblokProvider = (options: OAuthUserConfig<UserInfo>): OAuthConfig<UserInfo> => ({
+export const StoryblokAuthProvider = (options: OAuthUserConfig<Profile>): OAuthConfig<UserInfo> => ({
     id: 'storyblok',
     name: 'Storyblok',
     type: 'oauth',
@@ -25,19 +25,17 @@ export const StoryblokProvider = (options: OAuthUserConfig<UserInfo>): OAuthConf
                 client_id: context.provider.clientId as string,
                 client_secret: context.provider.clientSecret as string,
             })
-            return {tokens: new TokenSet(tokenRes)}
+            return {
+                tokens: tokenRes
+            }
         }
     },
     userinfo: 'https://app.storyblok.com/oauth/user_info',
     // profileUrl: "https://app.storyblok.com/oauth/user_info",
-    async profile(userInfo: UserInfo) {
-        console.log({userInfo})
+    async profile(profile) {
         return ({
-            id: userInfo.user.id.toString(),
-            name: userInfo.user.friendly_name,
-            // TODO not working...
-            // roles: userInfo.roles,
-            // space: userInfo.space,
+            id: profile.user.id.toString(),
+            name: profile.user.friendly_name,
         })
     },
     checks: ['state'],

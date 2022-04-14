@@ -1,7 +1,8 @@
 import {NextApiHandler} from "next";
-import NextAuth from "next-auth";
-import {StoryblokProvider} from "@src/custom-app/api/storyblok-provider";
+import NextAuth, {Session, JWT, User, Account, Profile} from "next-auth";
+import {StoryblokAuthProvider} from "@src/custom-app/next-auth/storyblok-auth-provider";
 import {CookieOption} from "next-auth/core/types";
+import {refreshToken, refreshToken2, TokenGrantResponse} from "@src/custom-app";
 
 const makeCookieOption = (name: string): CookieOption => ({
     name,
@@ -47,30 +48,83 @@ export const StoryblokAuth: (options?: StoryblokAuthOptions) => NextApiHandler =
             csrfToken: makeCookieOption('sb.next-auth.csrf-token')
         },
         providers: [
-            StoryblokProvider({
+            StoryblokAuthProvider({
                 clientId,
                 clientSecret,
             }),
         ],
         callbacks: {
-            async jwt({ token, account }) {
-                // Persist the OAuth access_token to the token right after signin
-                if (account) {
-                    token.accessToken = account.access_token
+            async jwt({ token, account, user, profile }): Promise<JWT> {
+                console.log('callback: jwt()')
+                console.log({account})
+                if (isInitialJwtCallback(account)) {
+                    // Initial sign in
+                    console.log('Initial sign in')
+                    // NOTE: token will not be an actual token! But it will be a User! Bug in next-auth?
+                    // To get the expire_in, we must refetch the token
+
+                    const tokenRefreshResponse = await refreshToken({
+                        grant_type: 'refresh_token',
+                        refresh_token: account.refresh_token,
+                        client_id: process.env.STORYBLOK_CLIENT_ID as string, // TODO should not be hard coded, ideally
+                        client_secret: process.env.STORYBLOK_CLIENT_SECRET as string,
+                    })
+
+                    console.log({token})
+                    console.log({account})
+                    console.log({user})
+                    console.log({profile})
+                    const profileTmp = profile as Profile
+                    return {
+                        accessToken: tokenRefreshResponse.access_token,
+                        expiresIn: tokenRefreshResponse.expires_in,
+                        accessTokenExpires: Date.now() + tokenRefreshResponse.expires_in * 1000,
+                        refreshToken: account.refresh_token,
+                        user: user,
+                        roles: profileTmp.roles,
+                        space: profileTmp.space,
+                    }
                 }
-                return token
+
+                if (!hasTokenExpired(token)) {
+                    // Return previous token if the access token has not expired yet
+                    console.log('Has not expired yet')
+                    console.log({token})
+                    console.log('Expires at', token.accessTokenExpires)
+                    return token
+                }
+
+                // // Persist the OAuth access_token to the token right after signin
+                // return {
+                //     ...token,
+                //     accessToken: account?.access_token,
+                // }
+
+                console.log('Refreshing token')
+                // Access token has expired, try to update it
+                return await refreshToken2(token)
             },
-            async session({ session, token, user }) {
+            // Returns the object that is passed to the frontend
+
+            async session({session, token}: {session: Session, token: JWT}): Promise<Session> {
                 // Send properties to the client, like an access_token from a provider.
-                // console.log('callback: session()')
-                // console.log({session})
-                // console.log({token})
-                // console.log({user})
+                console.log('callback: session()')
+                console.log({session})
+                console.log({token})
                 return {
-                    ...session,
+                    user: token.user,
+                    roles: token.roles,
+                    space: token.space,
                     accessToken: token.accessToken,
+                    expiresIn: token.expiresIn,
+                    expires: new Date(token.accessTokenExpires).toISOString(),
                 }
             },
         },
     })
 }
+
+const hasTokenExpired = (token: JWT) => Date.now() > token.accessTokenExpires
+
+// Whether this is the jwt callback after a sign in
+const isInitialJwtCallback = (account: Account | undefined): account is Account => typeof account !== 'undefined'

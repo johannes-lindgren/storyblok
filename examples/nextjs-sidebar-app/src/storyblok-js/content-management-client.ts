@@ -8,10 +8,10 @@ export class ContentManagementClient {
 
     private client: StoryblokClient
 
-    constructor(oauthToken: string) {
-        console.log('Init new ConentManagementClient') // TODO remove
+    constructor(accessToken: string) {
+        console.log('Init new ContentManagementClient') // TODO remove
         this.client = new StoryblokClient({
-            oauthToken: 'Bearer ' + oauthToken,
+            oauthToken: 'Bearer ' + accessToken,
             cache: {
                 clear: "auto",
                 type: "memory",
@@ -19,8 +19,8 @@ export class ContentManagementClient {
         })
     }
 
-    setToken(token: string){
-        this.client.setToken('Bearer ' + token)
+    setToken(accessToken: string){
+        this.client.setToken('Bearer ' + accessToken)
     }
 
     // // TODO type
@@ -33,7 +33,6 @@ export class ContentManagementClient {
     }
 
     async getStories(): Promise<Story[]> {
-        console.log(this.client.getToken())
         return this.client
             .get(`spaces/${tmpDevSpace}/stories`)
             .then(res => res.data.stories as unknown as Story[])

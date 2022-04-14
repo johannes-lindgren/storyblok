@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { GetServerSideProps, NextPage } from "next";
+import {GetServerSideProps, NextPage} from "next";
 import {useClient, useUser} from "@src/custom-app/custom-app-provider";
 import {useEffect, useState} from "react";
 import {Space, Story} from "@johannes-lindgren/storyblok-js";
@@ -42,7 +42,7 @@ type PageProps = {
 //     }
 // }
 
-const HomePage: NextPage<PageProps> = ({  }) => {
+const HomePage: NextPage<PageProps> = ({}) => {
     // const client = useClient()
     // const session = useSession()
     // const app = useCustomApp()
@@ -62,28 +62,44 @@ const HomePage: NextPage<PageProps> = ({  }) => {
     const client = useClient()
 
     const [stories, setStories] = useState<Story[] | undefined>(undefined)
-    const [space, setSpace] = useState<Space | undefined>(undefined)
-    useEffect(() => {
-        (async () => {
-            const strs = await client.getStories()
-            const sp = await client.getSpace()
-            setStories(strs)
-            setSpace(sp)
-        })()
-    }, [])
+    // useEffect(() => {
+    //     (async () => {
+    //         const strs = await client.getStories()
+    //         setStories(strs)
+    //     })()
+    // }, [])
 
-    console.log({stories})
-    console.log({space})
+    const [seconds, setSeconds] = useState(0);
+    const [isError, setError] = useState(false)
+
+    const delay = 20
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setSeconds(seconds => seconds + delay);
+            client.getStories()
+                .then(s => {
+                    setError(false)
+                    console.log(s)
+                })
+                .catch(e => {
+                    console.error(e)
+                    setError(true)
+                })
+        }, delay * 1000);
+        return () => clearInterval(interval);
+    }, [seconds]);
 
     // if(!session){
-        return <div>
-            <p>Signed in as {user.name}</p>
-            {/*<p>Space: <i>{JSON.stringify(space)}</i></p>*/}
-            {/*<p>Session: <i>{JSON.stringify(app.session ?? null)}</i></p>*/}
-            {/*<Button onClick={() => signIn('storyblok')} variant="contained">*/}
-            {/*    Sign in*/}
-            {/*</Button>*/}
-        </div>
+    return <div>
+        <p>Signed in as {user.name}</p>
+        <p>Time: {seconds}</p>
+        <p>{isError ? 'expired!' : 'connected'}</p>
+        {/*<p>Space: <i>{JSON.stringify(space)}</i></p>*/}
+        {/*<p>Session: <i>{JSON.stringify(app.session ?? null)}</i></p>*/}
+        {/*<Button onClick={() => signIn('storyblok')} variant="contained">*/}
+        {/*    Sign in*/}
+        {/*</Button>*/}
+    </div>
     // }
 
     // return (
@@ -111,8 +127,7 @@ export const getServerSideProps: GetServerSideProps<PageProps> = async (context)
     // console.log('Signed in!', sbSession)
 
     return {
-        props: {
-        }
+        props: {}
     }
 }
 

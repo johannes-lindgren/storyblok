@@ -1,5 +1,5 @@
-import {GetServerSidePropsContext, NextApiResponse} from "next";
 import cookie from "cookie";
+import {JWT} from "next-auth";
 
 export type StoryblokSession = TokenGrantResponse & UserInfo
 
@@ -25,7 +25,9 @@ export type TokenGrantResponse = {
     refresh_token: string
     token_type: string
     expires_in: number
+    error?: string
 }
+
 export type TokenRefreshResponse = Omit<TokenGrantResponse, 'refresh_token'>
 
 type TokenGrantRequest = {
@@ -42,7 +44,8 @@ type TokenRefreshRequest = {
     client_secret: string
     client_id: string
 }
-const sendTokenRequest = async <T extends TokenGrantRequest | TokenRefreshRequest, >(requestData: T extends TokenGrantRequest ? TokenGrantRequest : TokenRefreshRequest): Promise<T extends TokenGrantRequest ? TokenGrantResponse : TokenRefreshResponse> => {
+
+const sendTokenRequest = async <T extends TokenGrantRequest | TokenRefreshRequest,>(requestData: T): Promise<T extends TokenGrantRequest ? TokenGrantResponse : TokenRefreshResponse> => {
     const body = new URLSearchParams(requestData).toString()
 
     const headers = {
@@ -63,6 +66,26 @@ const sendTokenRequest = async <T extends TokenGrantRequest | TokenRefreshReques
     return await response.json() as unknown as (T extends TokenGrantRequest ? TokenGrantResponse : TokenRefreshResponse)
 }
 
+export const refreshToken2 = async (token: JWT): Promise<JWT> => {
+    const res = await sendTokenRequest({
+        grant_type: 'refresh_token',
+        client_id: process.env.STORYBLOK_CLIENT_ID as string, // TODO should not be hard coded, ideally
+        client_secret: process.env.STORYBLOK_CLIENT_SECRET as string,
+        refresh_token: token.refreshToken,
+    })
+
+    // TODO only for dev
+    const expires_in = res.expires_in
+    console.log('Got expires_in', expires_in)
+
+    return {
+        ...token,
+        accessToken: res.access_token,
+        expiresIn: expires_in,
+        accessTokenExpires: Date.now() + expires_in * 1000,
+    }
+}
+
 export const refreshToken = (props: TokenRefreshRequest) => sendTokenRequest(props)
 export const requestToken = (props: TokenGrantRequest) => sendTokenRequest(props)
 
@@ -81,30 +104,4 @@ export const getStoryblokSessionFromCookie = (c: string): StoryblokSession | und
         return undefined
     }
     return JSON.parse(storyblokSession)
-}
-export const getStoryblokSession = (context: GetServerSidePropsContext) => getStoryblokSessionFromCookie(context.req.headers.cookie ?? '')
-
-export function setStoryblokSessionCookie(
-    res: NextApiResponse,
-    session: StoryblokSession,
-) {
-    setCookies(res, {
-        storyblokSession: JSON.stringify(session)
-    })
-}
-
-function setCookies(
-    res: NextApiResponse,
-    // expiresIn: number,
-    cookies: Record<string, string>
-) {
-    res.setHeader('Set-Cookie', Object.entries(cookies).map(e => (
-        cookie.serialize(e[0], e[1], {
-            path: '/',
-            // maxAge: expiresIn,
-            httpOnly: false,
-            secure: true,
-            sameSite: 'none',
-        })
-    )));
 }

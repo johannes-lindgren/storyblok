@@ -1,6 +1,6 @@
 import * as React from "react";
-import {FunctionComponent, PropsWithChildren, SuspenseProps, useContext, useEffect, useMemo} from "react";
-import {SessionProvider, signIn, useSession as useNextAuthSession, useSession} from "next-auth/react";
+import {FunctionComponent, PropsWithChildren, SuspenseProps, useContext, useEffect, useMemo, useRef} from "react";
+import {getSession, SessionProvider, signIn, useSession as useNextAuthSession, useSession} from "next-auth/react";
 import {useRouter} from "next/router";
 import {ContentManagementClient} from "@src/storyblok-js/content-management-client";
 import {User} from "@src/custom-app/next-auth/types";
@@ -14,12 +14,12 @@ const CustomAppContext = React.createContext<CustomAppContext | undefined>(undef
 
 const CustomAppProvider: FunctionComponent<SuspenseProps> = (props) => (
     <SessionProvider>
-        <WithAutomaticRedirect {...props} />
+        <WithSessionContext {...props} />
     </SessionProvider>
 )
 
 // To protect all routes and automatically log in
-const WithAutomaticRedirect: FunctionComponent<SuspenseProps> = ({children, fallback}) => {
+const WithSessionContext: FunctionComponent<SuspenseProps> = ({children, fallback}) => {
     const {status} = useSession()
     const router = useRouter()
     useEffect(() => {
@@ -43,6 +43,34 @@ const WithAutomaticRedirect: FunctionComponent<SuspenseProps> = ({children, fall
 
 const CustomAppContextProvider: FunctionComponent<PropsWithChildren<{}>> = ({children}) => {
     const session = useNextAuthSession()
+    console.log({session})
+    const timer = useRef<ReturnType<typeof setTimeout>>()
+    function fetchSession() {
+        getSession()
+            .then(s => {
+                console.log('Fetched session', s)
+                console.log('New timeout', session.data?.expiresIn)
+                if(!session.data){
+                    return // TODO
+                }
+                timer.current = setTimeout(fetchSession, session.data.expiresIn * 1000)
+            })
+            .catch(e => {
+                console.error(e)
+            })
+    }
+    useEffect(() => {
+        if(!session.data){
+            return // TODO
+        }
+        console.log('Initial timeout is', session.data?.expiresIn)
+        if(!session.data.expiresIn){
+            throw new Error('session.data.expiresIn is required')
+        }
+        timer.current = setTimeout(fetchSession, session.data.expiresIn  * 1000);
+        return () => timer.current && clearTimeout(timer.current);
+    }, []);
+
     if (session.status !== 'authenticated') {
         throw Error(`The useSession() hook should only be used in components that are within a CustomAppContext. The current login status is '${session.status}'`)
     }
@@ -50,10 +78,9 @@ const CustomAppContextProvider: FunctionComponent<PropsWithChildren<{}>> = ({chi
         user: session.data.user,
         client: new ContentManagementClient(session.data.accessToken)
     }), []) // Only initialize once
-    if(customAppContext.client.client.getToken() !== session.data.accessToken){
-        console.log('Updating token!')
-    }
-    customAppContext.client.setToken(session.data.accessToken)
+
+
+    // customAppContext.client.setToken(session.data.accessToken)
     return (
         <CustomAppContext.Provider value={customAppContext}>
             {children}
@@ -71,6 +98,7 @@ const useUser = (): User => {
     if (session.status !== 'authenticated') {
         throw Error(`The useSession() hook should only be used in components that are within a CustomAppContext. The current login status is '${session.status}'`)
     }
+    console.log({session})
     return session.data.user
 }
 
