@@ -1,17 +1,19 @@
 import {ISODateString} from "next-auth/core/types";
 import {ProviderType} from "next-auth/providers";
-import {UserInfo} from "@src/custom-app/next-auth-storyblok/storyblok-oauth-api";
 
 declare module "next-auth" {
     /**
      * Returned by `useSession`, `getSession` and received as a prop on the `SessionProvider` React Context
      */
-    interface Session extends UserInfo  {
+    interface Session  {
         accessToken: string
         // Server-side generated string that specifies when the token will expire
         expires: ISODateString
         // seconds until it expires from the time it was set
         expiresIn: number
+        user: User
+        roles: Role[]
+        space: Space
     }
 
     interface JWT {
@@ -55,11 +57,11 @@ declare module "next-auth" {
     }
 }
 
-type Space = {
+export type Space = {
     id: number
     name: string
 }
 
-type Role = {
+export type Role = {
     name: string
 }

@@ -6,8 +6,7 @@ import CssBaseline from '@mui/material/CssBaseline';
 import {CacheProvider, EmotionCache} from '@emotion/react';
 import theme from '@src/theme';
 import createEmotionCache from '@src/create-emotion-cache';
-import {Layout} from "@src/layout/layout";
-import {CustomAppProvider} from "@src/custom-app/custom-app-provider";
+import {CustomAppContext} from "@src/custom-app/custom-app-context";
 import {CircularProgress} from "@mui/material";
 
 // Client-side cache, shared for the whole session of the user in the browser.
@@ -23,17 +22,15 @@ export default function MyApp(props: MyAppProps) {
     return (
         <CacheProvider value={emotionCache}>
             <Head>
-                <title>Storyblok Find & Replace</title>
+                <title>Storyblok Custom App</title>
                 <meta name="viewport" content="initial-scale=1, width=device-width"/>
             </Head>
             <ThemeProvider theme={theme}>
                 {/* CssBaseline kickstart an elegant, consistent, and simple baseline to build upon. */}
                 <CssBaseline/>
-                <Layout>
-                    <CustomAppProvider fallback={<CircularProgress />}>
-                            <Component {...pageProps} />
-                    </CustomAppProvider>
-                </Layout>
+                <CustomAppContext fallback={<CircularProgress/>}>
+                    <Component {...pageProps} />
+                </CustomAppContext>
             </ThemeProvider>
         </CacheProvider>
     );
