@@ -15,7 +15,6 @@ module.exports = {
         if (dev) {
             // Avoid importing two different versions of react. If this happens, the 'rule of hooks' will be broken
             Object.assign(config.resolve.alias, {
-                '@johannes-lindgren/storyblok-js': path.resolve('./node_modules/@johannes-lindgren/callback-js'),
                 'react': path.resolve('./node_modules/react'),
                 'react-dom': path.resolve('./node_modules/react-dom'),
             })
