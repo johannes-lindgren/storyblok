@@ -43,6 +43,6 @@ export const StoryblokAuthProvider = (options: OAuthUserConfig<Profile>): OAuthC
             name: profile.user.friendly_name,
         })
     },
-    checks: ['state'],
+    checks: ['state', 'pkce'],
     options,
 })

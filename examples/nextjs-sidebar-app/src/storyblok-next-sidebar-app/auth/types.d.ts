@@ -1,5 +1,6 @@
 import {ISODateString} from "next-auth/core/types";
 import {ProviderType} from "next-auth/providers";
+import {UserInfo} from "@src/next-auth-storyblok/storyblok-oauth-api";
 
 declare module "next-auth" {
     /**

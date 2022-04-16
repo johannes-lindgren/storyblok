@@ -1,6 +1,6 @@
 import {JWT} from "next-auth";
 
-
+// The data that is returned from https://app.storyblok.com/oauth/user_info
 export type UserInfo = {
     user: User,
     space: Space,

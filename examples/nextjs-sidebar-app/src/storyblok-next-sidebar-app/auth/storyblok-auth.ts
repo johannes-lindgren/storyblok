@@ -20,7 +20,7 @@ type StoryblokAuthOptions = {
     clientSecret?: string
 }
 
-export const StoryblokAuth: (options?: StoryblokAuthOptions) => NextApiHandler = (options ) => {
+export const StoryblokAuth: (options?: StoryblokAuthOptions) => NextApiHandler = (options) => {
     const {
         jwtSecret = process.env.STORYBLOK_JWT_SECRET,
         clientSecret = process.env.STORYBLOK_CLIENT_SECRET,
@@ -61,60 +61,63 @@ export const StoryblokAuth: (options?: StoryblokAuthOptions) => NextApiHandler =
     })
 }
 
-const makeCallbacks = (options: Required<StoryblokAuthOptions>): Partial<CallbacksOptions<Profile, Account>> => {
-    return ({
-        async jwt({token, account, user, profile}: {token: JWT, account: Account, user: User, profile: Profile}): Promise<JWT> {
-            if (isInitialJwtCallback(account)) {
-                // Initial sign in
+const makeCallbacks = (options: Required<StoryblokAuthOptions>): Partial<CallbacksOptions<Profile, Account>> => ({
+    async jwt({token, account, user, profile}): Promise<JWT> {
+        if (isInitialJwtCallback(account)) {
+            // Initial sign in
 
-                // NOTE: token will not be an actual token! But it will be a User! Bug in next-auth?
-                // To get the expire_in, we must refetch the token
+            // NOTE: token will not be an actual token! But it will be a User! Bug in next-auth?
+            // To get the expire_in, we must refetch the token
 
-                const tokenRefreshResponse = await refreshToken({
-                    grant_type: 'refresh_token',
-                    refresh_token: account.refresh_token,
-                    client_id: options.clientId, // TODO should not be hard coded, ideally
-                    client_secret: options.clientSecret,
-                })
-
-                const profileTmp = profile as Profile
-                return {
-                    accessToken: tokenRefreshResponse.access_token,
-                    expiresIn: tokenRefreshResponse.expires_in,
-                    accessTokenExpires: Date.now() + tokenRefreshResponse.expires_in * 1000,
-                    refreshToken: account.refresh_token,
-                    user: user,
-                    roles: profileTmp.roles,
-                    space: profileTmp.space,
-                }
+            const tokenRefreshResponse = await refreshToken({
+                grant_type: 'refresh_token',
+                refresh_token: account.refresh_token,
+                client_id: options.clientId, // TODO should not be hard coded, ideally
+                client_secret: options.clientSecret,
+            })
+            if (!user) {
+                throw new Error("The user is missing; this must be configured in the provider.")
+            }
+            if (!profile) {
+                throw new Error("The profile is missing; this must be configured in the provider.")
             }
 
-            // TODO add some margin, so that we do not risk requesting a new session a few ms after it has expired
-            if (!hasTokenExpired(token)) {
-                // Return previous token if the access token has not expired yet
-                return token
-            }
-
-            console.log('Refreshing token')
-            // Access token has expired, try to update it
-            return await refreshToken2(token)
-        },
-
-        // Returns the Session object that is accessible by the frontend app
-        async session({token}: { session: Session, token: JWT }): Promise<Session> {
-            console.log('Calculating new session object')
-            // Send properties to the client, like an access_token from a provider.
             return {
-                user: token.user,
-                roles: token.roles,
-                space: token.space,
-                accessToken: token.accessToken,
-                expiresInMs: new Date(token.accessTokenExpires).getTime() - Date.now(),
-                expires: new Date(token.accessTokenExpires).toISOString(),
+                accessToken: tokenRefreshResponse.access_token,
+                expiresIn: tokenRefreshResponse.expires_in,
+                accessTokenExpires: Date.now() + tokenRefreshResponse.expires_in * 1000,
+                refreshToken: account.refresh_token,
+                user: user,
+                roles: profile.roles,
+                space: profile.space,
             }
-        },
-    })
-}
+        }
+
+        // TODO add some margin, so that we do not risk requesting a new session a few ms after it has expired
+        if (!hasTokenExpired(token)) {
+            // Return previous token if the access token has not expired yet
+            return token
+        }
+
+        console.log('Refreshing token')
+        // Access token has expired, try to update it
+        return await refreshToken2(token)
+    },
+
+    // Returns the Session object that is accessible by the frontend app
+    async session({token}: { session: Session, token: JWT }): Promise<Session> {
+        // Send properties to the client, like an access_token from a provider.
+        return {
+            user: token.user,
+            roles: token.roles,
+            space: token.space,
+            accessToken: token.accessToken,
+            expiresInMs: new Date(token.accessTokenExpires).getTime() - Date.now(),
+            expires: new Date(token.accessTokenExpires).toISOString(),
+        }
+    },
+})
+
 const hasTokenExpired = (token: JWT) => Date.now() > token.accessTokenExpires
 
 // Whether this is the jwt callback after a sign in
