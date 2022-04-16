@@ -1,16 +1,16 @@
 import {NextApiHandler} from "next";
 import NextAuth, {Session, JWT, Account, Profile, CallbacksOptions} from "next-auth";
-import {StoryblokAuthProvider} from "@src/storyblok-next-sidebar-app/next-auth-storyblok/storyblok-auth-provider";
+import {StoryblokAuthProvider} from "@src/storyblok-next-sidebar-app/next-auth-storyblok/storyblok";
 import {CookieOption} from "next-auth/core/types";
 import {refreshToken, refreshToken2} from "@src/storyblok-next-sidebar-app/next-auth-storyblok/storyblok-oauth-api";
 
 const makeCookieOption = (name: string): CookieOption => ({
     name,
     options: {
-        secure: true,
-        sameSite: 'none',
-        httpOnly: true,
         path: '/',
+        secure: true,
+        sameSite: 'none', // Needed since custom apps are embedded in iframes
+        httpOnly: true, // The refresh token must not be accessible via client-side javascript
     }
 })
 
@@ -37,10 +37,8 @@ export const StoryblokAuth: (options?: StoryblokAuthOptions) => NextApiHandler =
     }
 
     return NextAuth({
-        // Configure one or more authentication providers
-        // TODO secret for signing jwt tokens (csrf tokens)
-        useSecureCookies: false,
         secret: jwtSecret,
+        // Need to use non-default settings since custom apps are embedded
         cookies: {
             sessionToken: makeCookieOption('sb.next-auth.sessionToken'),
             pkceCodeVerifier: makeCookieOption('sb.next-auth.pkce-code-verifier'),
@@ -59,6 +57,7 @@ export const StoryblokAuth: (options?: StoryblokAuthOptions) => NextApiHandler =
             clientSecret,
             jwtSecret,
         }),
+        // pages: // TODO disable login pages
     })
 }
 
@@ -101,14 +100,14 @@ const makeCallbacks = (options: Required<StoryblokAuthOptions>): Partial<Callbac
         },
 
         // Returns the Session object that is accessible by the frontend app
-        async session({session, token}: { session: Session, token: JWT }): Promise<Session> {
+        async session({token}: { session: Session, token: JWT }): Promise<Session> {
             // Send properties to the client, like an access_token from a provider.
             return {
                 user: token.user,
                 roles: token.roles,
                 space: token.space,
                 accessToken: token.accessToken,
-                expiresIn: token.expiresIn,
+                expiresInMs: new Date(token.accessTokenExpires).getTime() - Date.now(),
                 expires: new Date(token.accessTokenExpires).toISOString(),
             }
         },

@@ -1,5 +1,8 @@
 # Next.js with TypeScript example
 
+This is a starter project for creating custom apps for Storyblok with Next.js!
+
+## Setup
 
 Install ngrok globally with
 
@@ -56,3 +59,5 @@ openssl rand -base64 32
 ```
 
 Save in environmental variable `STORYBLOK_JWT_SECRET`
+
+Other env...

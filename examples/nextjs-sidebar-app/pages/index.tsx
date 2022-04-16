@@ -2,6 +2,7 @@ import * as React from 'react';
 import {GetServerSideProps, NextPage} from "next";
 import {useClient, useRoles, useSpace, useUser} from "@src/storyblok-next-sidebar-app/custom-app-provider";
 import {useEffect, useState} from "react";
+import {Story} from "@johannes-lindgren/storyblok-js";
 // import {Space, Story} from "@johannes-lindgren/storyblok-js";
 
 type PageProps = {
@@ -19,14 +20,16 @@ const IndexPage: NextPage<PageProps> = ({}) => {
 
     const [seconds, setSeconds] = useState(0);
     const [isError, setError] = useState(false)
+    const [stories, setStories] = useState<Story[]>([])
 
     const delay = 20
     useEffect(() => {
         const interval = setInterval(() => {
             setSeconds(seconds => seconds + delay);
-            client.getStories()
+            client.getStories(space.id)
                 .then(s => {
                     setError(false)
+                    setStories(s)
                     console.log(s)
                 })
                 .catch(e => {
@@ -46,6 +49,14 @@ const IndexPage: NextPage<PageProps> = ({}) => {
             </ul>
             <p>Time since login: <em>{seconds} seconds</em></p>
             <p>The access token is: <em>{isError ? 'expired!' : 'valid'}</em></p>
+            <h2>Stories:</h2>
+            <ul>
+                {stories.map(s => (
+                    <li key={s.uuid}>
+                        {s.name} (/{s.full_slug}) | {s.created_at}
+                    </li>
+                ))}
+            </ul>
         </div>
     )
 }

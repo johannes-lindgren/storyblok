@@ -66,10 +66,11 @@ const ClientContextProvider: FunctionComponent<PropsWithChildren<{}>> = ({childr
                 }
                 // TODO remove console.log
                 console.log('Fetched new session', newSession)
-                console.log('New timeout', session.data?.expiresIn)
+                console.log('New timeout', session.data?.expiresInMs, 'ms')
 
-                // client.setToken(newSession.accessToken) // storyblok-js-client doesn't allow us to update tokens for the content management API; only content delivery token
-                timer.current = setTimeout(updateSession, newSession?.expiresIn * 1000)
+                // storyblok-js-client doesn't allow us to update tokens for the content management API; only content delivery token
+                client.setAccessToken(newSession.accessToken)
+                timer.current = setTimeout(updateSession, newSession?.expiresInMs)
             })
             .catch(() => {
                 signIn() // Attempt to sign in again
@@ -78,9 +79,9 @@ const ClientContextProvider: FunctionComponent<PropsWithChildren<{}>> = ({childr
 
     useEffect(() => {
         // TODO remove console.log
-        console.log('Initial timeout is', session.data?.expiresIn)
+        console.log('Initial timeout is', session.data?.expiresInMs, 'ms')
 
-        timer.current = setTimeout(updateSession, session.data.expiresIn  * 1000);
+        timer.current = setTimeout(updateSession, session.data.expiresInMs);
 
         return () => timer.current && clearTimeout(timer.current);
     }, []);

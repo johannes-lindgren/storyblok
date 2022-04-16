@@ -2,23 +2,20 @@
 
 ## Getting Started
 
-Read [this article](https://www.storyblok.com/docs/plugins/custom-application) for how to create a custom app, then
-follow the instructions below.
-
-### Create an app
+Read [this article](https://www.storyblok.com/docs/plugins/custom-application) to learn how to set up an app.
 
 Create a new app and add the following values to your app settings:
 
 * URL to your app: https://[grok-uuid].ngrok.io
 * OAuth2 callback URL: https://[grok-uuid].ngrok.io/api/auth/callback/storyblok
 
-### New Project
+### Create an app
 
 The easiest way to get started is to clone
 the [example app](https://github.com/johannes-lindgren/storyblok/tree/main/examples/nextjs-sidebar-app) and follow the
 instructions in the `README.md` file.
 
-### Existing Project
+### New Project
 
 To add NextAuth.js to a project create a file called `[...nextauth].js` in `/pages/api/auth`. This contains the dynamic
 route handler for [NextAuth.js](https://next-auth.js.org/).
@@ -33,8 +30,7 @@ Rename `.env.local.example` to `.env.local` and add values for all environmental
 
 * STORYBLOK_CLIENT_ID - Can be found in the app settings.
 * STORYBLOK_CLIENT_SECRET - Can be found in the app settings.
-* STORYBLOK_CLIENT_REDIRECT_URI - Same as in your app
-  settings; `https://[grok-uuid].ngrok.io/api/auth/callback/storyblok`
+* NEXTAUTH_URL - Same as the url to your app; `https://[grok-uuid].ngrok.io`
 * STORYBLOK_JWT_SECRET - a random string. Can be generated with
      ```shell
     openssl rand -base64 32

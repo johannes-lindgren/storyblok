@@ -9,8 +9,9 @@ declare module "next-auth" {
         accessToken: string
         // Server-side generated string that specifies when the token will expire
         expires: ISODateString
-        // seconds until it expires from the time it was set
-        expiresIn: number
+        // seconds until it expires from the time the session was fetched from the backend
+        // i.e. not from the time that the token was issued.
+        expiresInMs: number
         user: User
         roles: Role[]
         space: Space
