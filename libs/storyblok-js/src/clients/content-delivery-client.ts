@@ -3,8 +3,10 @@ import {Space} from "../space";
 import {Story} from "../story";
 import {Links} from "../link";
 
+// TODO remove storyblok-js-client as a dependency.
+// Use throttle.ts for limiting the number of requests per second
+// Implement a caching mechanism, corresponding to the storyblok-js-client
 class ContentDeliveryClient {
-
     space?: Space
     client: StoryblokClient
     _cacheInvalidationParam?: number

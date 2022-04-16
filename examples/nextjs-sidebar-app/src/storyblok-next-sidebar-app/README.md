@@ -1,5 +1,13 @@
 # storyblok-next-custom-app
 
+`storyblok-next-custom-app` is a library that allows you to seamlessly integrate your Next.js applications with Storyblok.
+
+With very little configuration:
+
+* All routes are guarded 
+* End-users are automatically be signed in
+* Access tokens are automatically refreshed.
+
 ## Getting Started
 
 Read [this article](https://www.storyblok.com/docs/plugins/custom-application) to learn how to set up an app.
@@ -36,7 +44,7 @@ Rename `.env.local.example` to `.env.local` and add values for all environmental
     openssl rand -base64 32
     ```
 
-In your `_app.ts` file, wrap your component in an `CustomAppProvider` component:
+In your `_app.ts` file, wrap your page component in an `CustomAppProvider` component:
 
 ```typescript jsx
 ...
@@ -45,6 +53,8 @@ In your `_app.ts` file, wrap your component in an `CustomAppProvider` component:
 </CustomAppProvider>
 ...
 ```
+
+That's all that is needed in terms of configuration. Next, let's see how we can access the content management API.
 
 ### Usage
 
@@ -71,4 +81,4 @@ export default function IndexPage() {
 }
 ```
 
-That's it! Users will be signed in automatically, all routes are protected, and the access token will refresh automatically.
+That's it!

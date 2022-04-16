@@ -1,6 +1,6 @@
-import {Space, Story} from "@johannes-lindgren/storyblok-js";
-import throttled from './promise-throttle'
-import {stripLeadingSlash} from "@src/storyblok-js/utils/url-utils";
+import throttle from '../utils/throttle'
+import {stripLeadingSlash} from "../utils/url-utils";
+import {Story} from "../story";
 
 const contentManagementApiUrl = 'https://mapi.storyblok.com/v1'
 
@@ -15,7 +15,9 @@ export class ContentManagementClient {
         // TODO remove console.log
         console.log('Init new ContentManagementClient')
 
-        this.fetch = throttled((r, i) => fetch(r,i), 3, 1000); // TODO read dynamically via settings
+        // TODO read limits dynamically via settings
+        // Need to wrap fetch in an arrow function, as fetch is part of the window object
+        this.fetch = throttle((r: RequestInfo, i: RequestInit | undefined) => fetch(r,i), 3, 1000);
         this._accessToken = accessToken
         this._spaceId = spaceId
     }
@@ -36,17 +38,17 @@ export class ContentManagementClient {
         return await response.json()
     }
 
-    private post(relativeUrl: string, body: any) {
-        return this.fetch(`${contentManagementApiUrl}/${stripLeadingSlash(relativeUrl)}`, {
-            method: 'POST',
-            headers: {
-                // NOTE for personal oauth access tokens, 'Bearer ' should be omitted.
-                // But for custom apps, it must be included.
-                'Authorization': `Bearer ${this.accessToken}`
-            },
-            body: JSON.stringify(body),
-        })
-    }
+    // private async post(relativeUrl: string, body: any) {
+    //     return this.fetch(`${contentManagementApiUrl}/${stripLeadingSlash(relativeUrl)}`, {
+    //         method: 'POST',
+    //         headers: {
+    //             // NOTE for personal oauth access tokens, 'Bearer ' should be omitted.
+    //             // But for custom apps, it must be included.
+    //             'Authorization': `Bearer ${this.accessToken}`
+    //         },
+    //         body: JSON.stringify(body),
+    //     })
+    // }
 
     setAccessToken(accessToken: string) {
         this._accessToken = accessToken

@@ -1,6 +1,10 @@
 # @johannes-lindgren/storyblok-js
 
-A typed library for Storyblok!
+`@johannes-lindgren/storyblok-js` is an alternative to `@storyblok/js` that features
+
+* Full typescript coverage
+* Content Delivery API
+* Content Management API
 
 
 ## Content Delivery Client
@@ -38,6 +42,9 @@ Get [links](https://www.storyblok.com/docs/api/content-delivery/v2#core-resource
 ```javascript
 await client.getLinks({ starts_with: '/dir/subdir/my-content' })
 ```
+
+## Content Management Client
+
 
 ## Typescript
 
@@ -79,7 +86,7 @@ A storyblok component has several fields. These fields can have different types.
 import {RichText} from "@johannes-lindgren/storyblok-js";
 
 type Article = Block<{
-    richText: RichText,
+    richText: RichText
 }>
 ```
 
@@ -90,7 +97,7 @@ type Article = Block<{
 import {LinkField} from "@johannes-lindgren/storyblok-js";
 
 type Article = Block<{
-    link: LinkField,
+    link: LinkField
 }>
 ```
 

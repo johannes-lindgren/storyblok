@@ -9,7 +9,7 @@ import {
     useSession
 } from "next-auth/react";
 import {useRouter} from "next/router";
-import {ContentManagementClient} from "@src/storyblok-js/content-management-client";
+import {ContentManagementClient} from "@johannes-lindgren/storyblok-js";
 import {Session, User} from "next-auth";
 import {Role, Space} from "@src/storyblok-next-sidebar-app/auth/types";
 
@@ -57,7 +57,7 @@ const ClientContextProvider: FunctionComponent<PropsWithChildren<{}>> = ({childr
     // eslint-disable-next-line react-hooks/exhaustive-deps
     const client = useMemo(() => new ContentManagementClient(session.data.accessToken, session.data.space.id), [session.data.space.id]) // Only initialize once
 
-    // TODO add some margin, so that we do not risk requesting a new session a few ms after it has expired
+    // TODO add some negative margin to the timer, so that we do not risk requesting a new session a few ms after it has expired
 
     function updateSession() {
         getSession()

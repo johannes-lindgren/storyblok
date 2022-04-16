@@ -13,19 +13,19 @@ export default function <F extends AsyncFunction>(
     milliseconds: number
 ): F {
 
-    const queue: any = [];
+    const queue: QueueObj[] = [];
     const complete: number[] = [];
     let inflight = 0;
 
     var processQueue = function () {
         // Remove old complete entries.
-        var now = Date.now();
+        const now = Date.now();
         while (complete.length && complete[0] <= now - milliseconds)
             complete.shift();
 
         // Make calls from the queue that fit within the limit.
         while (queue.length && complete.length + inflight < calls) {
-            var request = queue.shift();
+            const request = queue.shift() as QueueObj;
             ++inflight;
 
             // Call the deferred function, fulfilling the wrapper Promise
@@ -49,8 +49,9 @@ export default function <F extends AsyncFunction>(
             setTimeout(processQueue, complete[0] + milliseconds - now);
     };
 
-    return function () {
+    return function (this: any) {
         return new Promise((resolve, reject) => {
+            // @ts-ignore
             queue.push({
                 this: this,
                 arguments: arguments,
@@ -60,5 +61,12 @@ export default function <F extends AsyncFunction>(
 
             processQueue()
         })
-    }
+    } as F
 };
+
+type QueueObj = {
+    this: any
+    arguments: any,
+    resolve: (value: any) => void,
+    reject: (reason?: any) => void
+}
