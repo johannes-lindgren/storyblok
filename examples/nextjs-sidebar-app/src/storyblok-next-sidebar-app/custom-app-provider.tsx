@@ -11,7 +11,7 @@ import {
 import {useRouter} from "next/router";
 import {ContentManagementClient} from "@src/storyblok-js/content-management-client";
 import {Session, User} from "next-auth";
-import {Role, Space} from "@src/storyblok-next-sidebar-app/auth-api/types";
+import {Role, Space} from "@src/storyblok-next-sidebar-app/auth/types";
 
 const ClientContext = React.createContext<ContentManagementClient | undefined>(undefined);
 
@@ -52,11 +52,12 @@ const ClientContextProvider: FunctionComponent<PropsWithChildren<{}>> = ({childr
     // We need to use a ref, so that useEffect can clean up the most recent timer.
     const timer = useRef<ReturnType<typeof setTimeout>>()
 
-    // We want to keep the dependency array empty, becuase we are going to mutate the client's token, in order to
+    // We want to keep the dependency array empty, because we are going to mutate the client's token, in order to
     // preserve the state of the built-in throttling mechanism
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    // const client = useMemo(() => new ContentManagementClient(session.data.accessToken), []) // Only initialize once
-    const client = useMemo(() => new ContentManagementClient(session.data.accessToken), [session.data.accessToken]) // Only initialize once
+    const client = useMemo(() => new ContentManagementClient(session.data.accessToken, session.data.space.id), [session.data.space.id]) // Only initialize once
+
+    // TODO add some margin, so that we do not risk requesting a new session a few ms after it has expired
 
     function updateSession() {
         getSession()
@@ -66,7 +67,7 @@ const ClientContextProvider: FunctionComponent<PropsWithChildren<{}>> = ({childr
                 }
                 // TODO remove console.log
                 console.log('Fetched new session', newSession)
-                console.log('New timeout', session.data?.expiresInMs, 'ms')
+                console.log('Initial timeout is', newSession?.expiresInMs / 1000, 's', '/', newSession?.expiresInMs / 1000 / 60, 'min')
 
                 // storyblok-js-client doesn't allow us to update tokens for the content management API; only content delivery token
                 client.setAccessToken(newSession.accessToken)
@@ -79,7 +80,7 @@ const ClientContextProvider: FunctionComponent<PropsWithChildren<{}>> = ({childr
 
     useEffect(() => {
         // TODO remove console.log
-        console.log('Initial timeout is', session.data?.expiresInMs, 'ms')
+        console.log('Initial timeout is', session.data?.expiresInMs / 1000, 's', '/', session.data?.expiresInMs / 1000 / 60, 'min')
 
         timer.current = setTimeout(updateSession, session.data.expiresInMs);
 

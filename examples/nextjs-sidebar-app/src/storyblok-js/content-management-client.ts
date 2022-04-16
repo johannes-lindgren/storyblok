@@ -9,16 +9,18 @@ export class ContentManagementClient {
     // TODO need to replace the client, because the storyblok-js-client doesn't let us update the oauth tokens
     private fetch: typeof fetch
     private _accessToken: string
+    private _spaceId: string | number
 
-    constructor(accessToken: string) {
+    constructor(accessToken: string, spaceId: string | number) {
         // TODO remove console.log
         console.log('Init new ContentManagementClient')
 
         this.fetch = throttled((r, i) => fetch(r,i), 3, 1000); // TODO read dynamically via settings
         this._accessToken = accessToken
+        this._spaceId = spaceId
     }
 
-    private async get<T>(relativeUrl: string): Promise<T> {
+    private async get(relativeUrl: string) {
         const response = await this.fetch(`${contentManagementApiUrl}/${stripLeadingSlash(relativeUrl)}`, {
             method: 'GET',
             headers: {
@@ -31,7 +33,7 @@ export class ContentManagementClient {
         if(!response.ok){
             throw new Error(response.statusText)
         }
-        return await response.json() as unknown as T
+        return await response.json()
     }
 
     private post(relativeUrl: string, body: any) {
@@ -53,6 +55,15 @@ export class ContentManagementClient {
     private get accessToken(): string {
         return this._accessToken
     }
+
+    set spaceId(spaceId) {
+        this._spaceId = spaceId
+    }
+
+    get spaceId(): string | number {
+        return this._spaceId
+    }
+
     //
     // // // TODO type
     // async getSpace(spaceId: number | string): Promise<Space | undefined> {
@@ -63,9 +74,9 @@ export class ContentManagementClient {
     //         })
     // }
 
-    async getStories(spaceId: number | string): Promise<Story[]> {
+    async getStories(): Promise<Story[]> {
         return this
-            .get(`spaces/${spaceId}/stories`)
+            .get(`spaces/${this.spaceId}/stories`)
             .then(res => res.stories as unknown as Story[])
     }
 }

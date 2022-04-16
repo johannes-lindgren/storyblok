@@ -1,8 +1,8 @@
 import {NextApiHandler} from "next";
-import NextAuth, {Session, JWT, Account, Profile, CallbacksOptions} from "next-auth";
-import {StoryblokAuthProvider} from "@src/storyblok-next-sidebar-app/next-auth-storyblok/storyblok";
+import NextAuth, {Session, JWT, Account, Profile, CallbacksOptions, User} from "next-auth";
+import {StoryblokAuthProvider} from "@src/next-auth-storyblok/storyblok";
 import {CookieOption} from "next-auth/core/types";
-import {refreshToken, refreshToken2} from "@src/storyblok-next-sidebar-app/next-auth-storyblok/storyblok-oauth-api";
+import {refreshToken, refreshToken2} from "@src/next-auth-storyblok/storyblok-oauth-api";
 
 const makeCookieOption = (name: string): CookieOption => ({
     name,
@@ -63,7 +63,7 @@ export const StoryblokAuth: (options?: StoryblokAuthOptions) => NextApiHandler =
 
 const makeCallbacks = (options: Required<StoryblokAuthOptions>): Partial<CallbacksOptions<Profile, Account>> => {
     return ({
-        async jwt({token, account, user, profile}): Promise<JWT> {
+        async jwt({token, account, user, profile}: {token: JWT, account: Account, user: User, profile: Profile}): Promise<JWT> {
             if (isInitialJwtCallback(account)) {
                 // Initial sign in
 
@@ -89,6 +89,7 @@ const makeCallbacks = (options: Required<StoryblokAuthOptions>): Partial<Callbac
                 }
             }
 
+            // TODO add some margin, so that we do not risk requesting a new session a few ms after it has expired
             if (!hasTokenExpired(token)) {
                 // Return previous token if the access token has not expired yet
                 return token
@@ -101,6 +102,7 @@ const makeCallbacks = (options: Required<StoryblokAuthOptions>): Partial<Callbac
 
         // Returns the Session object that is accessible by the frontend app
         async session({token}: { session: Session, token: JWT }): Promise<Session> {
+            console.log('Calculating new session object')
             // Send properties to the client, like an access_token from a provider.
             return {
                 user: token.user,

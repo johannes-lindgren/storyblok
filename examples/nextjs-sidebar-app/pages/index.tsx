@@ -26,7 +26,7 @@ const IndexPage: NextPage<PageProps> = ({}) => {
     useEffect(() => {
         const interval = setInterval(() => {
             setSeconds(seconds => seconds + delay);
-            client.getStories(space.id)
+            client.getStories()
                 .then(s => {
                     setError(false)
                     setStories(s)
