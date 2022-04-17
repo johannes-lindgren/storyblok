@@ -1,27 +1,6 @@
-import {JWT} from "next-auth";
+import {JWT} from "next-auth/jwt";
 
-// The data that is returned from https://app.storyblok.com/oauth/user_info
-export type UserInfo = {
-    user: User,
-    space: Space,
-    roles: Role[],
-}
-
-export type User = {
-    id: number
-    friendly_name: string
-}
-
-export type Space = {
-    id: number
-    name: string
-}
-
-export type Role = {
-    name: string
-}
-
-export type TokenRequestData = {
+type TokenRequestData = {
     access_token: string
     refresh_token: string
     token_type: string
@@ -32,7 +11,7 @@ export type TokenRequestData = {
 type TokenRefreshResponse = Omit<TokenRequestData, 'refresh_token'>
 
 type TokenRequestPayload = {
-    grant_type: 'authorization_code',
+    grant_type: 'authorization_code'
     code: string
     client_secret: string
     client_id: string
@@ -40,7 +19,7 @@ type TokenRequestPayload = {
 }
 
 type TokenRefreshPayload = {
-    grant_type: 'refresh_token',
+    grant_type: 'refresh_token'
     refresh_token: string
     client_secret: string
     client_id: string
@@ -63,23 +42,27 @@ const sendTokenRequest = async <T extends TokenRequestPayload | TokenRefreshPayl
     return await response.json() as unknown as (T extends TokenRequestPayload ? TokenRequestData : TokenRefreshResponse)
 }
 
-export const refreshToken2 = async (token: JWT): Promise<JWT> => {
+// NOTE: to refresh a token, we need to provide a clientId and clientSecret, even though this is not required by the
+// standard OAuth 2.0 specification.
+const refreshToken = async (oldToken: JWT, clientId: string, clientSecret: string): Promise<JWT> => {
     const res = await sendTokenRequest({
         grant_type: 'refresh_token',
-        client_id: process.env.STORYBLOK_CLIENT_ID as string, // TODO should not be hard coded, ideally
-        client_secret: process.env.STORYBLOK_CLIENT_SECRET as string,
-        refresh_token: token.refreshToken,
+        client_id: clientId,
+        client_secret: clientSecret,
+        refresh_token: oldToken.refreshToken,
     })
 
     const expires_in = res.expires_in
 
     return {
-        ...token,
+        ...oldToken,
         accessToken: res.access_token,
         expiresIn: expires_in,
         accessTokenExpires: Date.now() + expires_in * 1000,
     }
 }
 
-export const refreshToken = (props: TokenRefreshPayload) => sendTokenRequest(props)
-export const requestToken = (props: TokenRequestPayload) => sendTokenRequest(props)
+// const refreshToken = (props: TokenRefreshPayload) => sendTokenRequest(props)
+const requestToken = (props: TokenRequestPayload) => sendTokenRequest(props)
+
+export {refreshToken, sendTokenRequest, requestToken}

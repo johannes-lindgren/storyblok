@@ -61,6 +61,7 @@ const Link = React.forwardRef<HTMLAnchorElement, LinkProps>(function Link(props,
 
   const router = useRouter();
   const pathname = typeof href === 'string' ? href : href.pathname;
+  // TODO get rid of clsx dependency
   const className = clsx(classNameProps, {
     [activeClassName]: router.pathname === pathname && activeClassName,
   });

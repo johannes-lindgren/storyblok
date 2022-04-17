@@ -1,7 +1,10 @@
-import {StoryblokAuth} from "@src/storyblok-next-sidebar-app";
+import {makeAppAuthOptions} from "@johannes-lindgren/storyblok-app-next/dist/api";
+import NextAuth from "next-auth";
 
-export default StoryblokAuth({
-    clientId: process.env.STORYBLOK_CLIENT_ID,
-    clientSecret: process.env.STORYBLOK_CLIENT_SECRET,
-    jwtSecret: process.env.STORYBLOK_JWT_SECRET,
-})
+export default NextAuth(
+    makeAppAuthOptions({
+        clientId: process.env.STORYBLOK_CLIENT_ID,
+        clientSecret: process.env.STORYBLOK_CLIENT_SECRET,
+        jwtSecret: process.env.STORYBLOK_JWT_SECRET,
+    })
+)

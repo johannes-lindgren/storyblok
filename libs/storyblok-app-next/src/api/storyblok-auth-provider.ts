@@ -1,6 +1,7 @@
 import {OAuthConfig, OAuthUserConfig} from "next-auth/providers";
-import {requestToken, UserInfo} from "@src/next-auth-storyblok/storyblok-oauth-api";
+import {requestToken} from "./storyblok-oauth-api";
 import {Profile} from "next-auth";
+import {UserInfo} from "@src/types/user-info";
 
 export const StoryblokAuthProvider = (options: OAuthUserConfig<Profile>): OAuthConfig<UserInfo> => ({
     id: 'storyblok',

@@ -1,9 +1,8 @@
 import * as React from 'react';
 import {GetServerSideProps, NextPage} from "next";
-import {useClient, useRoles, useSpace, useUser} from "@src/storyblok-next-sidebar-app/custom-app-provider";
 import {useEffect, useState} from "react";
 import {Story} from "@johannes-lindgren/storyblok-js";
-// import {Space, Story} from "@johannes-lindgren/storyblok-js";
+import {useClient, useRoles, useSpace, useUser} from "@johannes-lindgren/storyblok-app-next/dist/react";
 
 type PageProps = {
     // storyblokToken: string
@@ -15,8 +14,6 @@ const IndexPage: NextPage<PageProps> = ({}) => {
     const roles = useRoles()
     const space = useSpace()
     const client = useClient()
-
-    // const [stories, setStories] = useState<Story[] | undefined>(undefined)
 
     const [seconds, setSeconds] = useState(0);
     const [isError, setError] = useState(false)
@@ -63,7 +60,7 @@ const IndexPage: NextPage<PageProps> = ({}) => {
 
 export default IndexPage
 
-export const getServerSideProps: GetServerSideProps<PageProps> = async (context) => {
+export const getServerSideProps: GetServerSideProps<PageProps> = async (_) => {
     return {
         props: {}
     }

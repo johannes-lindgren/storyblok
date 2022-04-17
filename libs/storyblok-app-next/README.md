@@ -1,16 +1,22 @@
-# storyblok-next-custom-app
+<div align="center">
+	<h1 align="center">@johannes-lindgren/storyblok-app-next</h1>
+  <p align="center">
+    A typed JavaScript library to integrate your apps within <a href="https://www.storyblok.com" target="_blank">Storyblok</a>.
+  </p>
+  <br />
+</div>
 
-`storyblok-next-custom-app` is a library that allows you to seamlessly integrate your Next.js applications with Storyblok.
+`storyblok-app-next` is a library that allows you to seamlessly integrate your Next.js applications with Storyblok.
 
 With very little configuration:
 
-* All routes are guarded 
+* All routes are guarded
 * End-users are automatically be signed in
 * Access tokens are automatically refreshed.
 
 ## Getting Started
 
-Read [this article](https://www.storyblok.com/docs/plugins/custom-application) to learn how to set up an app.
+Read [this introduction to custom apps](https://www.storyblok.com/docs/plugins/custom-application).
 
 Create a new app and add the following values to your app settings:
 
@@ -29,9 +35,10 @@ To add NextAuth.js to a project create a file called `[...nextauth].js` in `/pag
 route handler for [NextAuth.js](https://next-auth.js.org/).
 
 ```typescript
-import {StoryblokAuth} from "@johannes-lindgren/storyblok-next-sidebar-app";
+import {makeAppAuthOptions} from "@johannes-lindgren/storyblok-app-next/dist/api";
+import NextAuth from "next-auth";
 
-export default StoryblokAuth()
+export default NextAuth(makeAppAuthOptions())
 ```
 
 Rename `.env.local.example` to `.env.local` and add values for all environmental variables:

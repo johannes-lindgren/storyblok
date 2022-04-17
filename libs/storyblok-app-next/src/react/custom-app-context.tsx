@@ -8,28 +8,33 @@ import {
     useSession as useNextAuthSession,
     useSession
 } from "next-auth/react";
-import {useRouter} from "next/router";
+// import {useRouter} from "next/router";
 import {ContentManagementClient} from "@johannes-lindgren/storyblok-js";
 import {Session, User} from "next-auth";
-import {Role, Space} from "@src/storyblok-next-sidebar-app/auth/types";
+import {Role, Space} from "@src/types";
 
 const ClientContext = React.createContext<ContentManagementClient | undefined>(undefined);
 
-const CustomAppProvider: FunctionComponent<SuspenseProps> = (props) => (
+const CustomAppProvider: FunctionComponent<SuspenseProps> = ({children,fallback}) => (
     <SessionProvider>
-        <WithSessionContext {...props} />
+        <WithSessionContext fallback={fallback}>
+            {children}
+        </WithSessionContext>
     </SessionProvider>
 )
 
 // To protect all routes and automatically log in
 const WithSessionContext: FunctionComponent<SuspenseProps> = ({children, fallback}) => {
     const {status} = useSession()
-    const router = useRouter()
-    useEffect(() => {
-        if (window.top == window.self) {
-            router.push('https://app.storyblok.com/oauth/app_redirect')
-        }
-    })
+
+    // TODO re-enable, but throws error (router is null)
+    // const router = useRouter()
+    // useEffect(() => {
+    //     if (router.isReady && window.top == window.self) {
+    //         router.push('https://app.storyblok.com/oauth/app_redirect')
+    //     }
+    // }, [router.isReady])
+
     if (status === 'unauthenticated') {
         signIn('storyblok')
     }
@@ -50,7 +55,7 @@ const ClientContextProvider: FunctionComponent<PropsWithChildren<{}>> = ({childr
 
     // We use setTimeout instead of setInterval, because the delay is read from the session
     // We need to use a ref, so that useEffect can clean up the most recent timer.
-    const timer = useRef<ReturnType<typeof setTimeout>>()
+    const timer = useRef<number>()
 
     // We want to keep the dependency array empty, because we are going to mutate the client's token, in order to
     // preserve the state of the built-in throttling mechanism
@@ -71,7 +76,7 @@ const ClientContextProvider: FunctionComponent<PropsWithChildren<{}>> = ({childr
 
                 // storyblok-js-client doesn't allow us to update tokens for the content management API; only content delivery token
                 client.setAccessToken(newSession.accessToken)
-                timer.current = setTimeout(updateSession, newSession?.expiresInMs)
+                timer.current = window.setTimeout(updateSession, newSession.expiresInMs)
             })
             .catch(() => {
                 signIn() // Attempt to sign in again
@@ -79,12 +84,21 @@ const ClientContextProvider: FunctionComponent<PropsWithChildren<{}>> = ({childr
     }
 
     useEffect(() => {
+        // Note: if you edit the code with hot module replacement, you are likely to eventually get a timeout.
+        //  Because you need to set the timeout at the moment you fetch the session from the backend.
+        //  With hot module replacement, the useEffect() hook will execute without refetching the session from useSession(),
+        //  therefore the expiresInMs will be outdated. But this is not a problem in production.
+
         // TODO remove console.log
         console.log('Initial timeout is', session.data?.expiresInMs / 1000, 's', '/', session.data?.expiresInMs / 1000 / 60, 'min')
 
-        timer.current = setTimeout(updateSession, session.data.expiresInMs);
+        timer.current = window.setTimeout(updateSession, session.data.expiresInMs);
 
-        return () => timer.current && clearTimeout(timer.current);
+        return () => {
+            if(typeof timer.current === 'number'){
+                window.clearTimeout(timer.current)
+            }
+        }
     }, []);
 
     if (session.status !== 'authenticated') {
