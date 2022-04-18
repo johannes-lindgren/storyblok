@@ -3,10 +3,20 @@ import {GetServerSideProps, NextPage} from "next";
 import {useEffect, useState} from "react";
 import {Story} from "@johannes-lindgren/storyblok-js";
 import {useClient, useRoles, useSpace, useUser} from "@johannes-lindgren/storyblok-app-next/dist/react";
+import {Alert, Chip, Container, IconButton, Tooltip, Typography} from "@mui/material";
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableContainer from '@mui/material/TableContainer';
+import TableHead from '@mui/material/TableHead';
+import TableRow from '@mui/material/TableRow';
+import Paper from '@mui/material/Paper';
+import {Edit, Power, PowerOff, TimerOutlined} from "@mui/icons-material";
 
 type PageProps = {
     // storyblokToken: string
 }
+
 
 const IndexPage: NextPage<PageProps> = ({}) => {
 
@@ -15,8 +25,9 @@ const IndexPage: NextPage<PageProps> = ({}) => {
     const space = useSpace()
     const client = useClient()
 
+    const [hasErrored, setErrored] = useState(false)
     const [seconds, setSeconds] = useState(0);
-    const [isError, setError] = useState(false)
+    const [isConnected, setConnected] = useState(true)
     const [stories, setStories] = useState<Story[]>([])
 
     const delay = 20
@@ -25,36 +36,97 @@ const IndexPage: NextPage<PageProps> = ({}) => {
             setSeconds(seconds => seconds + delay);
             client.getStories()
                 .then(s => {
-                    setError(false)
+                    setConnected(true)
                     setStories(s)
                     console.log(s)
                 })
                 .catch(e => {
                     console.error(e)
-                    setError(true)
+                    setErrored(true)
+                    setConnected(false)
                 })
         }, delay * 1000);
         return () => clearInterval(interval);
     }, [seconds]);
 
     return (
-        <div>
+        <Container maxWidth='sm'>
+            <Typography variant="h2" sx={{my: 2}}>
+                {space.name}
+            </Typography>
             <p>Signed in as <em>{user.name}</em> on the <em>{space.name}</em> space</p>
             <p>Your roles are: </p>
-            <ul>
-                {roles.map(role => (<li key={role.name}>{role.name}</li>))}
-            </ul>
-            <p>Time since login: <em>{seconds} seconds</em></p>
-            <p>The access token is: <em>{isError ? 'expired!' : 'valid'}</em></p>
-            <h2>Stories:</h2>
-            <ul>
-                {stories.map(s => (
-                    <li key={s.uuid}>
-                        {s.name} (/{s.full_slug}) | {s.created_at}
-                    </li>
-                ))}
-            </ul>
-        </div>
+            {roles.map(role => (<
+                    Chip key={role.name} variant="outlined" label={role.name}/>
+            ))}
+
+            <Typography variant="h2" sx={{my: 2}}>
+                Connection
+            </Typography>
+            <p><TimerOutlined fontSize="small" /><em>{seconds} seconds</em> since application was opened.</p>
+
+            {isConnected ? (
+                <Chip label="connected" color="success" variant="outlined" icon={<Power/>}/>
+            ) : (
+                <Chip label="disconnected" color="error" variant="outlined" icon={<PowerOff/>}/>
+            )}
+
+            {hasErrored ? (
+                <Alert severity='error' sx={{my: 2}}>
+                    The connection was broken at least once. See the log for details.
+                </Alert>
+            ) : (
+                <Alert severity='success' sx={{my: 2}}>
+                    The connection has not been broken a single time
+                </Alert>
+            )}
+
+            <Typography variant="h2" sx={{my: 2}}>
+                Stories
+            </Typography>
+            <TableContainer component={Paper} sx={{my: 2}}>
+                <Table>
+                    <TableHead>
+                        <TableRow>
+                            <TableCell>Name</TableCell>
+                            <TableCell align="right">Full slug</TableCell>
+                            <TableCell align="right">Created at</TableCell>
+                            <TableCell align="right">Actions</TableCell>
+                        </TableRow>
+                    </TableHead>
+                    <TableBody>
+                        {stories.map((story) => (
+                            <TableRow
+                                key={story.uuid}
+                                sx={{'&:last-child td, &:last-child th': {border: 0}}}
+                            >
+                                <TableCell component="th" scope="row">
+                                    {story.name}
+                                </TableCell>
+                                <TableCell align="right">/{story.full_slug}</TableCell>
+                                <TableCell align="right">
+                                    {new Date(story.created_at).toLocaleDateString(undefined, {
+                                        weekday: 'long',
+                                        year: 'numeric',
+                                        month: 'long',
+                                        day: 'numeric'
+                                    })}
+                                </TableCell>
+                                <TableCell align="right">
+                                    <Tooltip title="Edit">
+                                        <IconButton aria-label="edit">
+                                            <Edit
+                                                href={`https://app.storyblok.com/#!/me/spaces/${space.id}/stories/0/0/${story.id}`}/>
+
+                                        </IconButton>
+                                    </Tooltip>
+                                </TableCell>
+                            </TableRow>
+                        ))}
+                    </TableBody>
+                </Table>
+            </TableContainer>
+        </Container>
     )
 }
 

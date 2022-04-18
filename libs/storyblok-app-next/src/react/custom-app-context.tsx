@@ -8,7 +8,6 @@ import {
     useSession as useNextAuthSession,
     useSession
 } from "next-auth/react";
-// import {useRouter} from "next/router";
 import {ContentManagementClient} from "@johannes-lindgren/storyblok-js";
 import {Session, User} from "next-auth";
 import {Role, Space} from "@src/types";
@@ -25,34 +24,30 @@ const CustomAppProvider: FunctionComponent<SuspenseProps> = ({children,fallback}
 
 // To protect all routes and automatically log in
 const WithSessionContext: FunctionComponent<SuspenseProps> = ({children, fallback}) => {
-    const {status} = useSession()
+    const session = useSession()
 
-    // TODO re-enable, but throws error (router is null)
-    // const router = useRouter()
-    // useEffect(() => {
-    //     if (router.isReady && window.top == window.self) {
-    //         router.push('https://app.storyblok.com/oauth/app_redirect')
-    //     }
-    // }, [router.isReady])
+    useEffect(() => {
+        if (window.top == window.self) {
+            console.log('Redirecting')
+            window.location.assign('https://app.storyblok.com/oauth/app_redirect')
+        }
+    }, [])
 
-    if (status === 'unauthenticated') {
+    if (session.status === 'unauthenticated') {
         signIn('storyblok')
     }
-    if (status !== 'authenticated') {
+    if (session.status !== 'authenticated') {
         return <>{fallback}</>
     }
     return (
-        <ClientContextProvider>
+        <ClientContextProvider session={session.data}>
             {children}
         </ClientContextProvider>
     )
 }
 
 
-const ClientContextProvider: FunctionComponent<PropsWithChildren<{}>> = ({children}) => {
-    // This component is wrapped in another component that already ensures that data is not null
-    const session = useNextAuthSession() as {data: Session, status: "authenticated"}
-
+const ClientContextProvider: FunctionComponent<PropsWithChildren<{session: Session}>> = ({children, session}) => {
     // We use setTimeout instead of setInterval, because the delay is read from the session
     // We need to use a ref, so that useEffect can clean up the most recent timer.
     const timer = useRef<number>()
@@ -60,7 +55,7 @@ const ClientContextProvider: FunctionComponent<PropsWithChildren<{}>> = ({childr
     // We want to keep the dependency array empty, because we are going to mutate the client's token, in order to
     // preserve the state of the built-in throttling mechanism
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    const client = useMemo(() => new ContentManagementClient(session.data.accessToken, session.data.space.id), [session.data.space.id]) // Only initialize once
+    const client = useMemo(() => new ContentManagementClient(session.accessToken, session.space.id), [session.space.id]) // Only initialize once
 
     // TODO add some negative margin to the timer, so that we do not risk requesting a new session a few ms after it has expired
 
@@ -71,8 +66,9 @@ const ClientContextProvider: FunctionComponent<PropsWithChildren<{}>> = ({childr
                     throw Error('Failed to fetch new session')
                 }
                 // TODO remove console.log
-                console.log('Fetched new session', newSession)
-                console.log('Initial timeout is', newSession?.expiresInMs / 1000, 's', '/', newSession?.expiresInMs / 1000 / 60, 'min')
+                console.log('Fetched new session')
+                console.log('The new session new session', newSession)
+                console.log('The new session timeout is', newSession?.expiresInMs / 1000, 's', '/', newSession?.expiresInMs / 1000 / 60, 'min')
 
                 // storyblok-js-client doesn't allow us to update tokens for the content management API; only content delivery token
                 client.setAccessToken(newSession.accessToken)
@@ -90,14 +86,14 @@ const ClientContextProvider: FunctionComponent<PropsWithChildren<{}>> = ({childr
         //  therefore the expiresInMs will be outdated. But this is not a problem in production.
 
         // TODO remove console.log
-        console.log('Initial timeout is', session.data?.expiresInMs / 1000, 's', '/', session.data?.expiresInMs / 1000 / 60, 'min')
+        console.log('Using existing session')
+        console.log('The initial session is', session)
+        console.log('The initial timeout is', session.expiresInMs / 1000, 's', '/', session.expiresInMs / 1000 / 60, 'min')
 
-        timer.current = window.setTimeout(updateSession, session.data.expiresInMs);
+        timer.current = window.setTimeout(updateSession, session.expiresInMs);
 
         return () => {
-            if(typeof timer.current === 'number'){
-                window.clearTimeout(timer.current)
-            }
+            window.clearTimeout(timer.current)
         }
     }, []);
 
@@ -105,10 +101,6 @@ const ClientContextProvider: FunctionComponent<PropsWithChildren<{}>> = ({childr
         throw Error(`The useSession() hook should only be used in components that are within a CustomAppContext. The current login status is '${session.status}'`)
     }
 
-    // TODO remove console.log
-    console.log({session})
-
-    // customAppContext.client.setToken(session.data.accessToken)
     return (
         <ClientContext.Provider value={client}>
             {children}

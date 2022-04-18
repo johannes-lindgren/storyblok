@@ -10,8 +10,6 @@ import json from '@rollup/plugin-json';
 const packageJson = require('./package.json');
 const external = [...Object.keys(packageJson.peerDependencies || {})];
 
-console.log({external})
-
 export default ({
     input: `./src/**/index.ts`,
     output: {
@@ -20,10 +18,6 @@ export default ({
         sourcemap: true,
     },
     external,
-    // external: [
-    //     'react',
-    //     'react-proptypes',
-    // ],
     plugins: [
         json(), // needed for openid-client, for some reason
         depsExternal(),
