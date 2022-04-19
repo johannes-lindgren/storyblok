@@ -14,30 +14,43 @@ import {Role, Space} from "@src/types";
 
 const ClientContext = React.createContext<ContentManagementClient | undefined>(undefined);
 
-const CustomAppProvider: FunctionComponent<SuspenseProps> = ({children,fallback}) => (
-    <SessionProvider>
-        <WithSessionContext fallback={fallback}>
-            {children}
-        </WithSessionContext>
-    </SessionProvider>
-)
+const CustomAppProvider: FunctionComponent<SuspenseProps> = ({children, fallback}) => {
 
+    useEffect(() => {
+        if (window.top == window.self) {
+            console.log('Redirecting :)')
+            window.location.assign('https://app.storyblok.com/oauth/app_redirect')
+        }
+    }, [])
+
+    return (
+        <SessionProvider>
+            <WithSessionContext fallback={fallback}>
+                {children}
+            </WithSessionContext>
+        </SessionProvider>
+    )
+}
 // To protect all routes and automatically log in
 const WithSessionContext: FunctionComponent<SuspenseProps> = ({children, fallback}) => {
     const session = useSession()
 
-    useEffect(() => {
-        if (window.top == window.self) {
-            console.log('Redirecting')
-            window.location.assign('https://app.storyblok.com/oauth/app_redirect')
-        }
-    }, [])
 
     if (session.status === 'unauthenticated') {
         signIn('storyblok')
     }
     if (session.status !== 'authenticated') {
-        return <>{fallback}</>
+        return (
+            <div style={{
+                display: 'flex',
+                height: '100vh',
+                width: '100vw',
+                alignItems: 'center',
+                justifyContent: 'center',
+            }}>
+                {fallback}
+            </div>
+        )
     }
     return (
         <ClientContextProvider session={session.data}>
@@ -47,7 +60,7 @@ const WithSessionContext: FunctionComponent<SuspenseProps> = ({children, fallbac
 }
 
 
-const ClientContextProvider: FunctionComponent<PropsWithChildren<{session: Session}>> = ({children, session}) => {
+const ClientContextProvider: FunctionComponent<PropsWithChildren<{ session: Session }>> = ({children, session}) => {
     // We use setTimeout instead of setInterval, because the delay is read from the session
     // We need to use a ref, so that useEffect can clean up the most recent timer.
     const timer = useRef<number>()
@@ -62,7 +75,7 @@ const ClientContextProvider: FunctionComponent<PropsWithChildren<{session: Sessi
     function updateSession() {
         getSession()
             .then(newSession => {
-                if(!newSession){
+                if (!newSession) {
                     throw Error('Failed to fetch new session')
                 }
                 // TODO remove console.log
@@ -110,7 +123,7 @@ const ClientContextProvider: FunctionComponent<PropsWithChildren<{session: Sessi
 
 const useSessionContext = () => {
     const session = useNextAuthSession()
-    if(!isAuthenticated(session)){
+    if (!isAuthenticated(session)) {
         throw Error(`The hook should only be used in components that are within a CustomAppContext. The current login status is '${session.status}'`)
     }
     return session
@@ -118,7 +131,7 @@ const useSessionContext = () => {
 
 const useClient = (): ContentManagementClient => {
     const client = useContext(ClientContext)
-    if(!client){
+    if (!client) {
         throw Error(`The hook should only be used in components that are within a CustomAppContext. The current client is undefined`)
     }
     return client
@@ -137,6 +150,6 @@ const useRoles = (): Role[] => {
     return session.data.roles
 }
 
-const isAuthenticated = (session: SessionContextValue): session is {data: Session, status: "authenticated"} => session.status === 'authenticated'
+const isAuthenticated = (session: SessionContextValue): session is { data: Session, status: "authenticated" } => session.status === 'authenticated'
 
 export {CustomAppProvider, useClient, useUser, useSpace, useRoles}
