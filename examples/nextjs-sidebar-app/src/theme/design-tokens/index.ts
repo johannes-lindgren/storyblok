@@ -13,7 +13,9 @@ export const light_border = `1px solid ${light}`
 //Box-shadow
 export const box_shadow_default = `0 2px 17px 3px rgba(34, 42, 69, 0.07)`
 //Transition
-export const base_transition = `all 0.1s ease-in-out`
+export const base_transition_duration = '0.1s'
+export const base_transition_easing = 'ease-in-out'
+export const base_transition = `all ${base_transition_duration} ${base_transition_easing}`
 export const base_border_radius = `5px`
 
 
