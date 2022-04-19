@@ -51,18 +51,12 @@ const IndexPage: NextPage<PageProps> = ({}) => {
 
     return (
         <Container maxWidth='sm'>
-            <Typography variant="h2" sx={{my: 2}}>
-                {space.name}
-            </Typography>
             <p>Signed in as <em>{user.name}</em> on the <em>{space.name}</em> space</p>
             <p>Your roles are: </p>
             {roles.map(role => (<
                     Chip key={role.name} variant="outlined" label={role.name}/>
             ))}
 
-            <Typography variant="h2" sx={{my: 2}}>
-                Connection
-            </Typography>
             <p><TimerOutlined fontSize="small" /><em>{seconds} seconds</em> since application was opened.</p>
 
             {isConnected ? (
@@ -81,7 +75,7 @@ const IndexPage: NextPage<PageProps> = ({}) => {
                 </Alert>
             )}
 
-            <Typography variant="h2" sx={{my: 2}}>
+            <Typography variant="h4" sx={{my: 2}}>
                 Stories
             </Typography>
             <TableContainer component={Paper} sx={{my: 2}}>

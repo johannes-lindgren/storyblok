@@ -17,8 +17,8 @@ const ClientContext = React.createContext<ContentManagementClient | undefined>(u
 const CustomAppProvider: FunctionComponent<SuspenseProps> = ({children, fallback}) => {
 
     useEffect(() => {
-        if (window.top == window.self) {
-            console.log('Redirecting :)')
+        if (!isAppEmbedded()) {
+            console.log('The app should be embedded within the Storyblok app, redirecting...')
             window.location.assign('https://app.storyblok.com/oauth/app_redirect')
         }
     }, [])
@@ -34,7 +34,6 @@ const CustomAppProvider: FunctionComponent<SuspenseProps> = ({children, fallback
 // To protect all routes and automatically log in
 const WithSessionContext: FunctionComponent<SuspenseProps> = ({children, fallback}) => {
     const session = useSession()
-
 
     if (session.status === 'unauthenticated') {
         signIn('storyblok')
@@ -110,10 +109,6 @@ const ClientContextProvider: FunctionComponent<PropsWithChildren<{ session: Sess
         }
     }, []);
 
-    if (session.status !== 'authenticated') {
-        throw Error(`The useSession() hook should only be used in components that are within a CustomAppContext. The current login status is '${session.status}'`)
-    }
-
     return (
         <ClientContext.Provider value={client}>
             {children}
@@ -124,7 +119,7 @@ const ClientContextProvider: FunctionComponent<PropsWithChildren<{ session: Sess
 const useSessionContext = () => {
     const session = useNextAuthSession()
     if (!isAuthenticated(session)) {
-        throw Error(`The hook should only be used in components that are within a CustomAppContext. The current login status is '${session.status}'`)
+        throw Error(`The hook should only be used in components that are within a <${CustomAppProvider.displayName} /> component. The current login status is '${session.status}'`)
     }
     return session
 }
@@ -132,7 +127,7 @@ const useSessionContext = () => {
 const useClient = (): ContentManagementClient => {
     const client = useContext(ClientContext)
     if (!client) {
-        throw Error(`The hook should only be used in components that are within a CustomAppContext. The current client is undefined`)
+        throw Error(`The hook should only be used in components that are within a <${CustomAppProvider.displayName} /> component. The current client is undefined`)
     }
     return client
 }
@@ -149,6 +144,8 @@ const useRoles = (): Role[] => {
     const session = useSessionContext()
     return session.data.roles
 }
+
+const isAppEmbedded = () => window.top != window.self
 
 const isAuthenticated = (session: SessionContextValue): session is { data: Session, status: "authenticated" } => session.status === 'authenticated'
 
