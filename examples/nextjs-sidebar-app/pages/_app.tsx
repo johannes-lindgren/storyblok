@@ -4,7 +4,7 @@ import {AppProps} from 'next/app';
 import {ThemeProvider} from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import {CacheProvider, EmotionCache} from '@emotion/react';
-import storyblokTheme from '@src/theme/storyblok-theme';
+import storyblokLightTheme from '@src/theme/storyblok-light-theme';
 import createEmotionCache from '@src/create-emotion-cache';
 import {CircularProgress} from "@mui/material";
 import {CustomAppProvider} from "@johannes-lindgren/storyblok-app-next/dist/react";
@@ -25,7 +25,7 @@ export default function MyApp(props: MyAppProps) {
                 <title>Storyblok Custom App</title>
                 <meta name="viewport" content="initial-scale=1, width=device-width"/>
             </Head>
-            <ThemeProvider theme={storyblokTheme}>
+            <ThemeProvider theme={storyblokLightTheme}>
                 {/* CssBaseline kickstart an elegant, consistent, and simple baseline to build upon. */}
                 <CssBaseline/>
                 <CustomAppProvider fallback={<CircularProgress/>}>

@@ -1,4 +1,4 @@
-import {createTheme, Palette} from '@mui/material/styles';
+import {createTheme} from '@mui/material/styles';
 import {
     base_border_radius,
     black,
@@ -20,8 +20,6 @@ import {
 import {TypographyOptions} from "@mui/material/styles/createTypography";
 import {Shadows} from "@mui/material/styles/shadows";
 import {alpha} from "@mui/material";
-
-// TODO augment the theme
 
 const typography: TypographyOptions = ({
     // fontSize: 10,
@@ -80,10 +78,8 @@ const shadows = [
         .map(v => `${v[0]}px ${v[1]}px ${v[2]}px ${v[3]}px ${alpha(sb_dark_blue, 0.07)}`))
 ] as Shadows
 
-console.log({shadows})
-
 // Create a theme instance.
-const storyblokTheme = createTheme({
+const storyblokLightTheme = createTheme({
     palette: {
         mode: 'light',
         primary: {
@@ -123,17 +119,28 @@ const storyblokTheme = createTheme({
         action: {
             focus: color_primary,
             focusOpacity: 1,
-            active: light_50,
-            activatedOpacity: 1,
-            // disabled: light_50,
+            active: light,
+            activatedOpacity: 0.5,
             disabled: light_gray,
             disabledBackground: light,
-            disabledOpacity: 1,
-            hover: light_25,
-            hoverOpacity: 1,
+            // disabledOpacity: 1,
+            hover: light,
+            hoverOpacity: 0.25,
             selected: color_primary,
-            selectedOpacity: 1,
+            // selectedOpacity: 1,
         },
+        grey: {
+            "50": "#F4F8FF",
+            "100": "#ECF0FF",
+            "200": "#E2E6F5",
+            "300": "#D1D5E4",
+            "400": "#ADB1C0",
+            "500": "#8d919f",
+            "600": "#656976",
+            "700": "#525662",
+            "800": "#343743",
+            "900": "#141822",
+        }
     },
     shape: {
         borderRadius: base_border_radius,
@@ -141,9 +148,6 @@ const storyblokTheme = createTheme({
     transitions: {
         // duration: base_transition_duration,
         // easing: base_transition_easing,
-    },
-    breakpoints: {
-    //      TODO
     },
     shadows,
     // shadows: TODO
@@ -161,4 +165,4 @@ const storyblokTheme = createTheme({
 
 // TODO dark theme (replicate the side nav in the storyblok application)
 
-export default storyblokTheme;
+export default storyblokLightTheme;

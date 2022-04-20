@@ -2,7 +2,7 @@ import * as React from 'react';
 import Document, {Html, Head, Main, NextScript} from 'next/document';
 import createEmotionServer from '@emotion/server/create-instance';
 import createEmotionCache from "@src/create-emotion-cache";
-import storyblokTheme from "@src/theme/storyblok-theme";
+import storyblokLightTheme from "@src/theme/storyblok-light-theme";
 
 class MyDocument extends Document {
     render() {
@@ -10,7 +10,7 @@ class MyDocument extends Document {
             <Html lang="en">
                 <Head>
                     {/* PWA primary color */}
-                    <meta name="theme-color" content={storyblokTheme.palette.primary.main}/>
+                    <meta name="theme-color" content={storyblokLightTheme.palette.primary.main}/>
                     <link
                         rel="stylesheet"
                         href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap"

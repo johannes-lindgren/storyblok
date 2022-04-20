@@ -3,7 +3,7 @@ import {GetServerSideProps, NextPage} from "next";
 import {useEffect, useState} from "react";
 import {Story} from "@johannes-lindgren/storyblok-js";
 import {useClient, useRoles, useSpace, useUser} from "@johannes-lindgren/storyblok-app-next/dist/react";
-import {Alert, Chip, Container, IconButton, Tooltip, Typography} from "@mui/material";
+import {Alert, Chip, Container, IconButton, Link, Tooltip, Typography} from "@mui/material";
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
@@ -50,8 +50,8 @@ const IndexPage: NextPage<PageProps> = ({}) => {
     }, [seconds]);
 
     return (
-        <Container maxWidth='sm'>
-            <p>Signed in as <em>{user.name}</em> on the <em>{space.name}</em> space</p>
+        <Container maxWidth='sm' sx={{bgcolor: 'secondary'}}>
+            <p>Signed in as <em>{user.name}</em> on the <Link href={`https://app.storyblok.com/#!/me/spaces/${space.id}/dashboard`}>{space.name} space</Link></p>
             <p>Your roles are: </p>
             {roles.map(role => (<
                     Chip key={role.name} variant="outlined" label={role.name}/>
@@ -67,18 +67,18 @@ const IndexPage: NextPage<PageProps> = ({}) => {
 
             {hasErrored ? (
                 <Alert severity='error' sx={{my: 2}}>
-                    The connection was broken at least once. See the log for details.
+                    The connection was broken at least once since startup. See the log for details.
                 </Alert>
             ) : (
                 <Alert severity='success' sx={{my: 2}}>
-                    The connection has not been broken a single time
+                    The connection has not been broken since startup.
                 </Alert>
             )}
 
             <Typography variant="h4" sx={{my: 2}}>
                 Stories
             </Typography>
-            <TableContainer component={Paper} sx={{my: 2}}>
+            <TableContainer component={Paper} sx={{my: 2}} elevation={6}>
                 <Table>
                     <TableHead>
                         <TableRow>

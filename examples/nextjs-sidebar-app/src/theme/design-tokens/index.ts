@@ -24,10 +24,3 @@ export const icon_small_size = '1.6rem'
 export const icon_default_size = '2.4rem'
 export const icon_large_size = '3.2rem'
 export const icon_extra_large_size = '4.8rem'
-
-
-export const DEFAULT_BREAKPOINTS = {
-    MOBILE: 480,
-    TABLET: 768,
-    DESKTOP: 880,
-}
