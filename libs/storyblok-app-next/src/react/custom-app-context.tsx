@@ -1,46 +1,57 @@
-import * as React from "react";
-import {FunctionComponent, PropsWithChildren, SuspenseProps, useContext, useEffect, useMemo, useRef} from "react";
+import {FunctionComponent, ReactNode, SuspenseProps, useCallback, useContext, useEffect, useRef} from "react";
 import {
     getSession,
-    SessionContextValue,
-    SessionProvider,
+    SessionProvider as NextAuthSessionProvider,
     signIn,
     useSession as useNextAuthSession,
-    useSession
 } from "next-auth/react";
-import {ContentManagementClient} from "@johannes-lindgren/storyblok-js";
-import {Session, User} from "next-auth";
-import {Role, Space} from "@src/types";
+import {Session} from "next-auth";
+import {UserInfo} from "@src/types";
+import {ContentManagementClientProvider} from "@src/react/content-management-context";
+import {
+    SessionListener,
+    SessionRefreshListenerContext,
+    SessionRefreshListenerProvider,
+    usePublishSession
+} from "@src/react/session-listener-context";
 
-const ClientContext = React.createContext<ContentManagementClient | undefined>(undefined);
+// type UpdateToken<Client> = (client: Client, token: string) => void
+//
+// type MakeClientFactory<Client> = (session: Session) => () => Client
 
-const CustomAppProvider: FunctionComponent<SuspenseProps> = ({children, fallback}) => {
 
-    // TODO this would not be a good idea for tools. It works the same as sidebar apps, but it doesn't make sense without the content context.
-    //  add property where this feature can be enabled/disabled
-    // useEffect(() => {
-    //     if (!isAppEmbedded()) {
-    //         console.log('The app should be embedded within the Storyblok app, redirecting...')
-    //         window.location.assign('https://app.storyblok.com/oauth/app_redirect')
-    //     }
-    // }, [])
+// storyblok-js-client doesn't allow us to update tokens for the content management API; only content delivery token
+// const defaultMakeClient: MakeClientFactory<ContentManagementClient> = (session) => () => new ContentManagementClient(session.accessToken, session.space.id)
+// const defaultUpdateToken: UpdateToken<ContentManagementClient> = (client, token: string) => client.setAccessToken(token)
 
-    return (
-        <SessionProvider>
-            <WithSessionContext fallback={fallback}>
+// const isAppEmbedded = () => window.top != window.self
+
+// TODO this would not be a good idea for tools. It works the same as sidebar apps, but it doesn't make sense without the content context.
+//  add property where this feature can be enabled/disabled
+// useEffect(() => {
+//     if (!isAppEmbedded()) {
+//         console.log('The app should be embedded within the Storyblok app, redirecting...')
+//         window.location.assign('https://app.storyblok.com/oauth/app_redirect')
+//     }
+// }, [])
+
+const CustomAppProvider: FunctionComponent<SuspenseProps> = ({children, fallback}) => (
+    // NextAuthSessionProvider provides the session to the AuthGuard
+    <NextAuthSessionProvider>
+            <AuthGuard fallback={fallback}>
                 {children}
-            </WithSessionContext>
-        </SessionProvider>
-    )
-}
-// To protect all routes and automatically log in
-const WithSessionContext: FunctionComponent<SuspenseProps> = ({children, fallback}) => {
-    const session = useSession()
+            </AuthGuard>
+    </NextAuthSessionProvider>
+)
 
-    if (session.status === 'unauthenticated') {
+// Guarantees that the child component has access to a session.
+const AuthGuard: FunctionComponent<SuspenseProps> = ({children, fallback}) => {
+    const sessionContext = useNextAuthSession()
+
+    if (sessionContext.status === 'unauthenticated') {
         signIn('storyblok')
     }
-    if (session.status !== 'authenticated') {
+    if (sessionContext.status !== 'authenticated') {
         return (
             <div style={{
                 display: 'flex',
@@ -53,47 +64,55 @@ const WithSessionContext: FunctionComponent<SuspenseProps> = ({children, fallbac
             </div>
         )
     }
+
     return (
-        <ClientContextProvider session={session.data}>
-            {children}
-        </ClientContextProvider>
+        <SessionRefreshListenerProvider>
+            <WithTokenRefresh session={sessionContext.data}>
+                {children}
+            </WithTokenRefresh>
+        </SessionRefreshListenerProvider>
     )
 }
 
+type ClientContextProviderType = (props: {
+    children: ReactNode
+    session: Session
+    // makeClient: MakeClientFactory<Client>
+    // onTokenRefresh: UpdateToken<Client>
+}) => JSX.Element
 
-const ClientContextProvider: FunctionComponent<PropsWithChildren<{ session: Session }>> = ({children, session}) => {
-    // We use setTimeout instead of setInterval, because the delay is read from the session
-    // We need to use a ref, so that useEffect can clean up the most recent timer.
-    const timer = useRef<number>()
+const WithTokenRefresh: ClientContextProviderType = ({
+                                                              children,
+                                                              session
+                                                          }) => {
+    const refreshTimer = useRef<number>()
+    const publishNewSession = usePublishSession()
 
-    // We want to keep the dependency array empty, because we are going to mutate the client's token, in order to
-    // preserve the state of the built-in throttling mechanism
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    const client = useMemo(() => new ContentManagementClient(session.accessToken, session.space.id), [session.space.id]) // Only initialize once
-
-    // TODO add some negative margin to the timer, so that we do not risk requesting a new session a few ms after it has expired
-
-    function updateSession() {
+    const updateSession = useCallback(async () => {
+        // TODO add some negative margin to the timer, so that we do not risk requesting a new session a few ms after it has expired
+        // TODO add more negative margin to the timer on the backend, so that we always refresh
         getSession()
             .then(newSession => {
                 if (!newSession) {
                     throw Error('Failed to fetch new session')
                 }
+
                 // TODO remove console.log
                 console.log('Fetched new session')
                 console.log('The new session new session', newSession)
                 console.log('The new session timeout is', newSession?.expiresInMs / 1000, 's', '/', newSession?.expiresInMs / 1000 / 60, 'min')
 
-                // storyblok-js-client doesn't allow us to update tokens for the content management API; only content delivery token
-                client.setAccessToken(newSession.accessToken)
-                timer.current = window.setTimeout(updateSession, newSession.expiresInMs)
+                publishNewSession(newSession)
+
+                refreshTimer.current = window.setTimeout(updateSession, newSession.expiresInMs)
             })
             .catch(() => {
                 signIn() // Attempt to sign in again
             })
-    }
+    }, [])
 
     useEffect(() => {
+        // TODO solve this
         // Note: if you edit the code with hot module replacement, you are likely to eventually get a timeout.
         //  Because you need to set the timeout at the moment you fetch the session from the backend.
         //  With hot module replacement, the useEffect() hook will execute without refetching the session from useSession(),
@@ -104,51 +123,49 @@ const ClientContextProvider: FunctionComponent<PropsWithChildren<{ session: Sess
         console.log('The initial session is', session)
         console.log('The initial timeout is', session.expiresInMs / 1000, 's', '/', session.expiresInMs / 1000 / 60, 'min')
 
-        timer.current = window.setTimeout(updateSession, session.expiresInMs);
+        refreshTimer.current = window.setTimeout(updateSession, session.expiresInMs);
 
         return () => {
-            window.clearTimeout(timer.current)
+            window.clearTimeout(refreshTimer.current)
         }
     }, []);
 
     return (
-        <ClientContext.Provider value={client}>
+        <ContentManagementClientProvider>
             {children}
-        </ClientContext.Provider>
+        </ContentManagementClientProvider>
     )
 }
 
-const useSessionContext = () => {
+const useSessionWithRefresh = () => {
+    const subscribeList = useContext(SessionRefreshListenerContext)
     const session = useNextAuthSession()
-    if (!isAuthenticated(session)) {
-        throw Error(`The hook should only be used in components that are within a <${CustomAppProvider.displayName} /> component. The current login status is '${session.status}'`)
+    if (session.status !== 'authenticated') {
+        throw Error(`useSessionWithRefresh() must be wrapped in a <SessionProvider /> component.`)
     }
-    return session
-}
-
-const useClient = (): ContentManagementClient => {
-    const client = useContext(ClientContext)
-    if (!client) {
-        throw Error(`The hook should only be used in components that are within a <${CustomAppProvider.displayName} /> component. The current client is undefined`)
+    if (!subscribeList) {
+        throw new Error(`useSessionWithRefresh() must be wrapped in a <${SessionRefreshListenerProvider.displayName} />`)
     }
-    return client
+    return {
+        session: session.data,
+        subscribeSessionRefresh: (listener: SessionListener) => subscribeList.subscribe(listener),
+        unsubscribeSessionRefresh: (listener: SessionListener) => subscribeList.unsubscribe(listener)
+    }
 }
 
-const useUser = (): User => {
-    const session = useSessionContext()
-    return session.data.user
-}
-const useSpace = (): Space => {
-    const session = useSessionContext()
-    return session.data.space
-}
-const useRoles = (): Role[] => {
-    const session = useSessionContext()
-    return session.data.roles
+const useUserInfo = (): UserInfo => {
+    const session = useNextAuthSession()
+    if (session.status !== 'authenticated') {
+        throw Error(`\`useUserInfo()\` must be wrapped in a <${CustomAppProvider.displayName} /> component.`)
+    }
+    return {
+        user: {
+            id: parseInt(session.data.user.id),
+            friendly_name: session.data.user.name,
+        },
+        roles: session.data.roles,
+        space: session.data.space,
+    }
 }
 
-const isAppEmbedded = () => window.top != window.self
-
-const isAuthenticated = (session: SessionContextValue): session is { data: Session, status: "authenticated" } => session.status === 'authenticated'
-
-export {CustomAppProvider, useClient, useUser, useSpace, useRoles}
+export {CustomAppProvider, useUserInfo, useSessionWithRefresh}

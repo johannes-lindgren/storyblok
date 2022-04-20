@@ -1,4 +1,3 @@
-// import {NextApiHandler} from "next";
 import {CallbacksOptions} from "next-auth";
 import {CookieOption} from "next-auth/core/types";
 import {StoryblokAccount, StoryblokProfile} from "@src/types/module-augmentation";
@@ -21,15 +20,6 @@ type StoryblokAuthOptions = {
     clientId?: string
     clientSecret?: string
 }
-
-// TODO this would likely be the ideal way to do things. Instead of letting the library consumer pass
-//  makeNextAuthOptions() to NextAuth(), Storyblok() auth could be used directly.
-//  However, if we simply use the function below, the bundled code will utilize esm-browser instead of esm-node.
-//  An error will be thrown when it is detected that window.crypto is not defined.
-//  I haven't figured out to work around this issue. / Johannes
-// const StoryblokAuth: (options?: StoryblokAuthOptions) => any = (options) => {
-//     return NextAuth({})
-// }
 
 const makeAppAuthOptions = (options?: StoryblokAuthOptions) => {
     const {

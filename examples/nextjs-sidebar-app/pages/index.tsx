@@ -2,7 +2,7 @@ import * as React from 'react';
 import {GetServerSideProps, NextPage} from "next";
 import {useEffect, useState} from "react";
 import {Story} from "@johannes-lindgren/storyblok-js";
-import {useClient, useRoles, useSpace, useUser} from "@johannes-lindgren/storyblok-app-next/dist/react";
+import {useContentManagementClient, useUserInfo} from "@johannes-lindgren/storyblok-app-next/dist/react";
 import {Alert, Chip, Container, IconButton, Link, Tooltip, Typography} from "@mui/material";
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -17,13 +17,10 @@ type PageProps = {
     // storyblokToken: string
 }
 
-
 const IndexPage: NextPage<PageProps> = ({}) => {
 
-    const user = useUser()
-    const roles = useRoles()
-    const space = useSpace()
-    const client = useClient()
+    const {user, roles, space} = useUserInfo()
+    const client = useContentManagementClient()
 
     const [hasErrored, setErrored] = useState(false)
     const [seconds, setSeconds] = useState(0);
