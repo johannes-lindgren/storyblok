@@ -16,12 +16,14 @@ const ClientContext = React.createContext<ContentManagementClient | undefined>(u
 
 const CustomAppProvider: FunctionComponent<SuspenseProps> = ({children, fallback}) => {
 
-    useEffect(() => {
-        if (!isAppEmbedded()) {
-            console.log('The app should be embedded within the Storyblok app, redirecting...')
-            window.location.assign('https://app.storyblok.com/oauth/app_redirect')
-        }
-    }, [])
+    // TODO this would not be a good idea for tools. It works the same as sidebar apps, but it doesn't make sense without the content context.
+    //  add property where this feature can be enabled/disabled
+    // useEffect(() => {
+    //     if (!isAppEmbedded()) {
+    //         console.log('The app should be embedded within the Storyblok app, redirecting...')
+    //         window.location.assign('https://app.storyblok.com/oauth/app_redirect')
+    //     }
+    // }, [])
 
     return (
         <SessionProvider>
