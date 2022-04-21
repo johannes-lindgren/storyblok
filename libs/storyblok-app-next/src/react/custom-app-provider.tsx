@@ -1,6 +1,6 @@
 import {FunctionComponent, SuspenseProps} from "react";
 import {ContentManagementClientProvider} from "@src/react/content-management-provider";
-import {RefreshingSessionProvider} from "@src/react/refreshing-session-providder";
+import {RefreshingSessionProvider} from "@src/react/refreshing-session-provider";
 
 // TODO this would not be a good idea for tools. It works the same as sidebar apps, but it doesn't make sense without the content context.
 //  add property where this feature can be enabled/disabled

@@ -132,8 +132,8 @@ const useSession = () => {
     }
     return {
         session: session.data,
-        subscribeRefresh: (listener: Subscriber<Session>) => sessionSubject.subscribe(listener),
-        unsubscribeRefresh: (listener: Subscriber<Session>) => sessionSubject.unsubscribe(listener)
+        subscribeRefresh: (subscriber: Subscriber<Session>) => sessionSubject.subscribe(subscriber),
+        unsubscribeRefresh: (subscriber: Subscriber<Session>) => sessionSubject.unsubscribe(subscriber)
     }
 }
 

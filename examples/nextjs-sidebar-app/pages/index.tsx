@@ -2,7 +2,6 @@ import * as React from 'react';
 import {GetServerSideProps, NextPage} from "next";
 import {useEffect, useState} from "react";
 import {Story} from "@johannes-lindgren/storyblok-js";
-import {useContentManagementClient, useUserInfo} from "@johannes-lindgren/storyblok-app-next/dist/react";
 import {Alert, Chip, Container, IconButton, Link, Tooltip, Typography} from "@mui/material";
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -12,6 +11,7 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 import {Edit, Power, PowerOff, TimerOutlined} from "@mui/icons-material";
+import {useContentManagementClient, useUserInfo} from "@johannes-lindgren/storyblok-app-next/dist/react";
 
 type PageProps = {
     // storyblokToken: string

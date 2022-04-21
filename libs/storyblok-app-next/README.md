@@ -20,11 +20,12 @@ Read [this introduction to custom apps](https://www.storyblok.com/docs/plugins/c
 
 ### Create a Tunnel to localhost:3000
 
-We recommend using [ngrok](https://ngrok.com/) for creating tunnels to your locally hosted app.
+For development, we recommend using [ngrok](https://ngrok.com/) for creating tunnels to your locally hosted app.
 
 Sign up for an account on [ngrok](https://ngrok.com/) and sign in.
 
-[Follow the instructions on your ngrok dashboard](https://dashboard.ngrok.com/get-started/setup) to install the client application on your machine, connect to your account and fire it up.
+[Follow the instructions on your ngrok dashboard](https://dashboard.ngrok.com/get-started/setup) to install the client
+application on your machine, connect to your account and fire it up.
 
 ### Register an app
 
@@ -39,7 +40,8 @@ In the settings for your app, navigate to the _OAuth 2_ menu and provide the fol
 * URL to your app: _https://[your-grok-uuid].ngrok.io_
 * OAuth2 callback URL: _https://[your-grok-uuid].ngrok.io/api/auth/callback/storyblok_
 
-_[your-grok-uuid]_ should be substituted with the id of your running ngrok session. When you close and restart ngrok, you're assigned a new uuid that you need to provide to the Storyblok app.
+_[your-grok-uuid]_ should be substituted with the id of your running ngrok session. When you close and restart ngrok,
+you're assigned a new uuid that you need to provide to the Storyblok app.
 
 ### Using a Template
 
@@ -56,7 +58,9 @@ yarn add next-auth
 yarn add ... // TODO @johannes-lindgren/storyblok-app-next
 ```
 
-Create a file `[...nextauth].js` in `/pages/api/auth`.
+Create a file `[...nextauth].js` in `pages/api/auth`.
+
+`pages/api/auth/[...nextauth].js`:
 
 ```typescript
 import {makeAppAuthOptions} from "@johannes-lindgren/storyblok-app-next/dist/api";
@@ -65,21 +69,23 @@ import NextAuth from "next-auth";
 export default NextAuth(makeAppAuthOptions())
 ```
 
-This contains the dynamic
-route handler for [NextAuth.js](https://next-auth.js.org/).
+This contains the dynamic route handler for [NextAuth.js](https://next-auth.js.org/).
 
-In your `_app.ts` file, wrap your page component in an `CustomAppProvider` component:
+In your `_app.ts` file, wrap your page component in an `CustomAppProvider` component.
+
+`_app.ts`:
 
 ```typescript jsx
-...
-<CustomAppProvider>
-    <Component {...pageProps} />
-</CustomAppProvider>
-...
+const MyApp = (props) => (
+    <CustomAppProvider>
+        <Component {...props} />
+    </CustomAppProvider>
+)
+
+export default MyApp
 ```
 
 ### Environmental Variables
-
 
 Rename `.env.local.example` to `.env.local` and add values for all environmental variables:
 
@@ -91,20 +97,17 @@ Rename `.env.local.example` to `.env.local` and add values for all environmental
     openssl rand -base64 32
     ```
 
-
 ## Usage
 
-Create an index page `/pages/index.ts`
+In your pages, use the hooks `useUserInfo()` and `useContentManagementClient()`.
+
+`pages/index.ts`:
 
 ```typescript jsx
 export default function IndexPage() {
-    const user = useUser()
-    const roles = useRoles()
-    const space = useSpace()
+    const {user, roles, space} = useUserInfo()
+    const client = useContentManagementClient()
 
-    // Use the client to manage content as the currently signed-in user 
-    const client = useClient()
-  
     return (
         <div>
             <p>Signed in as <em>{user.name}</em> on the <em>{space.name}</em> space</p>
@@ -118,3 +121,15 @@ export default function IndexPage() {
 ```
 
 That's it!
+
+## Other Options
+
+CustomAppProvider
+
+* fallback
+
+### Custom Client
+
+If you prefer to use your own content management client, you need to ensure that the client's access token is refreshed when the session is refreshed. You should wrap you application within your own provider component that provides an instance of your client. Inside the client, subscribe to session refresh events with the `useSession()` hook:
+
+See `src/react/content-management-provider` for an example of an implementation.
