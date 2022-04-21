@@ -16,9 +16,10 @@ export const StoryblokAuthProvider = (options: OAuthUserConfig<Profile>): OAuthC
     },
     token: {
         url: "https://app.storyblok.com/oauth/token",
+        // NOTE: Storyblok implementation does not adhere to the standard specified in https://datatracker.ietf.org/doc/html/rfc6749#section-4.1.3
+        //  An additional parameter 'client_secret' is required.
+        //  Thus, we have to customize the implementation of request
         async request(context) {
-            // NOTE: Storyblok implementation does not adhere to the standard specified in https://datatracker.ietf.org/doc/html/rfc6749#section-4.1.3
-            // An additional parameter 'client_secret' is required
             if(!context.params.code || !context.provider.clientId || !context.provider.clientSecret){
                 console.error('code set', !!context.params.code)
                 console.error('clientId set', !!context.provider.clientId)
@@ -30,7 +31,7 @@ export const StoryblokAuthProvider = (options: OAuthUserConfig<Profile>): OAuthC
                 code: context.params.code,
                 redirect_uri: context.provider.callbackUrl,
                 client_id: context.provider.clientId,
-                client_secret: context.provider.clientSecret,
+                client_secret: context.provider.clientSecret, // Non-standard
             })
             return {
                 tokens: tokenRequestData
