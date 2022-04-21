@@ -1,4 +1,4 @@
-import {useSessionWithRefresh, useUserInfo} from "./custom-app-context";
+import {useSession, useUserInfo} from "./custom-app-context";
 import {createContext, FunctionComponent, PropsWithChildren, useContext, useMemo} from "react";
 import {ContentManagementClient} from "@johannes-lindgren/storyblok-js";
 import {Session} from "next-auth";
@@ -7,12 +7,12 @@ const ContentManagementContext = createContext<ContentManagementClient | undefin
 
 const ContentManagementClientProvider: FunctionComponent<PropsWithChildren<{}>> = ({children}) => {
     const {space} = useUserInfo()
-    const {session, subscribeSessionRefresh} = useSessionWithRefresh()
+    const {session, subscribeRefresh} = useSession()
 
     const client = useMemo(() => {
         // TODO unsubscribe the old client when
         const client = new ContentManagementClient(session.accessToken, space.id)
-        subscribeSessionRefresh((session: Session) => {
+        subscribeRefresh((session: Session) => {
                 console.log('Setting access token')
                 client.setAccessToken(session.accessToken)
             }

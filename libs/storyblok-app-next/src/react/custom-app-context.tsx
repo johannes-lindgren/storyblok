@@ -1,4 +1,13 @@
-import {FunctionComponent, ReactNode, SuspenseProps, useCallback, useContext, useEffect, useRef} from "react";
+import {
+    createContext,
+    FunctionComponent,
+    ReactNode,
+    SuspenseProps,
+    useCallback,
+    useContext,
+    useEffect,
+    useRef
+} from "react";
 import {
     getSession,
     SessionProvider as NextAuthSessionProvider,
@@ -8,12 +17,8 @@ import {
 import {Session} from "next-auth";
 import {UserInfo} from "@src/types";
 import {ContentManagementClientProvider} from "@src/react/content-management-context";
-import {
-    SessionListener,
-    SessionRefreshListenerContext,
-    SessionRefreshListenerProvider,
-    usePublishSession
-} from "@src/react/session-listener-context";
+import {Subject, Subscriber} from "@src/react/subject";
+
 
 // type UpdateToken<Client> = (client: Client, token: string) => void
 //
@@ -38,9 +43,9 @@ import {
 const CustomAppProvider: FunctionComponent<SuspenseProps> = ({children, fallback}) => (
     // NextAuthSessionProvider provides the session to the AuthGuard
     <NextAuthSessionProvider>
-            <AuthGuard fallback={fallback}>
-                {children}
-            </AuthGuard>
+        <AuthGuard fallback={fallback}>
+            {children}
+        </AuthGuard>
     </NextAuthSessionProvider>
 )
 
@@ -66,11 +71,9 @@ const AuthGuard: FunctionComponent<SuspenseProps> = ({children, fallback}) => {
     }
 
     return (
-        <SessionRefreshListenerProvider>
-            <WithTokenRefresh session={sessionContext.data}>
-                {children}
-            </WithTokenRefresh>
-        </SessionRefreshListenerProvider>
+        <WithTokenRefresh session={sessionContext.data}>
+            {children}
+        </WithTokenRefresh>
     )
 }
 
@@ -81,12 +84,13 @@ type ClientContextProviderType = (props: {
     // onTokenRefresh: UpdateToken<Client>
 }) => JSX.Element
 
+const SessionRefreshListenerContext = createContext<Subject<Session> | undefined>(undefined)
 const WithTokenRefresh: ClientContextProviderType = ({
-                                                              children,
-                                                              session
-                                                          }) => {
+                                                         children,
+                                                         session
+                                                     }) => {
     const refreshTimer = useRef<number>()
-    const publishNewSession = usePublishSession()
+    const sessionSubject = useRef(new Subject<Session>())
 
     const updateSession = useCallback(async () => {
         // TODO add some negative margin to the timer, so that we do not risk requesting a new session a few ms after it has expired
@@ -102,7 +106,7 @@ const WithTokenRefresh: ClientContextProviderType = ({
                 console.log('The new session new session', newSession)
                 console.log('The new session timeout is', newSession?.expiresInMs / 1000, 's', '/', newSession?.expiresInMs / 1000 / 60, 'min')
 
-                publishNewSession(newSession)
+                sessionSubject.current.next(newSession)
 
                 refreshTimer.current = window.setTimeout(updateSession, newSession.expiresInMs)
             })
@@ -131,25 +135,27 @@ const WithTokenRefresh: ClientContextProviderType = ({
     }, []);
 
     return (
-        <ContentManagementClientProvider>
-            {children}
-        </ContentManagementClientProvider>
+        <SessionRefreshListenerContext.Provider value={sessionSubject.current}>
+            <ContentManagementClientProvider>
+                {children}
+            </ContentManagementClientProvider>
+        </SessionRefreshListenerContext.Provider>
     )
 }
 
-const useSessionWithRefresh = () => {
-    const subscribeList = useContext(SessionRefreshListenerContext)
+const useSession = () => {
+    const sessionSubject = useContext(SessionRefreshListenerContext)
     const session = useNextAuthSession()
     if (session.status !== 'authenticated') {
         throw Error(`useSessionWithRefresh() must be wrapped in a <SessionProvider /> component.`)
     }
-    if (!subscribeList) {
-        throw new Error(`useSessionWithRefresh() must be wrapped in a <${SessionRefreshListenerProvider.displayName} />`)
+    if (!sessionSubject) {
+        throw new Error(`useSessionWithRefresh() must be wrapped in a <${CustomAppProvider.displayName} />`)
     }
     return {
         session: session.data,
-        subscribeSessionRefresh: (listener: SessionListener) => subscribeList.subscribe(listener),
-        unsubscribeSessionRefresh: (listener: SessionListener) => subscribeList.unsubscribe(listener)
+        subscribeRefresh: (listener: Subscriber<Session>) => sessionSubject.subscribe(listener),
+        unsubscribeRefresh: (listener: Subscriber<Session>) => sessionSubject.unsubscribe(listener)
     }
 }
 
@@ -168,4 +174,5 @@ const useUserInfo = (): UserInfo => {
     }
 }
 
-export {CustomAppProvider, useUserInfo, useSessionWithRefresh}
+export {CustomAppProvider, useUserInfo, useSession}
+export {SessionRefreshListenerContext};
