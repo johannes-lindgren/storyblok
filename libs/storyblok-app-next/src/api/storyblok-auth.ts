@@ -62,6 +62,8 @@ const makeAppAuthOptions = (options?: StoryblokAuthOptions) => {
         // pages: // TODO disable login pages
     })
 }
+// TODO add some negative margin to the timer, so that we do not risk requesting a new session a few ms after it has expired
+// TODO add more negative margin to the timer on the backend, so that we always refresh
 const makeCallbacks = ({
                            clientId,
                            clientSecret

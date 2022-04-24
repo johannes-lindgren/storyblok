@@ -24,7 +24,7 @@ function nextAuthMockUnauthenticated() {
     return {
         __esModule: true,
         // ...jest.requireActual('next-auth/react'),
-        signIn: jest.fn((provider?: string) => console.log(`Signing in to ${provider}...`)),
+        signIn: jest.fn(),
         SessionProvider,
         useSession,
         getSession: ()  => Promise.resolve(null),

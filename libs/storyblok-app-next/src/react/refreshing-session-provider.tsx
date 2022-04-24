@@ -67,18 +67,18 @@ const WithTokenRefresh: ClientContextProviderType = ({
                                                      }) => {
     const refreshTimer = useRef<number>()
     const sessionSubject = useRef(new Subject<CustomAppSession>())
+    const {data: session} = useNextAuthSession({
+        required: true,
+        onUnauthenticated: () => signIn('storyblok')
+    })
 
     const refreshSession = useCallback(async () => {
-        // TODO add some negative margin to the timer, so that we do not risk requesting a new session a few ms after it has expired
-        // TODO add more negative margin to the timer on the backend, so that we always refresh
         getSession()
             .then(newSession => {
                 if (!newSession) {
-                    throw Error('Failed to fetch new session')
+                    signIn()
+                    return
                 }
-
-                // TODO remove
-                logSession(newSession)
 
                 sessionSubject.current.next(newSession)
 
@@ -90,35 +90,32 @@ const WithTokenRefresh: ClientContextProviderType = ({
     }, [])
 
     useEffect(() => {
-        // TODO verify that this solved the below issue
-        refreshSession()
 
         // TODO solve this. Hint: The way to solve it could be to update the Session immediately on useEffect
         // Note: if you edit the code with hot module replacement, you are likely to eventually get a timeout.
         //  Because you need to set the timeout at the moment you fetch the session from the backend.
         //  With hot module replacement, the useEffect() hook will execute without refetching the session from useSession(),
         //  therefore the expiresInMs will be outdated. But this is not a problem in production or development in general.
+        // TODO verify that this solved the below issue
+        //  ugly solution. Use only if it helps solve the issue in non-development mode
+        // refreshSession()
 
-        // TODO remove console.log
-        // logSession(session)
+        if(!session){
+            return
+        }
 
-        // refreshTimer.current = window.setTimeout(updateSession, session.expiresInMs);
+        refreshTimer.current = window.setTimeout(refreshSession, session.expiresInMs);
 
         return () => {
             window.clearTimeout(refreshTimer.current)
         }
-    }, []);
+    }, [session?.expiresInMs]);
 
     return (
         <SessionRefreshListenerContext.Provider value={sessionSubject.current}>
             {children}
         </SessionRefreshListenerContext.Provider>
     )
-}
-
-const logSession = (session: CustomAppSession) => {
-    console.log('Session', session)
-    console.log('The session timeout is', session?.expiresInMs / 1000, 's', '/', session?.expiresInMs / 1000 / 60, 'min')
 }
 
 const useSession = () => {
@@ -131,7 +128,7 @@ const useSession = () => {
         throw Error(`useSessionWithRefresh() must be wrapped in a <SessionProvider /> component.`)
     }
     if (!sessionSubject) {
-        throw new Error(`useSession() must be wrapped in a <${RefreshingSessionProvider.displayName} />`)
+        throw new Error(`useSession() must be wrapped in a <RefreshingSessionProvider />`)
     }
     const subs = useMemo(() => ({
         subscribeRefresh: (subscriber: Subscriber<CustomAppSession>) => sessionSubject.subscribe(subscriber),
