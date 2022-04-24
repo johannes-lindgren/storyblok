@@ -1,6 +1,6 @@
-import {DefaultAccount, ISODateString} from "next-auth/core/types";
-import {User} from "next-auth";
 import {Role, Space, UserInfo} from "@src/types/user-info";
+import {ISODateString} from "next-auth/core/types";
+import {User} from "next-auth";
 
 // We are augmenting the types, because we want to pass some extra data to the front-end client application, such as
 // the access token, space id, roles.
@@ -23,7 +23,7 @@ declare module "next-auth" {
     /**
      * Returned by `useSession`, `getSession` and received as a prop on the `SessionProvider` React Context
      */
-    interface Session  {
+    interface Session {
         accessToken: string
         // Server-side generated string that specifies when the token will expire
         expires: ISODateString
@@ -33,6 +33,11 @@ declare module "next-auth" {
         user: User
         roles: Role[]
         space: Space
+    }
+
+    interface User {
+        id: string
+        name: string
     }
 
     // interface Account {    /**
@@ -55,19 +60,26 @@ declare module "next-auth" {
 
     // interface Profile extends UserInfo {
     // }
-
-    interface User {
-        id: string;
-        name: string;
-    }
 }
 
-interface StoryblokProfile extends UserInfo {}
-
-interface StoryblokAccount extends DefaultAccount{
-    expires_in: number
-    access_token: string
-    refresh_token: string
+interface CustomAppSession {
+    accessToken: string
+    // Server-side generated string that specifies when the token will expire
+    expires: ISODateString
+    // seconds until it expires from the time the session was fetched from the backend
+    // i.e. not from the time that the token was issued.
+    expiresInMs: number
+    user: User
+    roles: Role[]
+    space: Space
 }
 
-export {StoryblokAccount, StoryblokProfile}
+interface CustomAppUser {
+    id: string
+    name: string
+}
+
+interface CustomAppProfile extends UserInfo {
+}
+
+export {CustomAppProfile, CustomAppUser, CustomAppSession};

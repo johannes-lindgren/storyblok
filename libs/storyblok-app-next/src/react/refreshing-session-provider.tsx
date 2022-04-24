@@ -5,7 +5,7 @@ import {
     SuspenseProps,
     useCallback,
     useContext,
-    useEffect,
+    useEffect, useMemo,
     useRef
 } from "react";
 import {
@@ -14,8 +14,7 @@ import {
     signIn,
     useSession as useNextAuthSession,
 } from "next-auth/react";
-import {Session} from "next-auth";
-import {UserInfo} from "@src/types";
+import {CustomAppSession, UserInfo} from "@src/types";
 import {Subject, Subscriber} from "@src/react/subject";
 
 const RefreshingSessionProvider: FunctionComponent<SuspenseProps> = ({children, fallback}) => (
@@ -28,11 +27,13 @@ const RefreshingSessionProvider: FunctionComponent<SuspenseProps> = ({children, 
 
 // Guarantees that the child component has access to a session.
 const AuthGuard: FunctionComponent<SuspenseProps> = ({children, fallback}) => {
-    const sessionContext = useNextAuthSession()
+    const sessionContext = useNextAuthSession({
+        required: true,
+        onUnauthenticated: () => {
+            signIn('storyblok')
+        }
+    })
 
-    if (sessionContext.status === 'unauthenticated') {
-        signIn('storyblok')
-    }
     if (sessionContext.status !== 'authenticated') {
         return (
             <div style={{
@@ -56,16 +57,16 @@ const AuthGuard: FunctionComponent<SuspenseProps> = ({children, fallback}) => {
 
 type ClientContextProviderType = (props: {
     children: ReactNode
-    session: Session
+    session: CustomAppSession
 }) => JSX.Element
 
-const SessionRefreshListenerContext = createContext<Subject<Session> | undefined>(undefined)
+const SessionRefreshListenerContext = createContext<Subject<CustomAppSession> | undefined>(undefined)
 
 const WithTokenRefresh: ClientContextProviderType = ({
                                                          children
                                                      }) => {
     const refreshTimer = useRef<number>()
-    const sessionSubject = useRef(new Subject<Session>())
+    const sessionSubject = useRef(new Subject<CustomAppSession>())
 
     const refreshSession = useCallback(async () => {
         // TODO add some negative margin to the timer, so that we do not risk requesting a new session a few ms after it has expired
@@ -84,7 +85,7 @@ const WithTokenRefresh: ClientContextProviderType = ({
                 refreshTimer.current = window.setTimeout(refreshSession, newSession.expiresInMs)
             })
             .catch(() => {
-                signIn() // Attempt to sign in again
+                signIn('storyblok')
             })
     }, [])
 
@@ -115,26 +116,32 @@ const WithTokenRefresh: ClientContextProviderType = ({
     )
 }
 
-const logSession = (session: Session) => {
+const logSession = (session: CustomAppSession) => {
     console.log('Session', session)
     console.log('The session timeout is', session?.expiresInMs / 1000, 's', '/', session?.expiresInMs / 1000 / 60, 'min')
-
 }
 
 const useSession = () => {
     const sessionSubject = useContext(SessionRefreshListenerContext)
-    const session = useNextAuthSession()
+    const session = useNextAuthSession({
+        required: true,
+        onUnauthenticated: () => signIn('storyblok')
+    })
     if (session.status !== 'authenticated') {
         throw Error(`useSessionWithRefresh() must be wrapped in a <SessionProvider /> component.`)
     }
     if (!sessionSubject) {
         throw new Error(`useSession() must be wrapped in a <${RefreshingSessionProvider.displayName} />`)
     }
-    return {
-        session: session.data,
-        subscribeRefresh: (subscriber: Subscriber<Session>) => sessionSubject.subscribe(subscriber),
-        unsubscribeRefresh: (subscriber: Subscriber<Session>) => sessionSubject.unsubscribe(subscriber)
-    }
+    const subs = useMemo(() => ({
+        subscribeRefresh: (subscriber: Subscriber<CustomAppSession>) => sessionSubject.subscribe(subscriber),
+        unsubscribeRefresh: (subscriber: Subscriber<CustomAppSession>) => sessionSubject.unsubscribe(subscriber)
+    }), [sessionSubject])
+
+    return useMemo(() => ({
+        session: session.data as CustomAppSession,
+        ...subs,
+    }), [sessionSubject, session.data])
 }
 
 const useUserInfo = (): UserInfo => {
@@ -142,13 +149,14 @@ const useUserInfo = (): UserInfo => {
     if (session.status !== 'authenticated') {
         throw Error(`\`useUserInfo()\` must be wrapped in a <${RefreshingSessionProvider.displayName} /> component.`)
     }
+    const {user, space, roles} = session.data
     return {
         user: {
-            id: parseInt(session.data.user.id),
-            friendly_name: session.data.user.name,
+            id: parseInt(user.id),
+            friendly_name: user.name,
         },
-        roles: session.data.roles,
-        space: session.data.space,
+        roles,
+        space,
     }
 }
 

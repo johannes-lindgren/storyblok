@@ -1,9 +1,10 @@
 import {CallbacksOptions} from "next-auth";
 import {CookieOption} from "next-auth/core/types";
-import {StoryblokAccount, StoryblokProfile} from "@src/types/module-augmentation";
 import {JWT} from "next-auth/jwt";
 import {refreshToken, sendTokenRequest} from "@src/api/storyblok-oauth-api";
 import {StoryblokAuthProvider} from "@src/api/storyblok-auth-provider";
+import {StoryblokAccount} from "@src/types/storyblok-account";
+import {CustomAppProfile} from "@src/types";
 
 const makeCookieOption = (name: string): CookieOption => ({
     name,
@@ -64,7 +65,7 @@ const makeAppAuthOptions = (options?: StoryblokAuthOptions) => {
 const makeCallbacks = ({
                            clientId,
                            clientSecret
-                       }: Required<StoryblokAuthOptions>): Partial<CallbacksOptions<StoryblokProfile, StoryblokAccount>> => ({
+                       }: Required<StoryblokAuthOptions>): Partial<CallbacksOptions<CustomAppProfile, StoryblokAccount>> => ({
     async jwt({token, account, user, profile}): Promise<JWT> {
         if (isInitialJwtCallback(account)) {
             // Initial sign in
