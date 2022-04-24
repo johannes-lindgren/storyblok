@@ -1,6 +1,6 @@
 import {act, render, screen, waitFor} from "@testing-library/react"
 import {CustomAppProvider} from "@src/react/custom-app-provider";
-import {SessionContextValue, SessionProvider as NASessionProvider} from "next-auth/react";
+import {SessionContextValue, SessionProvider as NASessionProvider, signIn} from "next-auth/react";
 import {UseSessionOptions} from "next-auth/react/types";
 
 function nextAuthMockUnauthenticated() {
@@ -24,10 +24,10 @@ function nextAuthMockUnauthenticated() {
     return {
         __esModule: true,
         // ...jest.requireActual('next-auth/react'),
-        signIn: (provider?: string) => console.log(`Signing in to ${provider}...`),
+        signIn: jest.fn((provider?: string) => console.log(`Signing in to ${provider}...`)),
         SessionProvider,
         useSession,
-        getSession: jest.fn(()  => Promise.resolve(null)),
+        getSession: ()  => Promise.resolve(null),
     };
 }
 
@@ -41,11 +41,11 @@ it("should fallback if unauthenticated", async () => {
     })
 })
 
-// it("should sign in if unauthenticated", async () => {
-//     await act(async () => void render(<TestApp/>))
-//
-//     expect(signIn).toBeCalled()
-// })
+it("should sign in if unauthenticated", async () => {
+    await act(async () => void render(<TestApp/>))
+
+    expect(signIn).toBeCalledWith('storyblok')
+})
 
 
 function Fallback() {
