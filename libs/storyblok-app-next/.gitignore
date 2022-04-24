@@ -9,3 +9,6 @@ yarn-error.log*
 
 # IDE
 .idea
+
+# Environment
+.env.*
