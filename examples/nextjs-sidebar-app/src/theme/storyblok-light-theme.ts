@@ -153,6 +153,14 @@ const storyblokLightTheme = createTheme({
     // shadows: TODO
     typography,
     components: {
+        MuiCssBaseline: {
+            styleOverrides: {
+                mark: {
+                    color: white,
+                    backgroundColor: color_primary,
+                },
+            },
+        },
         MuiLink: {
             styleOverrides: {
                 root: {
