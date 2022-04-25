@@ -57,7 +57,6 @@ const refreshToken = async (oldToken: JWT, clientId: string, clientSecret: strin
     return {
         ...oldToken,
         accessToken: res.access_token,
-        expiresIn: expires_in,
         accessTokenExpires: Date.now() + expires_in * 1000,
     }
 }

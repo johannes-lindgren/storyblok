@@ -2,6 +2,7 @@ import {FunctionComponent} from "react";
 import {CustomAppProvider, useSession, useUserInfo} from "@src/react";
 
 const Fallback = () => <div data-testid="content" id="fallback">Loading...</div>
+
 const TestCustomApp: FunctionComponent = () => {
     const {session} = useSession()
     const {user, roles, space} = useUserInfo()

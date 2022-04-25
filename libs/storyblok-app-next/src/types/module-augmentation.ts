@@ -12,7 +12,6 @@ declare module "next-auth/jwt" {
         accessToken: string
         accessTokenExpires: number
         refreshToken: string
-        expiresIn: number
         space: Space,
         user: User
         roles: Role[]
@@ -30,6 +29,7 @@ declare module "next-auth" {
         // seconds until it expires from the time the session was fetched from the backend
         // i.e. not from the time that the token was issued.
         expiresInMs: number
+        // TODO merge into a single property userInfo
         user: User
         roles: Role[]
         space: Space
@@ -69,6 +69,7 @@ interface CustomAppSession {
     // seconds until it expires from the time the session was fetched from the backend
     // i.e. not from the time that the token was issued.
     expiresInMs: number
+    // TODO merge into a single property userInfo
     user: User
     roles: Role[]
     space: Space

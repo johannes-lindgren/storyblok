@@ -40,7 +40,7 @@ const CustomAppProvider: FunctionComponent<SuspenseProps> = ({ fallback, childre
                     void signIn('storyblok')
                     return
                 }
-                console.log('getSession() returned a session')
+                console.log('getSession() returned a session, expires in', newSession.expiresInMs / 1000, 's')
 
                 session.current = newSession
                 sessionSubject.current.next(newSession)
@@ -58,16 +58,13 @@ const CustomAppProvider: FunctionComponent<SuspenseProps> = ({ fallback, childre
     }, [])
 
     useEffect(() => {
-        if(!session.current) {
-            console.log('No current session: calling refreshSession()')
-            refreshSession()
-        }
+        refreshSession()
 
         return () => {
-            //    TODO where to clear?
-            // window.clearTimeout(refreshTimer.current)
+            console.log('Cleaning upp timer')
+            window.clearTimeout(refreshTimer.current)
         }
-    }, [session.current])
+    }, [])
 
 
     if (isLoading) {
@@ -95,20 +92,17 @@ const CustomAppProvider: FunctionComponent<SuspenseProps> = ({ fallback, childre
 
 type SessionData = {
     session: CustomAppSession
-    subscribeRefresh: (subscriber: Subscriber<CustomAppSession>) => void
+    subscribeRefresh: (subscriber: Subscriber<CustomAppSession>) => Subscriber<CustomAppSession>
     unsubscribeRefresh: (subscriber: Subscriber<CustomAppSession>) => void
 }
 
 const useSession = (): SessionData => {
     const sessionSubject = useContext(SessionSubjectContext)
     const session = useContext(SessionContext)
-    if (!session) {
+    if (!session || !sessionSubject) {
         throw Error(`\`useSession()\` must be wrapped in a <CustomAppProvider />`)
     }
-    if (!sessionSubject) {
-        throw new Error(`\`useSession()\` must be wrapped in a <CustomAppProvider />`)
-    }
-    const subscribeUnsubscribe = useMemo(() => ({
+    const subscribeUnsubscribe: Pick<SessionData, 'subscribeRefresh' | 'unsubscribeRefresh'> = useMemo(() => ({
         subscribeRefresh: (subscriber: Subscriber<CustomAppSession>) => sessionSubject.subscribe(subscriber),
         unsubscribeRefresh: (subscriber: Subscriber<CustomAppSession>) => sessionSubject.unsubscribe(subscriber)
     }), [sessionSubject])
