@@ -1,19 +1,139 @@
-import {FunctionComponent, SuspenseProps} from "react";
-import {RefreshingSessionProvider} from "@src/react/refreshing-session-provider";
+import {
+    createContext,
+    FunctionComponent,
+    SuspenseProps,
+    useCallback,
+    useContext,
+    useEffect,
+    useMemo,
+    useRef,
+    useState
+} from "react";
+import {getSession, signIn,} from "next-auth/react";
+import {CustomAppSession, UserInfo} from "@src/types";
+import {Subject, Subscriber} from "@src/react/subject";
+import {Session} from "next-auth";
 
-// TODO this would not be a good idea for tools. It works the same as sidebar apps, but it doesn't make sense without the content context.
-//  add property where this feature can be enabled/disabled
-// const isAppEmbedded = () => window.top != window.self
-// useEffect(() => {
-//     if (!isAppEmbedded()) {
-//         console.log('The app should be embedded within the Storyblok app, redirecting...')
-//         window.location.assign('https://app.storyblok.com/oauth/app_redirect')
-//     }
-// }, [])
+// When you need to read userinfo, or the token
+const SessionContext = createContext<Session | undefined>(undefined)
 
-const CustomAppProvider: FunctionComponent<SuspenseProps> = ({children, fallback}) => (
-    <RefreshingSessionProvider fallback={fallback}>
-        {children}
-    </RefreshingSessionProvider>
-)
-export {CustomAppProvider};
+// When you need to subscribe to session/token refresh
+const SessionSubjectContext = createContext<Subject<CustomAppSession> | undefined>(undefined)
+
+const CustomAppProvider: FunctionComponent<SuspenseProps> = ({ fallback, children}) => {
+
+    // We do not want to cause re-render when the session is refreshed
+    const session = useRef<Session | undefined>(undefined)
+    const sessionSubject = useRef(new Subject<CustomAppSession>())
+    const refreshTimer = useRef<number>()
+
+    // We want to cause re-render when the initial session is fetched
+    const [isLoading, setLoading] = useState<boolean>(session.current === undefined)
+
+    const refreshSession = useCallback(() => {
+        console.log('getSession()')
+        getSession()
+            .then(newSession => {
+                if (!newSession) {
+                    // User is not authenticated\
+                    console.log('getSession() returned null: signing in...')
+                    void signIn('storyblok')
+                    return
+                }
+                console.log('getSession() returned a session')
+
+                session.current = newSession
+                sessionSubject.current.next(newSession)
+
+                refreshTimer.current = window.setTimeout(refreshSession, newSession.expiresInMs)
+
+                // if this was the initial call to getSession -> Re-render with the child
+                setLoading(false)
+            })
+            .catch((e) => {
+                // TODO remove console log
+                console.error(e)
+                void signIn('storyblok')
+            })
+    }, [])
+
+    useEffect(() => {
+        if(!session.current) {
+            console.log('No current session: calling refreshSession()')
+            refreshSession()
+        }
+
+        return () => {
+            //    TODO where to clear?
+            // window.clearTimeout(refreshTimer.current)
+        }
+    }, [session.current])
+
+
+    if (isLoading) {
+        return (
+            <div style={{
+                display: 'flex',
+                height: '100vh',
+                width: '100vw',
+                alignItems: 'center',
+                justifyContent: 'center',
+            }}>
+                {fallback}
+            </div>
+        )
+    }
+
+    return (
+        <SessionContext.Provider value={session.current}>
+            <SessionSubjectContext.Provider value={sessionSubject.current}>
+                {children}
+            </SessionSubjectContext.Provider>
+        </SessionContext.Provider>
+    )
+}
+
+type SessionData = {
+    session: CustomAppSession
+    subscribeRefresh: (subscriber: Subscriber<CustomAppSession>) => void
+    unsubscribeRefresh: (subscriber: Subscriber<CustomAppSession>) => void
+}
+
+const useSession = (): SessionData => {
+    const sessionSubject = useContext(SessionSubjectContext)
+    const session = useContext(SessionContext)
+    if (!session) {
+        throw Error(`\`useSession()\` must be wrapped in a <CustomAppProvider />`)
+    }
+    if (!sessionSubject) {
+        throw new Error(`\`useSession()\` must be wrapped in a <CustomAppProvider />`)
+    }
+    const subscribeUnsubscribe = useMemo(() => ({
+        subscribeRefresh: (subscriber: Subscriber<CustomAppSession>) => sessionSubject.subscribe(subscriber),
+        unsubscribeRefresh: (subscriber: Subscriber<CustomAppSession>) => sessionSubject.unsubscribe(subscriber)
+    }), [sessionSubject])
+
+    return useMemo(() => ({
+        session: session as CustomAppSession,
+        ...subscribeUnsubscribe,
+    }), [sessionSubject, session.data])
+}
+
+const useUserInfo = (): UserInfo => {
+    const session = useContext(SessionContext)
+    if (session === undefined) {
+        throw Error(`\`useUserInfo()\` must be wrapped in a <CustomAppProvider />`)
+    }
+    const {user, space, roles} = session
+    return {
+        user: {
+            id: parseInt(user.id),
+            friendly_name: user.name,
+        },
+        roles,
+        space,
+    }
+}
+
+export {useUserInfo, useSession}
+export {CustomAppProvider}
