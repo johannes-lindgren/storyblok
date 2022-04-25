@@ -1,5 +1,5 @@
 import {OAuthConfig, OAuthUserConfig} from "next-auth/providers";
-import {requestToken} from "./storyblok-oauth-api";
+import {sendTokenRequest} from "./storyblok-oauth-api";
 import {Profile} from "next-auth";
 import {UserInfo} from "@src/types/user-info";
 
@@ -26,13 +26,14 @@ export const StoryblokAuthProvider = (options: OAuthUserConfig<Profile>): OAuthC
                 console.error('clientSecret set', !!context.provider.clientSecret)
                 throw new Error("Cannot make a token request without all the required parameters: code, client_id, client_secret")
             }
-            const tokenRequestData = await requestToken({
+            const tokenRequestData = await sendTokenRequest({
                 grant_type: 'authorization_code',
                 code: context.params.code,
                 redirect_uri: context.provider.callbackUrl,
                 client_id: context.provider.clientId,
                 client_secret: context.provider.clientSecret, // Non-standard
             })
+
             return {
                 tokens: tokenRequestData
             }

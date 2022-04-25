@@ -1,10 +1,11 @@
 import {CallbacksOptions} from "next-auth";
 import {CookieOption} from "next-auth/core/types";
 import {JWT} from "next-auth/jwt";
-import {refreshToken, sendTokenRequest} from "@src/api/storyblok-oauth-api";
+import {sendTokenRequest} from "@src/api/storyblok-oauth-api";
 import {StoryblokAuthProvider} from "@src/api/storyblok-auth-provider";
 import {StoryblokAccount} from "@src/types/storyblok-account";
 import {CustomAppProfile} from "@src/types";
+import {refreshToken} from "@src/api/refresh-token";
 
 // The client should consider the token expired before it actually is, so that it can refresh the token well-ahead of time.
 const CLIENT_MARGIN_MS = 60 * 1000
@@ -21,26 +22,29 @@ const makeCookieOption = (name: string): CookieOption => ({
     }
 })
 
-type StoryblokAuthOptions = {
+type NextAuthOptions = {
     jwtSecret?: string
     clientId?: string
     clientSecret?: string
 }
 
-const makeAppAuthOptions = (options?: StoryblokAuthOptions) => {
+const readEnvironmentVariable = (variableName: string): string => {
+    const v = process.env[variableName]
+    if(typeof v === 'undefined'){
+        throw new Error(`The environment variable '${variableName}' is required but not defined`)
+    }
+    return v
+}
+
+const makeAppAuthOptions = (options?: NextAuthOptions) => {
     const {
-        jwtSecret = process.env.STORYBLOK_JWT_SECRET,
-        clientSecret = process.env.STORYBLOK_CLIENT_SECRET,
-        clientId = process.env.STORYBLOK_CLIENT_ID
+        jwtSecret = readEnvironmentVariable('STORYBLOK_JWT_SECRET'),
+        clientSecret = readEnvironmentVariable('STORYBLOK_CLIENT_SECRET'),
+        clientId = readEnvironmentVariable('STORYBLOK_CLIENT_ID')
     } = options ?? {}
 
-    if (!jwtSecret || !clientSecret || !clientId) {
-        console.error('At least one of the following environmental variables has not been set.')
-        console.error('STORYBLOK_JWT_SECRET set:', !!jwtSecret)
-        console.error('STORYBLOK_CLIENT_SECRET set:', !!clientSecret)
-        console.error('STORYBLOK_CLIENT_ID set:', !!clientId)
-        console.error('Alternatively, pass values from other environmental variables as options in the StoryblokAuth() function call.')
-        throw new Error('The server environment is not set up correctly. Authentication will not function.')
+    if(!process.env.NEXTAUTH_URL){
+        throw new Error("The en environmental variable NEXTAUTH_URL is required but not defined")
     }
 
     return ({
@@ -64,6 +68,10 @@ const makeAppAuthOptions = (options?: StoryblokAuthOptions) => {
             clientSecret,
             jwtSecret,
         }) as CallbacksOptions,
+        theme: {
+            colorScheme: 'light',
+            brandColor: '#00b3b0',
+        },
         // pages: // TODO disable login pages
     })
 }
@@ -71,7 +79,7 @@ const makeAppAuthOptions = (options?: StoryblokAuthOptions) => {
 const makeCallbacks = ({
                            clientId,
                            clientSecret
-                       }: Required<StoryblokAuthOptions>): Partial<CallbacksOptions<CustomAppProfile, StoryblokAccount>> => ({
+                       }: Required<NextAuthOptions>): Partial<CallbacksOptions<CustomAppProfile, StoryblokAccount>> => ({
     // Here are a few timestamps
     // 1. accessTokenIssued
     // 2. The token will not be refreshed
@@ -79,10 +87,9 @@ const makeCallbacks = ({
     // 4. The token will be refreshed, it's after the stated expiration time, but the token is still valid
     // 5. accessTokenExpires - The token is actually expired.
     async jwt({token, account, user, profile}): Promise<JWT> {
-        if (isInitialJwtCallback(account)) {
-            // Initial sign in
-
-            // NOTE: token will not be an actual token! But it will be a User! Bug in next-auth?
+        // Check for initial sign in
+        if (account && user && profile) {
+            // IMPORTANT: token will not be an actual token! But it will be a User! Bug in next-auth?
             // To get the expire_in, we must refetch the token
 
             const tokenRefreshResponse = await sendTokenRequest({
@@ -91,15 +98,8 @@ const makeCallbacks = ({
                 client_id: clientId,
                 client_secret: clientSecret,
             })
-            if (!user) {
-                throw new Error("The user is missing; this must be configured in the provider.")
-            }
-            if (!profile) {
-                throw new Error("The profile is missing; this must be configured in the provider.")
-            }
 
             return {
-                email: undefined,
                 name: profile.user.friendly_name,
                 sub: profile.user.id.toString(),
                 accessToken: tokenRefreshResponse.access_token,
@@ -130,7 +130,8 @@ const makeCallbacks = ({
             roles: token.roles,
             space: token.space,
             accessToken: token.accessToken,
-            expiresInMs: timeTo(getExpiresByClient(token)), // Lie to client, so that it will refresh token well before it actually expires
+            // Underestimate the longevity of the token, so that it will refresh token well before it actually expires
+            expiresInMs: timeTo(getExpiresByClient(token)),
             expires: new Date(getExpiresByClient(token)).toISOString(),
         }
     },
@@ -150,8 +151,5 @@ const getExpiresByAPI = (token: JWT): number => getExpiresByStoryblok(token) - A
 
 // Counts the ms until a timestamp occurs
 const timeTo = (timestampMs: number): number => timestampMs - Date.now()
-
-// Whether this is the jwt callback after a sign in
-const isInitialJwtCallback = (account: StoryblokAccount | undefined): account is StoryblokAccount => typeof account !== 'undefined'
 
 export {makeAppAuthOptions}

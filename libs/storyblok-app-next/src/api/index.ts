@@ -1,1 +1,1 @@
-export * from './storyblok-auth'
+export * from './make-app-auth-options'
