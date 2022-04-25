@@ -63,7 +63,6 @@ Create a file `[...nextauth].js` in `pages/api/auth`.
 `pages/api/auth/[...nextauth].js`:
 
 ```typescript
-import {makeAppAuthOptions} from "@johannes-lindgren/storyblok-app-next/dist/api";
 import NextAuth from "next-auth";
 
 export default NextAuth(makeAppAuthOptions())
@@ -77,7 +76,7 @@ In your `_app.ts` file, wrap your page component in an `CustomAppProvider` compo
 
 ```typescript jsx
 const MyApp = (props) => (
-    <CustomAppProvider>
+    <CustomAppProvider fallback={<div>Loading...</div>}>
         <Component {...props} />
     </CustomAppProvider>
 )
@@ -106,7 +105,11 @@ In your pages, use the hooks `useUserInfo()` and `useContentManagementClient()`.
 ```typescript jsx
 export default function IndexPage() {
     const {user, roles, space} = useUserInfo()
-    const client = useContentManagementClient()
+    const {
+        session,
+        subscribeRefresh,
+        unsubscribeRefresh
+    } = useSession()
 
     return (
         <div>
@@ -130,6 +133,8 @@ CustomAppProvider
 
 ### Custom Client
 
-If you prefer to use your own content management client, you need to ensure that the client's access token is refreshed when the session is refreshed. You should wrap you application within your own provider component that provides an instance of your client. Inside the client, subscribe to session refresh events with the `useSession()` hook:
+If you prefer to use your own content management client, you need to ensure that the client's access token is refreshed
+when the session is refreshed. You should wrap you application within your own provider component that provides an
+instance of your client. Inside the client, subscribe to session refresh events with the `useSession()` hook:
 
 See `src/react/content-management-provider` for an example of an implementation.
