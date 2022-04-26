@@ -7,7 +7,9 @@ import {CacheProvider, EmotionCache} from '@emotion/react';
 import storyblokLightTheme from '@src/theme/storyblok-light-theme';
 import createEmotionCache from '@src/create-emotion-cache';
 import {CircularProgress} from "@mui/material";
-import {CustomAppProvider} from "@johannes-lindgren/storyblok-app-next/dist/react";
+import {CustomAppProvider} from "@johannes-lindgren/storyblok-app-next/react";
+import {ContentManagementClientProvider} from "@src/client/content-management-client-provider";
+import {StoryblokJsClientProvider} from "@src/client/storyblok-js-client-provider";
 
 // Client-side cache, shared for the whole session of the user in the browser.
 const clientSideEmotionCache = createEmotionCache();
@@ -29,7 +31,11 @@ export default function MyApp(props: MyAppProps) {
                 {/* CssBaseline kickstart an elegant, consistent, and simple baseline to build upon. */}
                 <CssBaseline/>
                 <CustomAppProvider fallback={<CircularProgress/>}>
-                    <Component {...pageProps} />
+                    <ContentManagementClientProvider>
+                        <StoryblokJsClientProvider>
+                            <Component {...pageProps} />
+                        </StoryblokJsClientProvider>
+                    </ContentManagementClientProvider>
                 </CustomAppProvider>
             </ThemeProvider>
         </CacheProvider>

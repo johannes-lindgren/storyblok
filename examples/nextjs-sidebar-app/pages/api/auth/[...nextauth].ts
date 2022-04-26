@@ -1,4 +1,4 @@
-import {makeAppAuthOptions} from "@johannes-lindgren/storyblok-app-next/dist/api";
+import {makeAppAuthOptions} from "@johannes-lindgren/storyblok-app-next/api";
 import NextAuth from "next-auth";
 
 export default NextAuth(

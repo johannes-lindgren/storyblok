@@ -1,4 +1,4 @@
-import {CallbacksOptions} from "next-auth";
+import {CallbacksOptions, NextAuthOptions} from "next-auth";
 import {CookieOption} from "next-auth/core/types";
 import {JWT} from "next-auth/jwt";
 import {sendTokenRequest} from "@src/api/storyblok-oauth-api";
@@ -36,7 +36,7 @@ const readEnvironmentVariable = (variableName: string): string => {
     return v
 }
 
-const makeAppAuthOptions = (options?: AppAuthOptions) => {
+const makeAppAuthOptions = (options?: AppAuthOptions): NextAuthOptions => {
     const {
         jwtSecret = readEnvironmentVariable('STORYBLOK_JWT_SECRET'),
         clientSecret = readEnvironmentVariable('STORYBLOK_CLIENT_SECRET'),

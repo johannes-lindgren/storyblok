@@ -36,11 +36,11 @@ const CustomAppProvider: FunctionComponent<SuspenseProps> = ({ fallback, childre
             .then(newSession => {
                 if (!newSession) {
                     // User is not authenticated\
-                    console.log('getSession() returned null: signing in...')
+                    console.debug('getSession() returned null: signing in...')
                     void signIn('storyblok')
                     return
                 }
-                console.log('getSession() returned a session, expires in', newSession.refreshInMs / 1000, 's')
+                console.debug('getSession() returned a session, should refresh in', newSession.refreshInMs / 1000, 's')
 
                 session.current = newSession
                 sessionSubject.current.next(newSession)
@@ -61,7 +61,7 @@ const CustomAppProvider: FunctionComponent<SuspenseProps> = ({ fallback, childre
         refreshSession()
 
         return () => {
-            console.log('Cleaning upp timer')
+            console.debug('Cleaning upp timer')
             window.clearTimeout(refreshTimer.current)
         }
     }, [])
