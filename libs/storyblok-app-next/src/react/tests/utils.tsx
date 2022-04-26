@@ -1,24 +1,47 @@
-import {FunctionComponent} from "react";
-import {CustomAppProvider, useSession, useUserInfo} from "@src/react";
+import {FunctionComponent, useEffect, useRef, useState} from "react";
+import {CustomAppProvider, Subscriber, useSession, useUserInfo} from "@src/react";
+import {CustomAppSession} from "@src/types";
 
 const Fallback = () => <div data-testid="content" id="fallback">Loading...</div>
 
 const TestCustomApp: FunctionComponent = () => {
-    const {session} = useSession()
+    const {session, subscribeRefresh, unsubscribeRefresh} = useSession()
     const {user, roles, space} = useUserInfo()
+    const [accessToken, setAccessToken] = useState<string>(session.accessToken)
+    const subscriber = useRef<undefined | Subscriber<CustomAppSession>>(undefined)
+    useEffect(() => {
+        subscriber.current = subscribeRefresh((newSession) => setAccessToken(newSession.accessToken))
+        return () => {
+            if(subscriber.current){
+                unsubscribeRefresh(subscriber.current)
+            }
+        }
+    }, [])
 
     return (
         <div data-testid="content" id="custom-app">
-            <p>Hello {user.friendly_name} from the `{space.name}` space. Your roles
-                are: {roles.map(role => role.name).join(', ')}</p>
-            <p>The fake access token is: {session.accessToken}</p>
+            <dl>
+                <dt>User name</dt>
+                <dd data-testid="user.friendly_name">{user.friendly_name}</dd>
+                <dt>Space name</dt>
+                <dd data-testid="space.name">{space.name}</dd>
+                <dt>Initial access token</dt>
+                <dd data-testid="initialAccessToken">{session.accessToken}</dd>
+                <dt>Current access token</dt>
+                <dd data-testid="currentAccessToken">{accessToken}</dd>
+            </dl>
+            <ul data-testid="roles">
+                {roles.map(role => (
+                  <li key={role.name}>{role.name}</li>
+                ))}
+            </ul>
         </div>
     )
 }
 
 export function TestApp() {
     return (
-        <CustomAppProvider fallback={<Fallback />}>
+        <CustomAppProvider fallback={<Fallback/>}>
             <TestCustomApp/>
         </CustomAppProvider>
     )

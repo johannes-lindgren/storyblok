@@ -96,6 +96,10 @@ type SessionData = {
     unsubscribeRefresh: (subscriber: Subscriber<CustomAppSession>) => void
 }
 
+/**
+ * IMPORTANT: Does not receive state updates. To do so, subscribe with subscribeRefresh and update the state in the
+ * callback function.
+ */
 const useSession = (): SessionData => {
     const sessionSubject = useContext(SessionSubjectContext)
     const session = useContext(SessionContext)

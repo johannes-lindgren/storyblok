@@ -1,37 +1,59 @@
 import {
     act, render,
-    screen
+    screen, waitFor
 } from "@testing-library/react"
 import {getSession} from "next-auth/react";
 
 import {TestApp} from "@src/react/tests/utils";
+import {UserInfo} from "@src/types";
 
 const refreshInMs = 15 * 60 * 1000 // 15 min, not important exactly how much
 
+const mockUserInfo: UserInfo = {
+    user: {
+        friendly_name: 'Tester',
+        id: 0,
+    },
+    roles: [{
+        name: 'tester'
+    }, {
+        name: 'test-author'
+    }],
+    space: {
+        id: 0,
+        name: 'Mock space'
+    },
+}
+
+const advanceTimeInSteps = async (steps: number, stepsMs: number) => {
+    for (let i = 0; i < steps; i++) {
+        jest.advanceTimersByTime(stepsMs);
+        await Promise.resolve();
+    }
+}
+
+function randomString(len: number) {
+    const charSet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    var randomString = '';
+    for (var i = 0; i < len; i++) {
+        var randomPoz = Math.floor(Math.random() * charSet.length);
+        randomString += charSet.substring(randomPoz,randomPoz+1);
+    }
+    return randomString;
+}
+
 function nextAuthMockAuthenticated() {
-    const getMockSession: typeof getSession = async () => ({
+    const createMockSession: typeof getSession = async () => ({
         refreshInMs,
         expires: new Date(Date.now() + refreshInMs).toISOString(),
-        accessToken: 'abcToken123',
-        userInfo: {
-            user: {
-                friendly_name: 'Tester',
-                id: 0,
-            },
-            roles: [{
-                name: 'tester'
-            }],
-            space: {
-                id: 0,
-                name: 'Mock space'
-            },
-        },
+        accessToken: randomString(48),
+        userInfo: mockUserInfo,
     })
 
     return {
         __esModule: true,
         signIn: jest.fn(),
-        getSession: jest.fn(getMockSession)
+        getSession: jest.fn(createMockSession)
     };
 }
 
@@ -43,46 +65,112 @@ afterEach(() => {
 
 jest.useFakeTimers();
 
-it("should render the fallback", async () => {
-    act(() => {
-        render(<TestApp/>)
+
+describe('<CustomAppProvider />', () => {
+
+    it("should render the fallback when initially opened", async () => {
+        act(() => {
+            render(<TestApp/>)
+        })
+        expect(screen.getByTestId("content").id).toBe("fallback")
     })
-    expect(screen.getByTestId("content").id).toBe("fallback")
+
+    it("should fetch a session when the app initially opens", async () => {
+        act(() => {
+            render(<TestApp/>)
+        })
+
+        expect(getSession).toHaveBeenCalledTimes(1)
+    })
+
+    it("should render the custom app after initially fetching a session", async () => {
+        act(() => {
+            render(<TestApp/>)
+        })
+
+        // Wait for the promises to resolve
+        await act(async () => {
+            await Promise.resolve()
+        })
+
+        expect(screen.getByTestId("content").id).toBe("custom-app")
+    })
+
+    it("should repeatedly refresh the session after it expires", async () => {
+        const expectedRefreshCount = 500
+        act(() => {
+            render(<TestApp/>)
+        })
+        await act(async () => {
+            await advanceTimeInSteps(1, refreshInMs / 2)
+            await advanceTimeInSteps(expectedRefreshCount - 1, refreshInMs)
+        })
+        expect(getSession).toHaveBeenCalledTimes(expectedRefreshCount)
+    })
+
 })
 
-it("should render the custom app", async () => {
-    act(() => {
-        render(<TestApp/>)
+describe('useUserInfo()', () => {
+    it('should return user data', async () => {
+        act(() => {
+            render(<TestApp/>)
+        })
+
+        await waitFor(() => {
+            expect(screen.getByTestId('user.friendly_name').textContent).toBe(mockUserInfo.user.friendly_name)
+        })
     })
 
-    // Wait for the promises to resolve
-    await act(async () => {
-        await Promise.resolve()
+    it('should return space data', async () => {
+        act(() => {
+            render(<TestApp/>)
+        })
+
+        await waitFor(() => {
+            expect(screen.getByTestId('space.name').textContent).toBe(mockUserInfo.space.name)
+        })
     })
 
-    expect(screen.getByTestId("content").id).toBe("custom-app")
+    it('should return role data', async () => {
+        act(() => {
+            render(<TestApp/>)
+        })
+
+        await waitFor(() => {
+            for (const role of mockUserInfo.roles) {
+                expect(screen.getByTestId('roles').textContent).toContain(role.name)
+            }
+        })
+    })
 })
 
-it("should fetch a session when app initially opens", async () => {
-    act(() => {
-        render(<TestApp/>)
+describe('useSession()', () => {
+    it('should return the initial access token', async () => {
+        act(() => {
+            render(<TestApp/>)
+        })
+
+        await waitFor(() => {
+            expect(screen.getByTestId('initialAccessToken').textContent).not.toBe("")
+        })
     })
 
-    expect(getSession).toHaveBeenCalledTimes(1)
-})
+    it('should let clients subscribe to token refresh', async () => {
+        act(() => {
+            render(<TestApp/>)
+        })
 
-it("should refresh the session after it expires", async () => {
-    const expectedRefreshCount = 500
-    act(() => {
-        render(<TestApp/>)
+        await act(async () => {
+            await advanceTimeInSteps(1, refreshInMs / 2)
+        })
+
+        const initialAccessToken = screen.getByTestId('initialAccessToken').textContent
+        expect(screen.getByTestId('currentAccessToken').textContent).toBe(initialAccessToken)
+
+        await act(async () => {
+            await advanceTimeInSteps(1, refreshInMs)
+        })
+
+        expect(screen.getByTestId('currentAccessToken').textContent).not.toBe(initialAccessToken)
     })
-    await act(async () => {
-        jest.advanceTimersByTime(refreshInMs / 2);
-        await Promise.resolve();
-        for (let i = 0; i < expectedRefreshCount - 1; i++) {
-            jest.advanceTimersByTime(refreshInMs);
-            await Promise.resolve();
-        }
-    })
-    expect(getSession).toHaveBeenCalledTimes(expectedRefreshCount)
 })
