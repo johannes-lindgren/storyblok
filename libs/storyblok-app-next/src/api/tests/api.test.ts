@@ -71,28 +71,30 @@ const makeMockInitialSession = (): Session => ({
     expires: new Date().toISOString(),
 } as Session)
 
+const mockUserInfo: UserInfo = {
+    user: {
+        friendly_name: 'Tester',
+        id: 0,
+    },
+    roles: [{name: 'admin'}],
+    space: {
+        name: 'Mock Space',
+        id: 0,
+    },
+}
+
 const mockUser: User = {
-    name: 'Tester',
-    id: '0'
+    name: mockUserInfo.user.friendly_name,
+    id: mockUserInfo.user.id.toString()
 }
 
 const makeMockJWT = (accessTokenExpires: number): JWT => ({
-    userInfo: {
-        user: {
-            friendly_name: 'Tester',
-            id: 0,
-        },
-        roles: [{name: 'admin'}],
-        space: {
-            name: 'Mock Space',
-            id: 0,
-        },
-    },
+    userInfo: mockUserInfo,
     accessToken: randomString(36),
     refreshToken: randomString(36),
     accessTokenExpires,
-    name: mockUser.name,
-    sub: mockUser.id
+    name: mockUserInfo.user.friendly_name,
+    sub: mockUserInfo.user.id.toString()
 })
 
 const jwtAboutToExpire = () => makeMockJWT(Date.now() + 5 * 1000) // Expires in 5 seconds
@@ -204,7 +206,7 @@ describe('the NextAuth JWT token API', () => {
 
 describe('the NextAuth session API', () => {
 
-    it("should include the time until expiration in the session", async () => {
+    it("should include the time at which the client should refresh the session", async () => {
         const options = makeMockOptions()
         const token: JWT = jwtNew()
         const session = await options.callbacks.session({
@@ -213,7 +215,7 @@ describe('the NextAuth session API', () => {
             session: makeMockInitialSession(), // This is what the initial session that is received looks like
         })
 
-        expect(session.expiresInMs).toBeDefined()
+        expect(session.refreshInMs).toBeDefined()
     })
 
     it("should inform the client to refresh the token before the token expires", async () => {
@@ -226,8 +228,8 @@ describe('the NextAuth session API', () => {
             session: makeMockInitialSession(),
         })
 
-        // The time difference between when the client perceives the token to expire, vs when it actually does
-        const marginMs = expiresInMs - session.expiresInMs
+        // The time difference between the expiration and the moment the client should refresh
+        const marginMs = expiresInMs - session.refreshInMs
 
         expect(marginMs).toBeGreaterThan(10 * 1000)
     })
@@ -253,8 +255,6 @@ describe('the NextAuth session API', () => {
             session: makeMockInitialSession(), // This is what the initial session that is received looks like
         })
 
-        expect(session.user).toBeDefined()
-        expect(session.roles).toBeDefined()
-        expect(session.space).toBeDefined()
+        expect(session.userInfo).toBeDefined()
     })
 })

@@ -40,12 +40,12 @@ const CustomAppProvider: FunctionComponent<SuspenseProps> = ({ fallback, childre
                     void signIn('storyblok')
                     return
                 }
-                console.log('getSession() returned a session, expires in', newSession.expiresInMs / 1000, 's')
+                console.log('getSession() returned a session, expires in', newSession.refreshInMs / 1000, 's')
 
                 session.current = newSession
                 sessionSubject.current.next(newSession)
 
-                refreshTimer.current = window.setTimeout(refreshSession, newSession.expiresInMs)
+                refreshTimer.current = window.setTimeout(refreshSession, newSession.refreshInMs)
 
                 // if this was the initial call to getSession -> Re-render with the child
                 setLoading(false)

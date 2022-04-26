@@ -22,7 +22,7 @@ const makeCookieOption = (name: string): CookieOption => ({
     }
 })
 
-type NextAuthOptions = {
+type AppAuthOptions = {
     jwtSecret?: string
     clientId?: string
     clientSecret?: string
@@ -36,7 +36,7 @@ const readEnvironmentVariable = (variableName: string): string => {
     return v
 }
 
-const makeAppAuthOptions = (options?: NextAuthOptions) => {
+const makeAppAuthOptions = (options?: AppAuthOptions) => {
     const {
         jwtSecret = readEnvironmentVariable('STORYBLOK_JWT_SECRET'),
         clientSecret = readEnvironmentVariable('STORYBLOK_CLIENT_SECRET'),
@@ -63,7 +63,7 @@ const makeAppAuthOptions = (options?: NextAuthOptions) => {
                 clientSecret,
             }),
         ],
-        callbacks: makeCallbacks({
+        callbacks: makeCallbacksForAutoRefresh({
             clientId,
             clientSecret,
             jwtSecret,
@@ -76,16 +76,15 @@ const makeAppAuthOptions = (options?: NextAuthOptions) => {
     })
 }
 
-const makeCallbacks = ({
+const makeCallbacksForAutoRefresh = ({
                            clientId,
                            clientSecret
-                       }: Required<NextAuthOptions>): Partial<CallbacksOptions<CustomAppProfile, StoryblokAccount>> => ({
+                       }: Required<AppAuthOptions>): Partial<CallbacksOptions<CustomAppProfile, StoryblokAccount>> => ({
     // Here are a few timestamps
-    // 1. accessTokenIssued
-    // 2. The token will not be refreshed
-    // 3. The token will be refreshed, but it's earlier than the stated expiration time
-    // 4. The token will be refreshed, it's after the stated expiration time, but the token is still valid
-    // 5. accessTokenExpires - The token is actually expired.
+    // 1. accessTokenIssued - The jwt hook will not refresh the token. The client is not advised to refresh yet.
+    // 2. expiresByAPI - The jwt hook will refresh the token, but the client has not been advised to do so yet.
+    // 3. expiresByClient - The jwt hook will refresh the token, the client will be asked to perform the request at this point.
+    // 4. expiresByStoryblok - The jwt hook will refresh the token. The token is expired by storyblok. The client should have already refreshed the token.
     async jwt({token, account, user, profile}): Promise<JWT> {
         // Check for initial sign in
         if (account && user && profile) {
@@ -127,7 +126,7 @@ const makeCallbacks = ({
             userInfo: token.userInfo,
             accessToken: token.accessToken,
             // Underestimate the longevity of the token, so that it will refresh token well before it actually expires
-            expiresInMs: timeTo(getExpiresByClient(token)),
+            refreshInMs: timeTo(getExpiresByClient(token)),
             expires: new Date(getExpiresByClient(token)).toISOString(),
         }
     },
