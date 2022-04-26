@@ -5,20 +5,28 @@
   "license": "MIT",
   "module": "dist/types/index.js",
   "type": "module",
+  "typesVersions": {
+    "*": {
+      "*": [
+        "dist/*/index.d.ts"
+      ]
+    }
+  },
   "exports": {
-    "./dist/api": {
+    "./api": {
       "import": "./dist/api/index.js"
     },
-    "./dist/react": {
+    "./react": {
       "import": "./dist/react/index.js"
     },
-    "./dist/types": {
+    "./types": {
       "import": "./dist/types/index.js"
     }
   },
   "files": [
     "dist",
-    "package.json"
+    "package.json",
+    "README.md"
   ],
   "scripts": {
     "build": "rollup -c",
