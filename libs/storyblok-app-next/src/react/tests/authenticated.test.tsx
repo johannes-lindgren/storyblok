@@ -13,15 +13,19 @@ function nextAuthMockAuthenticated() {
         expiresInMs,
         expires: new Date(Date.now() + expiresInMs).toISOString(),
         accessToken: 'abcToken123',
-        space: {
-            id: 0,
-            name: 'Mock space'
-        }, roles: [{
-            name: 'tester'
-        }], user: {
-            id: '0',
-            name: 'Tester'
-        }
+        userInfo: {
+            user: {
+                friendly_name: 'Tester',
+                id: 0,
+            },
+            roles: [{
+                name: 'tester'
+            }],
+            space: {
+                id: 0,
+                name: 'Mock space'
+            },
+        },
     })
 
     return {

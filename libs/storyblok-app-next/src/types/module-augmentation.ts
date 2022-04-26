@@ -1,6 +1,5 @@
-import {Role, Space, UserInfo} from "@src/types/user-info";
+import {UserInfo} from "@src/types/user-info";
 import {ISODateString} from "next-auth/core/types";
-import {User} from "next-auth";
 
 // We are augmenting the types, because we want to pass some extra data to the front-end client application, such as
 // the access token, space id, roles.
@@ -12,9 +11,7 @@ declare module "next-auth/jwt" {
         accessToken: string
         accessTokenExpires: number
         refreshToken: string
-        space: Space,
-        user: User
-        roles: Role[]
+        userInfo: UserInfo
     }
 }
 
@@ -29,10 +26,7 @@ declare module "next-auth" {
         // seconds until it expires from the time the session was fetched from the backend
         // i.e. not from the time that the token was issued.
         expiresInMs: number
-        // TODO merge into a single property userInfo
-        user: User
-        roles: Role[]
-        space: Space
+        userInfo: UserInfo
     }
 
     interface User {
@@ -69,10 +63,6 @@ interface CustomAppSession {
     // seconds until it expires from the time the session was fetched from the backend
     // i.e. not from the time that the token was issued.
     expiresInMs: number
-    // TODO merge into a single property userInfo
-    user: User
-    roles: Role[]
-    space: Space
 }
 
 interface CustomAppUser {

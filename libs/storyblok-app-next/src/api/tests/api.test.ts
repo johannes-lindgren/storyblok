@@ -68,8 +68,7 @@ const makeMockOptions = () => makeAppAuthOptions({
 })
 
 const makeMockInitialSession = (): Session => ({
-    user,
-    expires: '',
+    expires: new Date().toISOString(),
 } as Session)
 
 const mockUser: User = {
@@ -78,11 +77,16 @@ const mockUser: User = {
 }
 
 const makeMockJWT = (accessTokenExpires: number): JWT => ({
-    user: mockUser,
-    roles: [{name: 'admin'}],
-    space: {
-        name: 'Mock Space',
-        id: 0,
+    userInfo: {
+        user: {
+            friendly_name: 'Tester',
+            id: 0,
+        },
+        roles: [{name: 'admin'}],
+        space: {
+            name: 'Mock Space',
+            id: 0,
+        },
     },
     accessToken: randomString(36),
     refreshToken: randomString(36),
@@ -113,7 +117,7 @@ const userInfo: UserInfo = {
     } ]
 }
 
-const user = { id: '113692', name: 'Johannes Lindgren', email: undefined }
+const user: User = { id: '113692', name: 'Johannes Lindgren', email: undefined }
 
 describe('the make NextAuth options factory', () => {
 

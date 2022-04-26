@@ -105,9 +105,7 @@ const makeCallbacks = ({
                 accessToken: tokenRefreshResponse.access_token,
                 accessTokenExpires: Date.now() + tokenRefreshResponse.expires_in * 1000,
                 refreshToken: account.refresh_token,
-                user: user,
-                roles: profile.roles,
-                space: profile.space
+                userInfo: profile,
             }
         }
 
@@ -126,9 +124,7 @@ const makeCallbacks = ({
     async session({token}) {
         // Send properties to the client, like an access_token from a provider.
         return {
-            user: token.user,
-            roles: token.roles,
-            space: token.space,
+            userInfo: token.userInfo,
             accessToken: token.accessToken,
             // Underestimate the longevity of the token, so that it will refresh token well before it actually expires
             expiresInMs: timeTo(getExpiresByClient(token)),

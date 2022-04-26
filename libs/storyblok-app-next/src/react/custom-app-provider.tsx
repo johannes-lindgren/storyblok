@@ -118,15 +118,7 @@ const useUserInfo = (): UserInfo => {
     if (session === undefined) {
         throw Error(`\`useUserInfo()\` must be wrapped in a <CustomAppProvider />`)
     }
-    const {user, space, roles} = session
-    return {
-        user: {
-            id: parseInt(user.id),
-            friendly_name: user.name,
-        },
-        roles,
-        space,
-    }
+    return session.userInfo
 }
 
 export {useUserInfo, useSession}
