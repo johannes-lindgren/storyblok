@@ -13,20 +13,12 @@
     }
   },
   "exports": {
-    "./api": {
-      "import": "./dist/api/index.js"
-    },
-    "./react": {
-      "import": "./dist/react/index.js"
-    },
-    "./types": {
-      "import": "./dist/types/index.js"
+    "./": {
+      "import": "./dist/*/index.js"
     }
   },
   "files": [
-    "dist",
-    "package.json",
-    "README.md"
+    "dist"
   ],
   "scripts": {
     "build": "rollup -c",
