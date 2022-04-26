@@ -123,18 +123,65 @@ export default function IndexPage() {
 }
 ```
 
+To use the access token, you need instantiate a client and subscribe to access tokens as they are refreshed in the
+background. Use the `useClient()` hook for this purpose, for example:
+
+```typescript jsx
+const {space} = useUserInfo()
+
+const setAccessToken = useMemo(() => (client: StoryblokJsClient, token: string) => {
+    client.client.defaults.headers['Authorization'] = `Bearer ${token}`
+}, [])
+
+const client = useClient(
+    (token) => {
+        const client = new StoryblokJsClient({}, 'https://mapi.storyblok.com/v1')
+        setAccessToken(client, token)
+        return client
+    },
+    setAccessToken,
+    [space.id]
+)
+```
+
+To share the same client across the whole application, provide the client via a context.
+
+```typescript jsx
+const ContentManagementContext = createContext<StoryblokJsClient | undefined>(undefined);
+
+const App: FunctionComponent<PropsWithChildren<{}>> = ({children}) => {
+    const {space} = useUserInfo()
+
+    const setAccessToken = useMemo(() => (client: StoryblokJsClient, token: string) => {
+        client.client.defaults.headers['Authorization'] = `Bearer ${token}`
+    }, [])
+
+    const client = useClient(
+        (token) => {
+            const client = new StoryblokJsClient({}, 'https://mapi.storyblok.com/v1')
+            setAccessToken(client, token)
+            return client
+        },
+        setAccessToken,
+        [space.id]
+    )
+
+    return (
+        <ContentManagementContext.Provider value={client}>
+            {children}
+        </ContentManagementContext.Provider>
+    )
+}
+
+const useStoryblokJsClient = (): StoryblokJsClient => {
+    const client = useContext(ContentManagementContext)
+    if (!client) {
+        throw new Error(`\`useContentManagementClient()\` must be wrapped in a <${StoryblokJsClientProvider.displayName} />`)
+    }
+    return client
+}
+
+export {StoryblokJsClientProvider, useStoryblokJsClient}
+```
+
 That's it!
-
-## Other Options
-
-CustomAppProvider
-
-* fallback
-
-### Custom Client
-
-If you prefer to use your own content management client, you need to ensure that the client's access token is refreshed
-when the session is refreshed. You should wrap you application within your own provider component that provides an
-instance of your client. Inside the client, subscribe to session refresh events with the `useSession()` hook:
-
-See `src/react/content-management-provider` for an example of an implementation.

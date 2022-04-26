@@ -13,9 +13,9 @@ class Subject<T> {
     }
 
     subscribe(subscriber: Subscriber<T>) {
-        console.log('Subscribing new listener...')
+        console.debug('Subscribing new listener...')
         this.subscribers.add(subscriber)
-        console.log(`There are ${subscriber.length} listeners`)
+        console.debug(`There are ${this.subscribers.size} listeners`)
         return subscriber
     }
 
