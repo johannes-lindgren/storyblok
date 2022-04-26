@@ -6,12 +6,12 @@ import {getSession} from "next-auth/react";
 
 import {TestApp} from "@src/react/tests/utils";
 
-const expiresInMs = 899 * 1000
+const refreshInMs = 15 * 60 * 1000 // 15 min, not important exactly how much
 
 function nextAuthMockAuthenticated() {
     const getMockSession: typeof getSession = async () => ({
-        expiresInMs,
-        expires: new Date(Date.now() + expiresInMs).toISOString(),
+        refreshInMs,
+        expires: new Date(Date.now() + refreshInMs).toISOString(),
         accessToken: 'abcToken123',
         userInfo: {
             user: {
@@ -77,10 +77,10 @@ it("should refresh the session after it expires", async () => {
         render(<TestApp/>)
     })
     await act(async () => {
-        jest.advanceTimersByTime(expiresInMs / 2);
+        jest.advanceTimersByTime(refreshInMs / 2);
         await Promise.resolve();
         for (let i = 0; i < expectedRefreshCount - 1; i++) {
-            jest.advanceTimersByTime(expiresInMs);
+            jest.advanceTimersByTime(refreshInMs);
             await Promise.resolve();
         }
     })
