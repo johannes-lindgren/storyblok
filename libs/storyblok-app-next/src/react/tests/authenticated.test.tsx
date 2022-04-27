@@ -93,6 +93,7 @@ describe('<CustomAppProvider />', () => {
             await Promise.resolve()
         })
 
+
         expect(screen.getByTestId("content").id).toBe("custom-app")
     })
 
@@ -106,6 +107,7 @@ describe('<CustomAppProvider />', () => {
             await advanceTimeInSteps(expectedRefreshCount - 1, refreshInMs)
         })
         expect(getSession).toHaveBeenCalledTimes(expectedRefreshCount)
+        screen.debug()
     })
 
 })
@@ -151,7 +153,7 @@ describe('useSession()', () => {
         })
 
         await waitFor(() => {
-            expect(screen.getByTestId('initialAccessToken').textContent).not.toBe("")
+            expect(screen.getByTestId('accessToken').textContent).not.toBe("")
         })
     })
 
@@ -164,13 +166,12 @@ describe('useSession()', () => {
             await advanceTimeInSteps(1, refreshInMs / 2)
         })
 
-        const initialAccessToken = screen.getByTestId('initialAccessToken').textContent
-        expect(screen.getByTestId('currentAccessToken').textContent).toBe(initialAccessToken)
+        const initialAccessToken = screen.getByTestId('accessToken').textContent
 
         await act(async () => {
             await advanceTimeInSteps(1, refreshInMs)
         })
 
-        expect(screen.getByTestId('currentAccessToken').textContent).not.toBe(initialAccessToken)
+        expect(screen.getByTestId('accessToken').textContent).not.toBe(initialAccessToken)
     })
 })

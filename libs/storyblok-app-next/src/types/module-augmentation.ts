@@ -57,6 +57,7 @@ interface CustomAppSession {
     expires: ISODateString
     // seconds until the token should be refreshed. The time is measured from the moment the session is received.
     refreshInMs: number
+    userInfo: UserInfo
 }
 
 interface CustomAppUser {

@@ -5,33 +5,23 @@ import {
     useCallback,
     useContext,
     useEffect,
-    useMemo,
     useRef,
     useState
 } from "react";
 import {getSession, signIn,} from "next-auth/react";
 import {CustomAppSession, UserInfo} from "@src/types";
-import {Subject, Subscriber} from "@src/react/subject";
 import {Session} from "next-auth";
 
 // When you need to read userinfo, or the token
 const SessionContext = createContext<Session | undefined>(undefined)
 
-// When you need to subscribe to session/token refresh
-const SessionSubjectContext = createContext<Subject<CustomAppSession> | undefined>(undefined)
-
 const CustomAppProvider: FunctionComponent<SuspenseProps> = ({ fallback, children}) => {
 
     // We do not want to cause re-render when the session is refreshed
-    const session = useRef<Session | undefined>(undefined)
-    const sessionSubject = useRef(new Subject<CustomAppSession>())
+    const [session, setSession] = useState<Session | undefined>(undefined)
     const refreshTimer = useRef<number>()
 
-    // We want to cause re-render when the initial session is fetched
-    const [isLoading, setLoading] = useState<boolean>(session.current === undefined)
-
     const refreshSession = useCallback(() => {
-        console.log('getSession()')
         getSession()
             .then(newSession => {
                 if (!newSession) {
@@ -40,18 +30,14 @@ const CustomAppProvider: FunctionComponent<SuspenseProps> = ({ fallback, childre
                     void signIn('storyblok')
                     return
                 }
-                console.debug('getSession() returned a session, should refresh in', newSession.refreshInMs / 1000, 's')
+                console.debug('getSession() returned a session, should refresh in', Math.floor(newSession.refreshInMs / 1000 / 60), 'm', Math.floor(newSession.refreshInMs / 1000 % 60), 's')
 
-                session.current = newSession
-                sessionSubject.current.next(newSession)
+                setSession(newSession)
 
                 refreshTimer.current = window.setTimeout(refreshSession, newSession.refreshInMs)
-
-                // if this was the initial call to getSession -> Re-render with the child
-                setLoading(false)
             })
             .catch((e) => {
-                // TODO remove console log
+                console.error('Failed to fetch session. Will attempt to sign in again.')
                 console.error(e)
                 void signIn('storyblok')
             })
@@ -61,13 +47,12 @@ const CustomAppProvider: FunctionComponent<SuspenseProps> = ({ fallback, childre
         refreshSession()
 
         return () => {
-            console.debug('Cleaning upp timer')
             window.clearTimeout(refreshTimer.current)
         }
     }, [])
 
 
-    if (isLoading) {
+    if (!session) {
         return (
             <div style={{
                 display: 'flex',
@@ -82,48 +67,34 @@ const CustomAppProvider: FunctionComponent<SuspenseProps> = ({ fallback, childre
     }
 
     return (
-        <SessionContext.Provider value={session.current}>
-            <SessionSubjectContext.Provider value={sessionSubject.current}>
+        <SessionContext.Provider value={session}>
                 {children}
-            </SessionSubjectContext.Provider>
         </SessionContext.Provider>
     )
-}
-
-type SessionData = {
-    session: CustomAppSession
-    subscribeRefresh: (subscriber: Subscriber<CustomAppSession>) => Subscriber<CustomAppSession>
-    unsubscribeRefresh: (subscriber: Subscriber<CustomAppSession>) => void
 }
 
 /**
  * IMPORTANT: Does not receive state updates. To do so, subscribe with subscribeRefresh and update the state in the
  * callback function.
  */
-const useSession = (): SessionData => {
-    const sessionSubject = useContext(SessionSubjectContext)
+const useSession = (): CustomAppSession => {
     const session = useContext(SessionContext)
-    if (!session || !sessionSubject) {
+    if (!session) {
         throw Error(`\`useSession()\` must be wrapped in a <CustomAppProvider />`)
     }
-    const subscribeUnsubscribe: Pick<SessionData, 'subscribeRefresh' | 'unsubscribeRefresh'> = useMemo(() => ({
-        subscribeRefresh: (subscriber: Subscriber<CustomAppSession>) => sessionSubject.subscribe(subscriber),
-        unsubscribeRefresh: (subscriber: Subscriber<CustomAppSession>) => sessionSubject.unsubscribe(subscriber)
-    }), [sessionSubject])
 
-    return useMemo(() => ({
-        session: session as CustomAppSession,
-        ...subscribeUnsubscribe,
-    }), [sessionSubject, session.data])
+    return session
 }
 
 const useUserInfo = (): UserInfo => {
-    const session = useContext(SessionContext)
-    if (session === undefined) {
-        throw Error(`\`useUserInfo()\` must be wrapped in a <CustomAppProvider />`)
-    }
+    const session = useSession()
     return session.userInfo
 }
 
-export {useUserInfo, useSession}
+const useAccessToken = (): string => {
+    const session = useSession()
+    return session.accessToken
+}
+
+export {useUserInfo, useAccessToken}
 export {CustomAppProvider}

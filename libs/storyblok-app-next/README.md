@@ -104,84 +104,40 @@ In your pages, use the hooks `useUserInfo()` and `useContentManagementClient()`.
 
 ```typescript jsx
 export default function IndexPage() {
-    const {user, roles, space} = useUserInfo()
-    const {
-        session,
-        subscribeRefresh,
-        unsubscribeRefresh
-    } = useSession()
+  const {user, roles, space} = useUserInfo()
+  const accessToken = useAccessToken()
 
-    return (
-        <div>
+  // Perform a request with the accessToken
+  
+  return (
+          <div>
             <p>Signed in as <em>{user.name}</em> on the <em>{space.name}</em> space</p>
             <p>Your roles are: </p>
             <ul>
-                {roles.map(role => (<li key={role.name}>{role.name}</li>))}
+              {roles.map(role => (<li key={role.name}>{role.name}</li>))}
             </ul>
-        </div>
-    )
+          </div>
+  )
 }
 ```
 
-To use the access token, you need instantiate a client and subscribe to access tokens as they are refreshed in the
-background. Use the `useClient()` hook for this purpose, for example:
+The content management API has a rate limit. Therefore, we recommend using a client that throttles the requests. If the client persists the access token, remember to refresh it with `useEffect()`:
 
 ```typescript jsx
-const {space} = useUserInfo()
+const accessToken = useAccessToken()
 
-const setAccessToken = useMemo(() => (client: StoryblokJsClient, token: string) => {
-    client.client.defaults.headers['Authorization'] = `Bearer ${token}`
-}, [])
-
-const client = useClient(
-    (token) => {
-        const client = new StoryblokJsClient({}, 'https://mapi.storyblok.com/v1')
-        setAccessToken(client, token)
-        return client
-    },
-    setAccessToken,
-    [space.id]
+const client = useMemo(
+    () => new StoryblokJsClient({}, 'https://mapi.storyblok.com/v1'),
+    []
 )
+
+// Refresh the token
+useEffect(() => {
+    client.client.defaults.headers['Authorization'] = `Bearer ${token}`
+}, [client, accessToken])
 ```
 
-To share the same client across the whole application, provide the client via a context.
-
-```typescript jsx
-const ContentManagementContext = createContext<StoryblokJsClient | undefined>(undefined);
-
-const App: FunctionComponent<PropsWithChildren<{}>> = ({children}) => {
-    const {space} = useUserInfo()
-
-    const setAccessToken = useMemo(() => (client: StoryblokJsClient, token: string) => {
-        client.client.defaults.headers['Authorization'] = `Bearer ${token}`
-    }, [])
-
-    const client = useClient(
-        (token) => {
-            const client = new StoryblokJsClient({}, 'https://mapi.storyblok.com/v1')
-            setAccessToken(client, token)
-            return client
-        },
-        setAccessToken,
-        [space.id]
-    )
-
-    return (
-        <ContentManagementContext.Provider value={client}>
-            {children}
-        </ContentManagementContext.Provider>
-    )
-}
-
-const useStoryblokJsClient = (): StoryblokJsClient => {
-    const client = useContext(ContentManagementContext)
-    if (!client) {
-        throw new Error(`\`useContentManagementClient()\` must be wrapped in a <${StoryblokJsClientProvider.displayName} />`)
-    }
-    return client
-}
-
-export {StoryblokJsClientProvider, useStoryblokJsClient}
-```
+To share the same client across the whole application, provide the client via
+a [context](https://reactjs.org/docs/context.html).
 
 That's it!

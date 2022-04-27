@@ -175,6 +175,13 @@ describe('the NextAuth JWT token API', () => {
             user,
             profile: userInfo
         }
+
+        expect(options?.callbacks?.jwt).toBeDefined()
+
+        if(!options?.callbacks?.jwt){
+            return
+        }
+
         const jwt = await options.callbacks.jwt(initialSignInContext)
 
         expect(typeof jwt.accessToken).toBe('string')
@@ -185,6 +192,12 @@ describe('the NextAuth JWT token API', () => {
     it("should not refresh or request a token if the token is not about to expire", async () => {
         const options = makeMockOptions()
         const validToken: JWT = jwtNew()
+
+        expect(options?.callbacks?.jwt).toBeDefined()
+        if(!options?.callbacks?.jwt){
+            return
+        }
+
         const jwt = await options.callbacks.jwt({
             token: validToken
         })
@@ -195,6 +208,12 @@ describe('the NextAuth JWT token API', () => {
     it("should refresh the token some time before it expires", async () => {
         const options = makeMockOptions()
         const tokenAboutToExpire: JWT = jwtAboutToExpire()
+
+        expect(options?.callbacks?.jwt).toBeDefined()
+        if(!options?.callbacks?.jwt){
+            return
+        }
+
         const jwt = await options.callbacks.jwt({
             token: tokenAboutToExpire
         })
@@ -209,6 +228,12 @@ describe('the NextAuth session API', () => {
     it("should include the time at which the client should refresh the session", async () => {
         const options = makeMockOptions()
         const token: JWT = jwtNew()
+
+        expect(options?.callbacks?.session).toBeDefined()
+        if(!options?.callbacks?.session){
+            return
+        }
+
         const session = await options.callbacks.session({
             token: token,
             user,
@@ -222,6 +247,12 @@ describe('the NextAuth session API', () => {
         const options = makeMockOptions()
         const expiresInMs = expiresIn * 1000 // ms until Storyblok expires the token
         const token: JWT = makeMockJWT(Date.now() + expiresInMs)
+
+        expect(options?.callbacks?.session).toBeDefined()
+        if(!options?.callbacks?.session){
+            return
+        }
+
         const session = await options.callbacks.session({
             token: token,
             user,
@@ -237,6 +268,12 @@ describe('the NextAuth session API', () => {
     it("should include the issued access token", async () => {
         const options = makeMockOptions()
         const token: JWT = jwtNew() // Expires in 1 second
+
+        expect(options?.callbacks?.session).toBeDefined()
+        if(!options?.callbacks?.session){
+            return
+        }
+
         const session = await options.callbacks.session({
             token: token,
             user,
@@ -249,6 +286,12 @@ describe('the NextAuth session API', () => {
     it("should include user info in the session", async () => {
         const options = makeMockOptions()
         const token: JWT = jwtNew()
+
+        expect(options?.callbacks?.session).toBeDefined()
+        if(!options?.callbacks?.session){
+            return
+        }
+
         const session = await options.callbacks.session({
             token: token,
             user,

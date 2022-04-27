@@ -1,22 +1,18 @@
-import {FunctionComponent, useEffect, useRef, useState} from "react";
-import {CustomAppProvider, Subscriber, useSession, useUserInfo} from "@src/react";
-import {CustomAppSession} from "@src/types";
+import {FunctionComponent, useEffect, useState} from "react";
+import {CustomAppProvider, useAccessToken, useUserInfo} from "@src/react";
+
+// TODO let the build ignore this folder!
 
 const Fallback = () => <div data-testid="content" id="fallback">Loading...</div>
 
 const TestCustomApp: FunctionComponent = () => {
-    const {session, subscribeRefresh, unsubscribeRefresh} = useSession()
+    const accessToken = useAccessToken()
     const {user, roles, space} = useUserInfo()
-    const [accessToken, setAccessToken] = useState<string>(session.accessToken)
-    const subscriber = useRef<undefined | Subscriber<CustomAppSession>>(undefined)
+    const [tokenCount, setTokenCount] = useState(0)
+
     useEffect(() => {
-        subscriber.current = subscribeRefresh((newSession) => setAccessToken(newSession.accessToken))
-        return () => {
-            if(subscriber.current){
-                unsubscribeRefresh(subscriber.current)
-            }
-        }
-    }, [])
+        setTokenCount(prevVal => prevVal + 1)
+    }, [accessToken])
 
     return (
         <div data-testid="content" id="custom-app">
@@ -25,10 +21,10 @@ const TestCustomApp: FunctionComponent = () => {
                 <dd data-testid="user.friendly_name">{user.friendly_name}</dd>
                 <dt>Space name</dt>
                 <dd data-testid="space.name">{space.name}</dd>
-                <dt>Initial access token</dt>
-                <dd data-testid="initialAccessToken">{session.accessToken}</dd>
                 <dt>Current access token</dt>
-                <dd data-testid="currentAccessToken">{accessToken}</dd>
+                <dd data-testid="accessToken">{accessToken}</dd>
+                <dt>Refresh count</dt>
+                <dd data-testid="tokenCount">{tokenCount}</dd>
             </dl>
             <ul data-testid="roles">
                 {roles.map(role => (
