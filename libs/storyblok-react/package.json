@@ -15,6 +15,7 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
+    "@johannes-lindgren/storyblok-js": "link:../../libs/storyblok-js"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "21.0.1",

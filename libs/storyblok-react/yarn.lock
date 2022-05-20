@@ -2,12 +2,9 @@
 # yarn lockfile v1
 
 
-"@johannes-lindgren/storyblok-js@../storyblok-js":
-  version "0.0.1-development"
-  dependencies:
-    axios "0.25.0"
-    crypto-js "4.1.1"
-    storyblok-js-client "4.2.0"
+"@johannes-lindgren/storyblok-js@link:../storyblok-js":
+  version "0.0.0"
+  uid ""
 
 "@rollup/plugin-commonjs@21.0.1":
   version "21.0.1"
