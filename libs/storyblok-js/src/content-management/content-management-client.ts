@@ -1,6 +1,7 @@
 import throttle from '../utils/throttle'
-import {stripLeadingSlash} from "../utils/url-utils";
+import {noLeadingSlash} from "../utils/url-utils";
 import {Story} from "../story";
+import {Component} from "./model/component";
 
 const contentManagementApiUrl = 'https://mapi.storyblok.com/v1'
 
@@ -22,33 +23,7 @@ export class ContentManagementClient {
         this._spaceId = spaceId
     }
 
-    private async get(relativeUrl: string) {
-        const response = await this.fetch(`${contentManagementApiUrl}/${stripLeadingSlash(relativeUrl)}`, {
-            method: 'GET',
-            headers: {
-                // NOTE for personal oauth access tokens, 'Bearer ' should be omitted.
-                // But for custom apps, it must be included.
-                'Authorization': `Bearer ${this.accessToken}`,
-                'Content-Type': 'application/json',
-            },
-        })
-        if(!response.ok){
-            throw new Error(response.statusText)
-        }
-        return await response.json()
-    }
-
-    // private async post(relativeUrl: string, body: any) {
-    //     return this.fetch(`${contentManagementApiUrl}/${stripLeadingSlash(relativeUrl)}`, {
-    //         method: 'POST',
-    //         headers: {
-    //             // NOTE for personal oauth access tokens, 'Bearer ' should be omitted.
-    //             // But for custom apps, it must be included.
-    //             'Authorization': `Bearer ${this.accessToken}`
-    //         },
-    //         body: JSON.stringify(body),
-    //     })
-    // }
+    // Properties Getters and Setters
 
     setAccessToken(accessToken: string) {
         this._accessToken = accessToken
@@ -66,20 +41,67 @@ export class ContentManagementClient {
         return this._spaceId
     }
 
-    //
-    // // // TODO type
-    // async getSpace(spaceId: number | string): Promise<Space | undefined> {
-    //     return this.client
-    //         .get(`spaces/${spaceId}`)
-    //         .then(res => {
-    //             return res.data.space as unknown as Space
-    //         })
+    // Helpers
+
+    private async get(relativeUrl: string) {
+        const response = await this.fetch(`${contentManagementApiUrl}/${noLeadingSlash(relativeUrl)}`, {
+            method: 'GET',
+            headers: {
+                // NOTE for personal oauth access tokens, 'Bearer ' should be omitted.
+                // But for custom apps, it must be included.
+                'Authorization': `Bearer ${this.accessToken}`,
+                'Content-Type': 'application/json',
+            },
+        })
+        if(!response.ok){
+            throw new Error(response.statusText)
+        }
+        return await response.json()
+    }
+
+    private getMultiple<T>(type: string): Promise<T[]> {
+        return this
+            .get(`spaces/${this.spaceId}/${type}`)
+            .then(res => res[type] as unknown as T[])
+    }
+
+    private getSingle<T>(type: string, id: string | number): Promise<T> {
+        return this
+            .get(`spaces/${this.spaceId}/${type}/${id}`)
+            .then(res => res[type] as unknown as T)
+    }
+
+    // API
+
+    // private async post(relativeUrl: string, body: any) {
+    //     return this.fetch(`${contentManagementApiUrl}/${stripLeadingSlash(relativeUrl)}`, {
+    //         method: 'POST',
+    //         headers: {
+    //             // NOTE for personal oauth access tokens, 'Bearer ' should be omitted.
+    //             // But for custom apps, it must be included.
+    //             'Authorization': `Bearer ${this.accessToken}`
+    //         },
+    //         body: JSON.stringify(body),
+    //     })
     // }
 
-    async getStories(): Promise<Story[]> {
+
+    getStories(): Promise<Omit<Story, 'content'>[]> {
+        return this.getMultiple('stories')
+    }
+
+    getStory(id: string | number): Promise<Story> {
         return this
-            .get(`spaces/${this.spaceId}/stories`)
-            .then(res => res.stories as unknown as Story[])
+            .get(`spaces/${this.spaceId}/stories/${id}`)
+            .then(res => res.story as unknown as Story)
+    }
+
+    getComponents(): Promise<Component[]> {
+        return this.getMultiple('components')
+    }
+
+    getComponent(id: string | number): Promise<Component> {
+        return this.getSingle('components', id)
     }
 }
 

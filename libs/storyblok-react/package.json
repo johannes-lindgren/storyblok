@@ -1,6 +1,6 @@
 {
   "name": "@johannes-lindgren/storyblok-react",
-  "version": "0.0.1-development",
+  "version": "0.0.2-development",
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.esm.js",
   "author": "Johannes Lindgren",
@@ -15,7 +15,7 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
-    "@johannes-lindgren/storyblok-js": "link:../../libs/storyblok-js"
+    "@johannes-lindgren/storyblok-js": "^0.0.1-development"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "21.0.1",

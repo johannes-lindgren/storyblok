@@ -67,7 +67,7 @@ More [details below](#typescript).
 
 ### Content Components
 
-Create your React components for rendering content with `createBlockComponent()`:
+Create your React components for rendering content with `makeBlockComponent()`:
 
 ```typescript jsx
 import {makeBlockComponent} from "@johannes-lindgren/storyblok-react";

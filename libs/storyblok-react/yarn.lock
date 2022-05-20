@@ -2,9 +2,14 @@
 # yarn lockfile v1
 
 
-"@johannes-lindgren/storyblok-js@link:../storyblok-js":
-  version "0.0.0"
-  uid ""
+"@johannes-lindgren/storyblok-js@^0.0.1-development":
+  version "0.0.1-development"
+  resolved "https://registry.yarnpkg.com/@johannes-lindgren/storyblok-js/-/storyblok-js-0.0.1-development.tgz#b3de0b8fdfbf4e61ecb987161f941dbafd58df15"
+  integrity sha512-tbL9WJTTkzJUfs85w61vHQoG+/O6t+dfZK1MzcP9PO3VdoT62lhs9mhbGUWKY58XuRAL3nB6PWV5ycdA28T6bg==
+  dependencies:
+    axios "0.25.0"
+    crypto-js "4.1.1"
+    storyblok-js-client "4.2.0"
 
 "@rollup/plugin-commonjs@21.0.1":
   version "21.0.1"
