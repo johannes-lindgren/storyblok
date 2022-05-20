@@ -4,6 +4,7 @@
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.esm.js",
   "author": "Johannes Lindgren",
+  "repository": "https://github.com/johannes-lindgren/storyblok/tree/main/libs/storyblok-js",
   "license": "MIT",
   "files": [
     "dist",
