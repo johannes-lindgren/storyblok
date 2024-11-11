@@ -1,1 +1,0 @@
-export const noLeadingSlash = (relativeUrl: string):string => relativeUrl.startsWith('/') ? relativeUrl.substring(1) : relativeUrl

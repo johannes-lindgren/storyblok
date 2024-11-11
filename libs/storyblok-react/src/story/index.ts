@@ -1,1 +1,0 @@
-export * from "@src/story/make-story-component";
