@@ -1,12 +1,4 @@
-import {
-  array,
-  literal,
-  object,
-  oneOf,
-  Parser,
-  parseString,
-  withDefault,
-} from 'pure-parse'
+import { array, literal, oneOf, Parser, withDefault } from 'pure-parse'
 
 import {
   BlocksField,
@@ -23,6 +15,8 @@ import {
   optionsContent,
   AssetContent,
   assetContent,
+  blockContent,
+  BlockContentSchema,
 } from './content'
 
 type Values<T extends unknown[]> = T[number]
@@ -119,18 +113,19 @@ export const contentParserFromComponent = <
 >(
   component: C,
   components: Components,
-): Parser<Simplify<ContentFromComponent<C, Components>>> =>
-  // @ts-ignore
-  object<ContentFromComponent<C>>({
-    _uid: parseString,
-    component: literal(component.name),
-    ...Object.fromEntries(
-      Object.entries(component.schema).map(([key, field]) => [
-        key,
-        contentParserFromField(field, components),
-      ]),
+): Parser<ContentFromComponent<C, Components>> =>
+  blockContent<ContentFromComponent<C, Components>>(
+    Object.entries(component.schema).reduce(
+      (acc, [key, field]) => {
+        // @ts-expect-error
+        acc[key] = contentParserFromField(field, components)
+        return acc
+      },
+      { component: literal(component.name) } as BlockContentSchema<
+        ContentFromComponent<C, Components>
+      >,
     ),
-  })
+  ) as Parser<ContentFromComponent<C, Components>>
 
 /**
  * Takes a complex type expression and simplifies it to a plain object. Useful when inferring types.
