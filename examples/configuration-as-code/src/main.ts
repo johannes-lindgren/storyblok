@@ -51,7 +51,7 @@ const pageComponent = component({
     isPublic: booleanField(),
     padding: numberField(),
     body: blocksField({
-      allowedComponents: [heroComponent.name, galleryComponent.name, 'page'],
+      allowedComponents: [heroComponent.name, galleryComponent.name],
     }),
   },
 })
@@ -72,7 +72,7 @@ const components = {
  */
 
 // TODO prevent infinite recursion
-// const parsePageContent = contentParserFromComponent(pageComponent, components)
+const parsePageContent = contentParserFromComponent(pageComponent, components)
 
 type PageContent = ContentFromComponent<typeof pageComponent, typeof components>
 const page: PageContent = {
@@ -95,23 +95,6 @@ const page: PageContent = {
       component: 'gallery',
       columnCount: 3,
       images: [],
-    },
-    {
-      _uid: 'aadfsd',
-      component: 'page',
-      title: 'Subpage',
-      padding: 10,
-      isPublic: true,
-      body: [
-        {
-          _uid: 'saa',
-          component: 'hero',
-          title: 'hello!',
-          background: undefined,
-          align: 'left',
-          padded: ['bottom'],
-        },
-      ],
     },
   ],
 }

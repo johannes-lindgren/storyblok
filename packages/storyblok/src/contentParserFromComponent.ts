@@ -98,9 +98,13 @@ const contentParserFromField = <
       // TODO this can cause infinite recursion
       return array(
         oneOf(
-          ...Object.values(components).map((component) =>
-            contentParserFromComponent(component, components),
-          ),
+          ...Object.values(components)
+            .filter((component) =>
+              field.component_whitelist.includes(component.name),
+            )
+            .map((component) =>
+              contentParserFromComponent(component, components),
+            ),
         ),
       ) as Parser<ContentFromField<F, Components>>
   }
