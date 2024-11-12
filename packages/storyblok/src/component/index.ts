@@ -1,3 +1,13 @@
+export type AssetField = {
+  type: 'asset'
+  filetypes: ('images' | 'videos' | 'audios' | 'texts')[]
+}
+
+export type AssetsField = {
+  type: 'multiasset'
+  filetypes: ('images' | 'videos' | 'audios' | 'texts')[]
+}
+
 export type BlocksField<ComponentNames extends string[] = string[]> = {
   type: 'bloks'
   restrict_components: true
@@ -51,6 +61,8 @@ export type ReferencesField = {
 }
 
 export type Field =
+  | AssetField
+  | AssetsField
   | TextField
   | BooleanField
   | NumberField
@@ -66,6 +78,20 @@ export type Component = {
   name: string
   schema: Schema
 }
+
+export const assetField = (
+  options: Pick<AssetField, 'filetypes'>,
+): AssetField => ({
+  type: 'asset',
+  ...options,
+})
+
+export const assetsField = (
+  options: Pick<AssetsField, 'filetypes'>,
+): AssetsField => ({
+  type: 'multiasset',
+  ...options,
+})
 
 export const textField = (): TextField => ({
   type: 'text',

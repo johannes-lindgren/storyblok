@@ -32,12 +32,6 @@ export type StoryLinkContent = {
   linktype: 'story'
 } & SharedLinkContent
 
-export type LinkContent =
-  | StoryLinkContent
-  | UrlLinkContent
-  | EmailLinkContent
-  | AssetLinkContent
-
 const sharedLinkContentSchema = {
   fieldtype: literal('multilink'),
   id: parseString,
@@ -46,32 +40,27 @@ const sharedLinkContentSchema = {
   target: optional(literal('_blank', '_self')),
 } as const
 
-export const parseStoryLinkContent = object<StoryLinkContent>({
-  linktype: literal('story'),
-  ...sharedLinkContentSchema,
-})
+export const storyLinkContent = (): Parser<StoryLinkContent> =>
+  object<StoryLinkContent>({
+    linktype: literal('story'),
+    ...sharedLinkContentSchema,
+  })
 
-export const parseUrlLinkContent = object<UrlLinkContent>({
-  linktype: literal('url'),
-  ...sharedLinkContentSchema,
-})
+export const urlLinkContent = (): Parser<UrlLinkContent> =>
+  object<UrlLinkContent>({
+    linktype: literal('url'),
+    ...sharedLinkContentSchema,
+  })
 
-export const parseEmailLinkContent = object<EmailLinkContent>({
-  linktype: literal('email'),
-  ...sharedLinkContentSchema,
-  email: optional(parseString),
-})
+export const emailLinkContent = (): Parser<EmailLinkContent> =>
+  object<EmailLinkContent>({
+    linktype: literal('email'),
+    ...sharedLinkContentSchema,
+    email: optional(parseString),
+  })
 
-export const parseAssetLinkContent = object<AssetLinkContent>({
-  linktype: literal('asset'),
-  ...sharedLinkContentSchema,
-})
-
-// TODO options will determine which of the four type to use
-export const linkContent = (): Parser<LinkContent> =>
-  oneOf(
-    parseStoryLinkContent,
-    parseUrlLinkContent,
-    parseEmailLinkContent,
-    parseAssetLinkContent,
-  )
+export const assetLinkContent = (): Parser<AssetLinkContent> =>
+  object<AssetLinkContent>({
+    linktype: literal('asset'),
+    ...sharedLinkContentSchema,
+  })

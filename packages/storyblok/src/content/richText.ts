@@ -1,6 +1,6 @@
-// TODO: Add more types
 import { array, literal, object, Parser } from 'pure-parse'
 
+// TODO: Add more node types
 export type RichTextContent = {
   type: 'doc'
   content: RichTextContent[]

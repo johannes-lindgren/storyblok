@@ -1,24 +1,29 @@
 import {
+  array,
+  literal,
+  object,
+  oneOf,
+  Parser,
+  parseString,
+  withDefault,
+} from 'pure-parse'
+
+import {
   BlocksField,
   Component,
   Field,
   OptionField,
   OptionsField,
-} from '../component'
+} from './component'
 import {
-  array,
-  literal,
-  object,
-  oneOf,
-  parseBoolean,
-  Parser,
-  parseString,
-} from 'pure-parse'
-import { booleanContent } from './boolean'
-import { textContent } from './text'
-import { numberContent } from './number'
-import { optionContent } from './option'
-import { optionsContent } from './options'
+  booleanContent,
+  textContent,
+  numberContent,
+  optionContent,
+  optionsContent,
+  AssetContent,
+  assetContent,
+} from './content'
 
 type Values<T extends unknown[]> = T[number]
 
@@ -41,6 +46,8 @@ export type ContentFromField<
           number: number
           boolean: boolean
           bloks: never
+          asset: AssetContent | undefined
+          multiasset: AssetContent[]
           // Handled in the other branch of the ternary; story references
           option: never
           options: never
@@ -65,6 +72,14 @@ const contentParserFromField = <
   components: Components,
 ): Parser<ContentFromField<F, Components>> => {
   switch (field.type) {
+    case 'asset':
+      return withDefault(assetContent(), undefined) as Parser<
+        ContentFromField<F, Components>
+      >
+    case 'multiasset':
+      return withDefault(array(assetContent()), []) as Parser<
+        ContentFromField<F, Components>
+      >
     case 'boolean':
       return booleanContent() as Parser<ContentFromField<F, Components>>
     case 'text':
@@ -76,12 +91,11 @@ const contentParserFromField = <
         ContentFromField<F, Components>
       >
     case 'option':
-      // TODO use optionsParser
       return optionContent(...Object.keys(field.options)) as Parser<
         ContentFromField<F, Components>
       >
     case 'bloks':
-      // TODO use blockParser
+      // TODO this can cause infinite recursion
       return array(
         oneOf(
           ...Object.values(components).map((component) =>
@@ -106,7 +120,7 @@ export const contentParserFromComponent = <
   object<ContentFromComponent<C>>({
     _uid: parseString,
     component: literal(component.name),
-    schema: Object.fromEntries(
+    ...Object.fromEntries(
       Object.entries(component.schema).map(([key, field]) => [
         key,
         contentParserFromField(field, components),
