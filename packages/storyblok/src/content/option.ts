@@ -1,7 +1,7 @@
-import { literal, Parser, parseString } from 'pure-parse'
+import { literal, Parser } from 'pure-parse'
 
-export type OptionContent = string
+export type OptionContent<T extends string = never> = T
 
-export const optionContent = <Option extends OptionContent>(
+export const optionContent = <Option extends OptionContent<string>>(
   ...options: Option[]
-): Parser<OptionContent> => literal(...options)
+): Parser<Option> => literal(...options)
