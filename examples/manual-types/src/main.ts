@@ -9,6 +9,8 @@ import {
   linkContent,
   AssetContent,
   assetContent,
+  OptionContent,
+  optionContent,
 } from '@johannes-lindgren/storyblok'
 
 type PageContent = BlockContent<{
@@ -22,7 +24,7 @@ type HeroContent = BlockContent<{
   component: 'hero'
   image: AssetContent | undefined
   buttonLink: LinkContent | undefined
-  buttonType: 'primary' | 'secondary'
+  buttonType: OptionContent<'primary' | 'secondary'>
 }>
 
 type GridContent = BlockContent<{
@@ -34,7 +36,7 @@ const parseHeroContent = blockContent<HeroContent>({
   component: literal('hero'),
   image: withDefault(assetContent(), undefined),
   buttonLink: withDefault(linkContent(), undefined),
-  buttonType: withDefault(literal('primary', 'secondary'), 'primary'),
+  buttonType: withDefault(optionContent('primary', 'secondary'), 'primary'),
 })
 
 const parseGridContent = blockContent<GridContent>({
