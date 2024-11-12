@@ -1,8 +1,24 @@
-import { BlocksField, Component, Field } from '../component'
-import { array, literal, object, oneOf, Parser, parseString } from 'pure-parse'
+import {
+  BlocksField,
+  Component,
+  Field,
+  OptionField,
+  OptionsField,
+} from '../component'
+import {
+  array,
+  literal,
+  object,
+  oneOf,
+  parseBoolean,
+  Parser,
+  parseString,
+} from 'pure-parse'
 import { booleanContent } from './boolean'
 import { textContent } from './text'
 import { numberContent } from './number'
+import { optionContent } from './option'
+import { optionsContent } from './options'
 
 type Values<T extends unknown[]> = T[number]
 
@@ -16,13 +32,20 @@ export type ContentFromField<
         Components
       >
     }[Values<ComponentNames>][]
-  : {
-      text: string
-      number: number
-      boolean: boolean
-      // Handled in the other branch of the ternary
-      bloks: never
-    }[F['type']]
+  : F extends OptionField<infer Options>
+    ? keyof Options
+    : F extends OptionsField<infer Options>
+      ? (keyof Options)[]
+      : {
+          text: string
+          number: number
+          boolean: boolean
+          bloks: never
+          // Handled in the other branch of the ternary; story references
+          option: never
+          options: never
+          // Handled in the other branch of the ternary
+        }[F['type']]
 
 export type ContentFromComponent<
   C extends Component,
@@ -48,7 +71,17 @@ const contentParserFromField = <
       return textContent() as Parser<ContentFromField<F, Components>>
     case 'number':
       return numberContent() as Parser<ContentFromField<F, Components>>
+    case 'options':
+      return optionsContent(...Object.keys(field.options)) as Parser<
+        ContentFromField<F, Components>
+      >
+    case 'option':
+      // TODO use optionsParser
+      return optionContent(...Object.keys(field.options)) as Parser<
+        ContentFromField<F, Components>
+      >
     case 'bloks':
+      // TODO use blockParser
       return array(
         oneOf(
           ...Object.values(components).map((component) =>
