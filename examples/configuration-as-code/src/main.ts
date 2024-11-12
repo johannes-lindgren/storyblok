@@ -5,6 +5,8 @@ import {
   textField,
   contentParserFromComponent,
   blocksField,
+  optionField,
+  optionsField,
 } from '@johannes-lindgren/storyblok'
 import { pushComponents } from './management-api'
 import { Infer } from 'pure-parse'
@@ -13,6 +15,21 @@ const heroComponent = component({
   name: 'hero',
   schema: {
     title: textField(),
+    align: optionField({
+      options: {
+        left: 'Left',
+        center: 'Center',
+        right: 'Right',
+      },
+    }),
+    padded: optionsField({
+      options: {
+        left: 'Left',
+        right: 'Right',
+        top: 'Top',
+        bottom: 'Bottom',
+      },
+    }),
   },
 })
 
@@ -35,6 +52,11 @@ const pageComponent = component({
   },
 })
 
+/*
+ * The component library
+ * Will be serialized and uploaded to Storyblok
+ */
+
 const components = {
   page: pageComponent,
   hero: heroComponent,
@@ -45,7 +67,9 @@ const components = {
  * ...or generate one
  */
 
+// TODO prevent infinite recursion
 const parsePageContent = contentParserFromComponent(pageComponent, components)
+
 type PageContent = Infer<typeof parsePageContent>
 const page: PageContent = {
   _uid: '123',
@@ -58,6 +82,8 @@ const page: PageContent = {
       _uid: 'aadfsd',
       component: 'hero',
       title: 'Hero',
+      align: 'center',
+      padded: ['left', 'top', 'right'],
     },
     {
       _uid: 'aadfsd',
@@ -75,6 +101,8 @@ const page: PageContent = {
           _uid: 'saa',
           component: 'hero',
           title: 'hello!',
+          align: 'left',
+          padded: ['bottom'],
         },
       ],
     },

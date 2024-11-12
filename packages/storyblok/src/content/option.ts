@@ -1,6 +1,7 @@
-import { Parser, parseString } from 'pure-parse'
+import { literal, Parser, parseString } from 'pure-parse'
 
 export type OptionContent = string
 
-// TODO options as a parameter
-export const optionContent = (): Parser<OptionContent> => parseString
+export const optionContent = <Option extends OptionContent>(
+  ...options: Option[]
+): Parser<OptionContent> => literal(...options)
