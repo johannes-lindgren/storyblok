@@ -1,30 +1,30 @@
+import { array, literal, oneOf, Parser, withDefault } from 'pure-parse'
+
 import {
   BlocksField,
   Component,
   Field,
   OptionField,
   OptionsField,
-} from '../component'
+} from './component'
 import {
-  array,
-  literal,
-  object,
-  oneOf,
-  parseBoolean,
-  Parser,
-  parseString,
-} from 'pure-parse'
-import { booleanContent } from './boolean'
-import { textContent } from './text'
-import { numberContent } from './number'
-import { optionContent } from './option'
-import { optionsContent } from './options'
+  booleanContent,
+  textContent,
+  numberContent,
+  optionContent,
+  optionsContent,
+  AssetContent,
+  assetContent,
+  blockContent,
+  BlockContentSchema,
+} from './content'
+import { ComponentLibrary } from './componentLibrary'
 
 type Values<T extends unknown[]> = T[number]
 
 export type ContentFromField<
   F extends Field,
-  Components extends Record<string, Component>,
+  Components extends ComponentLibrary,
 > = F extends BlocksField<infer ComponentNames>
   ? {
       [ComponentName in Values<ComponentNames>]: ContentFromComponent<
@@ -41,6 +41,8 @@ export type ContentFromField<
           number: number
           boolean: boolean
           bloks: never
+          asset: AssetContent | undefined
+          multiasset: AssetContent[]
           // Handled in the other branch of the ternary; story references
           option: never
           options: never
@@ -49,7 +51,7 @@ export type ContentFromField<
 
 export type ContentFromComponent<
   C extends Component,
-  Components extends Record<string, Component>,
+  Components extends ComponentLibrary,
 > = {
   [K in keyof C['schema']]: ContentFromField<C['schema'][K], Components>
 } & {
@@ -59,12 +61,20 @@ export type ContentFromComponent<
 
 const contentParserFromField = <
   F extends Field,
-  Components extends Record<string, Component>,
+  Components extends ComponentLibrary,
 >(
   field: F,
   components: Components,
 ): Parser<ContentFromField<F, Components>> => {
   switch (field.type) {
+    case 'asset':
+      return withDefault(assetContent(), undefined) as Parser<
+        ContentFromField<F, Components>
+      >
+    case 'multiasset':
+      return withDefault(array(assetContent()), []) as Parser<
+        ContentFromField<F, Components>
+      >
     case 'boolean':
       return booleanContent() as Parser<ContentFromField<F, Components>>
     case 'text':
@@ -76,17 +86,20 @@ const contentParserFromField = <
         ContentFromField<F, Components>
       >
     case 'option':
-      // TODO use optionsParser
       return optionContent(...Object.keys(field.options)) as Parser<
         ContentFromField<F, Components>
       >
     case 'bloks':
-      // TODO use blockParser
+      // TODO this can cause infinite recursion
       return array(
         oneOf(
-          ...Object.values(components).map((component) =>
-            contentParserFromComponent(component, components),
-          ),
+          ...Object.values(components)
+            .filter((component) =>
+              field.component_whitelist.includes(component.name),
+            )
+            .map((component) =>
+              contentParserFromComponent(component, components),
+            ),
         ),
       ) as Parser<ContentFromField<F, Components>>
   }
@@ -97,24 +110,20 @@ const contentParserFromField = <
  */
 export const contentParserFromComponent = <
   C extends Component,
-  Components extends Record<string, Component>,
+  Components extends ComponentLibrary,
 >(
   component: C,
   components: Components,
-): Parser<Simplify<ContentFromComponent<C, Components>>> =>
-  // @ts-ignore
-  object<ContentFromComponent<C>>({
-    _uid: parseString,
-    component: literal(component.name),
-    schema: Object.fromEntries(
-      Object.entries(component.schema).map(([key, field]) => [
-        key,
-        contentParserFromField(field, components),
-      ]),
+): Parser<ContentFromComponent<C, Components>> =>
+  blockContent<ContentFromComponent<C, Components>>(
+    Object.entries(component.schema).reduce(
+      (acc, [key, field]) => {
+        // @ts-expect-error
+        acc[key] = contentParserFromField(field, components)
+        return acc
+      },
+      { component: literal(component.name) } as BlockContentSchema<
+        ContentFromComponent<C, Components>
+      >,
     ),
-  })
-
-/**
- * Takes a complex type expression and simplifies it to a plain object. Useful when inferring types.
- */
-export type Simplify<T> = T extends infer _ ? { [K in keyof T]: T[K] } : never
+  ) as Parser<ContentFromComponent<C, Components>>

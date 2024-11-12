@@ -1,6 +1,6 @@
-import { parseBoolean, withDefault } from 'pure-parse'
+import { parseBoolean } from 'pure-parse'
 
-export type Boolean = boolean
+export type BooleanContent = boolean
 
 // TODO default option
-export const booleanContent = () => withDefault(parseBoolean, false)
+export const booleanContent = () => parseBoolean

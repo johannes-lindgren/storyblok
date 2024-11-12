@@ -1,4 +1,4 @@
-import { Component } from '@johannes-lindgren/storyblok'
+import { Component, ComponentLibrary } from '@johannes-lindgren/storyblok'
 import {
   array,
   isUndefined,
@@ -76,13 +76,13 @@ export const postComponent = async (component: Component) => {
  * Pushes a local component library to the Storyblok space
  * @param components
  */
-export const pushComponents = async (components: Component[]) => {
+export const pushComponents = async (components: ComponentLibrary) => {
   const remoteComponents = await getComponents()
   const componentName2Id = new Map(
     remoteComponents.map((component) => [component.name, component.id]),
   )
 
-  const updateComponentTasks = components.map((component) => {
+  const updateComponentTasks = Object.values(components).map((component) => {
     const id = componentName2Id.get(component.name)
     if (!isUndefined(id)) {
       return () => putComponent(component, id)
