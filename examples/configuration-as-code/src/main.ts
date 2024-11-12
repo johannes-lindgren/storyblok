@@ -10,6 +10,7 @@ import {
   assetsField,
   ContentFromComponent,
   contentParserFromComponent,
+  componentLibrary,
 } from '@johannes-lindgren/storyblok'
 import { pushComponents } from './management-api'
 
@@ -57,21 +58,20 @@ const pageComponent = component({
 })
 
 /*
- * The component library
- * Will be serialized and uploaded to Storyblok
+ * Construct a component library
+ * This object will be serialized and pushed to Storyblok
  */
 
-const components = {
-  page: pageComponent,
-  hero: heroComponent,
-  gallery: galleryComponent,
-} as const
+const components = componentLibrary([
+  pageComponent,
+  heroComponent,
+  galleryComponent,
+])
 
 /*
  * ...or generate one
  */
 
-// TODO prevent infinite recursion
 const parsePageContent = contentParserFromComponent(pageComponent, components)
 
 type PageContent = ContentFromComponent<typeof pageComponent, typeof components>
@@ -99,5 +99,5 @@ const page: PageContent = {
   ],
 }
 
-await pushComponents(Object.values(components))
+await pushComponents(components)
 console.log('Done')

@@ -18,12 +18,13 @@ import {
   blockContent,
   BlockContentSchema,
 } from './content'
+import { ComponentLibrary } from './componentLibrary'
 
 type Values<T extends unknown[]> = T[number]
 
 export type ContentFromField<
   F extends Field,
-  Components extends Record<string, Component>,
+  Components extends ComponentLibrary,
 > = F extends BlocksField<infer ComponentNames>
   ? {
       [ComponentName in Values<ComponentNames>]: ContentFromComponent<
@@ -50,7 +51,7 @@ export type ContentFromField<
 
 export type ContentFromComponent<
   C extends Component,
-  Components extends Record<string, Component>,
+  Components extends ComponentLibrary,
 > = {
   [K in keyof C['schema']]: ContentFromField<C['schema'][K], Components>
 } & {
@@ -60,7 +61,7 @@ export type ContentFromComponent<
 
 const contentParserFromField = <
   F extends Field,
-  Components extends Record<string, Component>,
+  Components extends ComponentLibrary,
 >(
   field: F,
   components: Components,
@@ -109,7 +110,7 @@ const contentParserFromField = <
  */
 export const contentParserFromComponent = <
   C extends Component,
-  Components extends Record<string, Component>,
+  Components extends ComponentLibrary,
 >(
   component: C,
   components: Components,
@@ -126,8 +127,3 @@ export const contentParserFromComponent = <
       >,
     ),
   ) as Parser<ContentFromComponent<C, Components>>
-
-/**
- * Takes a complex type expression and simplifies it to a plain object. Useful when inferring types.
- */
-export type Simplify<T> = T extends infer _ ? { [K in keyof T]: T[K] } : never
