@@ -8,19 +8,18 @@ import {
   OptionsField,
 } from './component'
 import {
-  booleanContent,
-  textContent,
-  numberContent,
-  optionContent,
-  optionsContent,
   AssetContent,
   assetContent,
   blockContent,
   BlockContentSchema,
+  booleanContent,
+  numberContent,
+  optionContent,
+  optionsContent,
+  textContent,
 } from './content'
 import { ComponentLibrary } from './componentLibrary'
-
-type Values<T extends unknown[]> = T[number]
+import { Values } from './values'
 
 export type ContentFromField<
   F extends Field,
@@ -33,12 +32,12 @@ export type ContentFromField<
       >
     }[Values<ComponentNames>][]
   : F extends OptionField<infer Options>
-    ? keyof Options
+    ? keyof Options | undefined
     : F extends OptionsField<infer Options>
       ? (keyof Options)[]
       : {
           text: string
-          number: number
+          number: string
           boolean: boolean
           bloks: never
           asset: AssetContent | undefined
@@ -76,31 +75,42 @@ const contentParserFromField = <
         ContentFromField<F, Components>
       >
     case 'boolean':
-      return booleanContent() as Parser<ContentFromField<F, Components>>
+      return withDefault(booleanContent(), false) as Parser<
+        ContentFromField<F, Components>
+      >
     case 'text':
-      return textContent() as Parser<ContentFromField<F, Components>>
+      return withDefault(textContent(), '') as Parser<
+        ContentFromField<F, Components>
+      >
     case 'number':
-      return numberContent() as Parser<ContentFromField<F, Components>>
+      return withDefault(numberContent(), '0') as Parser<
+        ContentFromField<F, Components>
+      >
     case 'options':
-      return optionsContent(...Object.keys(field.options)) as Parser<
-        ContentFromField<F, Components>
-      >
+      return withDefault(
+        optionsContent(...Object.keys(field.options)),
+        [],
+      ) as Parser<ContentFromField<F, Components>>
     case 'option':
-      return optionContent(...Object.keys(field.options)) as Parser<
-        ContentFromField<F, Components>
-      >
+      return withDefault(
+        optionContent(...Object.keys(field.options)),
+        undefined,
+      ) as Parser<ContentFromField<F, Components>>
     case 'bloks':
       // TODO this can cause infinite recursion
-      return array(
-        oneOf(
-          ...Object.values(components)
-            .filter((component) =>
-              field.component_whitelist.includes(component.name),
-            )
-            .map((component) =>
-              contentParserFromComponent(component, components),
-            ),
+      return withDefault(
+        array(
+          oneOf(
+            ...Object.values(components)
+              .filter((component) =>
+                field.component_whitelist.includes(component.name),
+              )
+              .map((component) =>
+                contentParserFromComponent(component, components),
+              ),
+          ),
         ),
+        [],
       ) as Parser<ContentFromField<F, Components>>
   }
 }

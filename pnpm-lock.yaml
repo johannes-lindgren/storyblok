@@ -17,6 +17,9 @@ importers:
       '@johannes-lindgren/storyblok':
         specifier: workspace:*
         version: link:../../packages/storyblok
+      '@johannes-lindgren/storyblok-migrations':
+        specifier: workspace:*
+        version: link:../../packages/storyblok-migrations
       pure-parse:
         specifier: ^0.0.0-beta.6
         version: 0.0.0-beta.6
@@ -71,6 +74,9 @@ importers:
       '@johannes-lindgren/storyblok':
         specifier: workspace:*
         version: link:../../packages/storyblok
+      '@johannes-lindgren/storyblok-migrations':
+        specifier: workspace:*
+        version: link:../../packages/storyblok-migrations
     devDependencies:
       '@types/node':
         specifier: ^22.9.0
@@ -84,6 +90,58 @@ importers:
 
   packages/storyblok:
     dependencies:
+      pure-parse:
+        specifier: ^0.0.0-beta.6
+        version: 0.0.0-beta.6
+    devDependencies:
+      '@egjs/flicking-plugins':
+        specifier: ^4.7.1
+        version: 4.7.1(@egjs/flicking@4.11.4)
+      '@egjs/vue3-flicking':
+        specifier: ^4.11.4
+        version: 4.11.4(vue@3.5.12(typescript@5.6.3))
+      highlight.js:
+        specifier: ^11.10.0
+        version: 11.10.0
+      prettier:
+        specifier: 3.1.0
+        version: 3.1.0
+      sass-embedded:
+        specifier: ^1.79.4
+        version: 1.80.6
+      typedoc:
+        specifier: ^0.26.8
+        version: 0.26.11(typescript@5.6.3)
+      typedoc-plugin-markdown:
+        specifier: ^4.2.9
+        version: 4.2.10(typedoc@0.26.11(typescript@5.6.3))
+      typedoc-vitepress-theme:
+        specifier: ^1.0.2
+        version: 1.0.2(typedoc-plugin-markdown@4.2.10(typedoc@0.26.11(typescript@5.6.3)))
+      typescript:
+        specifier: ^5.5.4
+        version: 5.6.3
+      vite:
+        specifier: ^5.4.8
+        version: 5.4.10(@types/node@22.9.0)(sass-embedded@1.80.6)
+      vite-bundle-visualizer:
+        specifier: ^1.2.1
+        version: 1.2.1(rollup@4.24.4)
+      vite-plugin-dts:
+        specifier: ^4.2.3
+        version: 4.3.0(@types/node@22.9.0)(rollup@4.24.4)(typescript@5.6.3)(vite@5.4.10(@types/node@22.9.0)(sass-embedded@1.80.6))
+      vitepress:
+        specifier: ^1.4.0
+        version: 1.5.0(@algolia/client-search@5.13.0)(@types/node@22.9.0)(postcss@8.4.47)(sass-embedded@1.80.6)(search-insights@2.17.2)(typescript@5.6.3)
+      vitest:
+        specifier: 0.34.6
+        version: 0.34.6(sass-embedded@1.80.6)
+
+  packages/storyblok-migrations:
+    dependencies:
+      '@johannes-lindgren/storyblok':
+        specifier: workspace:*
+        version: link:../storyblok
       pure-parse:
         specifier: ^0.0.0-beta.6
         version: 0.0.0-beta.6

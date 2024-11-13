@@ -6,13 +6,8 @@ import {
   parseNumber,
   parseString,
 } from 'pure-parse'
-
-// TODO pass spaceId and mapiToken as arguments
-const spaceId = parseInt(process.env.STORYBLOK_SPACE_ID || '')
-const mapiToken = process.env.STORYBLOK_MANAGEMENT_API_TOKEN || ''
-
-// TODO: calculate the base URL based on the spaceId
-const baseUrl = 'https://mapi.storyblok.com'
+import { Credentials } from '../Credentials'
+import { baseUrl } from './baseUrl'
 
 export type RemoteComponent = {
   name: string
@@ -28,12 +23,15 @@ const parseComponentsResponse = object({
   components: array(parseRemoteComponent),
 })
 
-export const getComponents = async (): Promise<RemoteComponent[]> => {
+export const getComponents = async (
+  credentials: Credentials,
+): Promise<RemoteComponent[]> => {
+  const { spaceId, accessToken } = credentials
   const res = await fetch(`${baseUrl}/v1/spaces/${spaceId}/components`, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
-      Authorization: `${mapiToken}`,
+      Authorization: `${accessToken}`,
     },
   })
 
@@ -46,38 +44,57 @@ export const getComponents = async (): Promise<RemoteComponent[]> => {
   return result.value.components
 }
 
-export const putComponent = async (component: Component, id: number) => {
-  await fetch(`${baseUrl}/v1/spaces/${spaceId}/components/${id}`, {
+export const putComponent = async (
+  credentials: Credentials,
+  component: Component,
+  id: number,
+) => {
+  const { spaceId, accessToken } = credentials
+  const res = await fetch(`${baseUrl}/v1/spaces/${spaceId}/components/${id}`, {
     method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `${accessToken}`,
+    },
     body: JSON.stringify({
       component,
     }),
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `${mapiToken}`,
-    },
   })
+  if (!res.ok) {
+    throw new Error('Request failed')
+  }
 }
 
-export const postComponent = async (component: Component) => {
-  await fetch(`${baseUrl}/v1/spaces/${spaceId}/components`, {
+export const postComponent = async (
+  credentials: Credentials,
+  component: Component,
+) => {
+  const { spaceId, accessToken } = credentials
+  const res = await fetch(`${baseUrl}/v1/spaces/${spaceId}/components`, {
     method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `${accessToken}`,
+    },
     body: JSON.stringify({
       component,
     }),
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `${mapiToken}`,
-    },
   })
+  if (!res.ok) {
+    throw new Error('Request failed')
+  }
 }
 
 /**
  * Pushes a local component library to the Storyblok space
+ * @param credentials
  * @param components
  */
-export const pushComponents = async (components: ComponentLibrary) => {
-  const remoteComponents = await getComponents()
+export const pushComponents = async (
+  credentials: Credentials,
+  components: ComponentLibrary,
+) => {
+  const remoteComponents = await getComponents(credentials)
   const componentName2Id = new Map(
     remoteComponents.map((component) => [component.name, component.id]),
   )
@@ -85,9 +102,9 @@ export const pushComponents = async (components: ComponentLibrary) => {
   const updateComponentTasks = Object.values(components).map((component) => {
     const id = componentName2Id.get(component.name)
     if (!isUndefined(id)) {
-      return () => putComponent(component, id)
+      return () => putComponent(credentials, component, id)
     } else {
-      return () => postComponent(component)
+      return () => postComponent(credentials, component)
     }
   })
 

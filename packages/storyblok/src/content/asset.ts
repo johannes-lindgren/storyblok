@@ -18,10 +18,14 @@ export type AssetContent = {
   title: string | undefined
   alt: string | undefined
   copyright: string | undefined
-  focus: [number, number] | undefined
+  focus: string | undefined
 }
 
-const parseFocus: Parser<[number, number]> = (data) => {
+/**
+ * Parses the focus property of an asset into a `[number, number]` coordinate
+ * @param data
+ */
+export const parseFocus: Parser<[number, number]> = (data) => {
   if (!isString(data)) {
     return failure('Expected string')
   }
@@ -42,5 +46,5 @@ export const assetContent = () =>
     title: undefineable(parseString),
     alt: undefineable(parseString),
     copyright: undefineable(parseString),
-    focus: undefineable(parseFocus),
+    focus: undefineable(parseString),
   })

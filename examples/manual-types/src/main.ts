@@ -12,6 +12,7 @@ import {
   storyLinkContent,
   StoryLinkContent,
 } from '@johannes-lindgren/storyblok'
+import { numberContentAsNumber } from '@johannes-lindgren/storyblok/src'
 
 type PageContent = BlockContent<{
   component: 'page'
@@ -41,7 +42,7 @@ const parseHeroContent = blockContent<HeroContent>({
 
 const parseGridContent = blockContent<GridContent>({
   component: literal('grid'),
-  columns: withDefault(numberContent(), 3),
+  columns: withDefault(numberContentAsNumber(), 3),
 })
 
 const parsePageContent = blockContent<PageContent>({

@@ -7,10 +7,12 @@
   "description": "",
   "type": "module",
   "scripts": {
-    "start": "tsx --env-file=.env.local ./src/main.ts"
+    "start:0": "tsx --env-file=.env.local ./src/migrations/0-init-demo-space.ts",
+    "start:1": "tsx --env-file=.env.local ./src/migrations/1-migrate.ts"
   },
   "dependencies": {
-    "@johannes-lindgren/storyblok": "workspace:*"
+    "@johannes-lindgren/storyblok": "workspace:*",
+    "@johannes-lindgren/storyblok-migrations": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^22.9.0",
