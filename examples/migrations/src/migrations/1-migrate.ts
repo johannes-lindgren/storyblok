@@ -1,6 +1,7 @@
 import { createMigration } from '@johannes-lindgren/storyblok-migrations'
 import { credentialsFromEnvironment } from '../credentialsFromEnvironment'
-import { componentsV1, componentsV2 } from '../lib/main'
+import { componentsV1 } from '../component-library/v1'
+import { componentsV2 } from '../component-library/v2'
 
 const migrate = createMigration({
   credentials: credentialsFromEnvironment(),

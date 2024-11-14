@@ -7,6 +7,7 @@ import {
   pushComponents,
 } from '@johannes-lindgren/storyblok-migrations'
 import { ComponentLibrary } from '@johannes-lindgren/storyblok'
+import { ContentStory } from '@johannes-lindgren/storyblok-migrations'
 
 /**
  * Prepare a space with initial content to demo migrations.
@@ -17,17 +18,17 @@ import { ComponentLibrary } from '@johannes-lindgren/storyblok'
 export const prepareMigrationsDemoSpace = async (
   credentials: Credentials,
   initialComponents: ComponentLibrary,
-  initialStories: Omit<Story, 'id' | 'uuid'>[],
+  initialStories: Omit<ContentStory, 'id' | 'uuid'>[],
 ) => {
   console.log('Starting preparing space...')
-
-  console.log('Starting pushing initial components...')
-  await pushComponents(credentials, initialComponents)
-  console.log('Finished pushing initial components.')
 
   console.log('Deleting all stories...')
   await deleteAllStories(credentials)
   console.log('Finished deleting all stories.')
+
+  console.log('Starting pushing initial components...')
+  await pushComponents(credentials, initialComponents)
+  console.log('Finished pushing initial components.')
 
   console.log('Starting pushing initial content...')
   await pushContent(credentials, initialStories)

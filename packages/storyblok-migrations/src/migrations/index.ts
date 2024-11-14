@@ -1,7 +1,6 @@
 import {
   ComponentLibrary,
   ContentFromLibrary,
-  contentParserFromComponent,
   contentParserFromLibrary,
 } from '@johannes-lindgren/storyblok'
 import { Credentials } from '../Credentials'
