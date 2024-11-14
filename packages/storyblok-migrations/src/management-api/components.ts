@@ -19,6 +19,10 @@ const parseRemoteComponent = object<RemoteComponent>({
   id: parseNumber,
 })
 
+const parseComponentResponse = object({
+  component: parseRemoteComponent,
+})
+
 const parseComponentsResponse = object({
   components: array(parseRemoteComponent),
 })
@@ -38,10 +42,34 @@ export const getComponents = async (
   const result = parseComponentsResponse(await res.json())
 
   if (result.tag === 'failure') {
+    console.error(res)
     throw new Error('Failed to fetch components')
   }
 
   return result.value.components
+}
+
+export const getComponent = async (
+  credentials: Credentials,
+  id: RemoteComponent['id'],
+): Promise<RemoteComponent> => {
+  const { spaceId, accessToken } = credentials
+  const res = await fetch(`${baseUrl}/v1/spaces/${spaceId}/components/${id}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `${accessToken}`,
+    },
+  })
+
+  const result = parseComponentResponse(await res.json())
+
+  if (result.tag === 'failure') {
+    console.error(res)
+    throw new Error('Failed to fetch components')
+  }
+
+  return result.value.component
 }
 
 export const putComponent = async (
@@ -61,6 +89,7 @@ export const putComponent = async (
     }),
   })
   if (!res.ok) {
+    console.error(res)
     throw new Error('Request failed')
   }
 }
@@ -81,6 +110,26 @@ export const postComponent = async (
     }),
   })
   if (!res.ok) {
+    console.error(res)
+    throw new Error('Request failed')
+  }
+}
+
+export const deleteComponent = async (
+  credentials: Credentials,
+  id: RemoteComponent['id'],
+) => {
+  console.log('deleteComponent', id)
+  const { spaceId, accessToken } = credentials
+  const res = await fetch(`${baseUrl}/v1/spaces/${spaceId}/components/${id}`, {
+    method: 'DELETE',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `${accessToken}`,
+    },
+  })
+  if (!res.ok) {
+    console.error(res)
     throw new Error('Request failed')
   }
 }

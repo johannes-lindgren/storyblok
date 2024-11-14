@@ -77,6 +77,8 @@ export type Schema = BlockSchema
 export type Component = {
   name: string
   schema: Schema
+  is_root: true
+  is_nestable: true
 }
 
 export const assetField = (
@@ -129,5 +131,15 @@ export const blocksField = <const ComponentNames extends string[]>(options: {
   component_whitelist: options.allowedComponents,
 })
 
-export const component = <const T extends Component>(component: T): T =>
-  component
+export const component = <
+  const T extends Omit<Component, 'is_root' | 'is_nestable'>,
+>(
+  component: T,
+): T & {
+  is_root: true
+  is_nestable: true
+} => ({
+  ...component,
+  is_root: true,
+  is_nestable: true,
+})

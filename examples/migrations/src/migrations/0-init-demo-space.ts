@@ -10,7 +10,7 @@ const initialStories: Omit<ContentStory, 'id' | 'uuid'>[] = [
     slug: 'a-new-story',
     content: {
       _uid: 'abc-123',
-      component: 'page',
+      component: 'page@1',
       title: 'A New Blog',
       padding: (10).toString(),
       isPublic: true,

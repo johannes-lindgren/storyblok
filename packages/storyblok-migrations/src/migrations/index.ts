@@ -2,6 +2,8 @@ import {
   ComponentLibrary,
   ContentFromLibrary,
   contentParserFromLibrary,
+  componentLibrary,
+  Component,
 } from '@johannes-lindgren/storyblok'
 import { Credentials } from '../Credentials'
 import {
@@ -10,6 +12,9 @@ import {
   getStory,
   putStory,
   pushComponents,
+  getComponents,
+  RemoteComponent,
+  putSpace,
 } from '../management-api'
 
 export type MigrationConfig<
@@ -60,5 +65,13 @@ export const forEachStory = async (
   callback: (story: StoriesStory) => Promise<void>,
 ) => {
   const stories = await getStories(credentials)
+  await Promise.all(stories.map(callback))
+}
+
+export const forEachComponent = async (
+  credentials: Credentials,
+  callback: (story: RemoteComponent) => Promise<void>,
+) => {
+  const stories = await getComponents(credentials)
   await Promise.all(stories.map(callback))
 }

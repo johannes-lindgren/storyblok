@@ -109,7 +109,6 @@ export const getStory = async (
   storyId: number,
 ): Promise<Story> => {
   const { spaceId, accessToken } = params
-  // TODO pagination, throttling
   const res = await fetch(
     `${baseUrl}/v1/spaces/${spaceId}/stories/${storyId}`,
     {
@@ -135,7 +134,6 @@ export const postStory = async (
   story: Omit<Story, 'id' | 'uuid'>,
 ): Promise<void> => {
   const { spaceId, accessToken } = params
-  // TODO pagination, throttling
   const res = await fetch(`${baseUrl}/v1/spaces/${spaceId}/stories`, {
     method: 'POST',
     headers: {
@@ -156,7 +154,6 @@ export const putStory = async (
   storyId: number,
 ): Promise<void> => {
   const { spaceId, accessToken } = params
-  // TODO pagination, throttling
   const res = await fetch(
     `${baseUrl}/v1/spaces/${spaceId}/stories/${storyId}`,
     {
@@ -176,22 +173,25 @@ export const putStory = async (
 
 export const deleteStory = async (
   params: Credentials,
-  storyId: number,
+  id: Story['id'],
 ): Promise<void> => {
   const { spaceId, accessToken } = params
-  // TODO pagination, throttling
-  const res = await fetch(
-    `${baseUrl}/v1/spaces/${spaceId}/stories/${storyId}`,
-    {
-      method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `${accessToken}`,
-      },
+  const res = await fetch(`${baseUrl}/v1/spaces/${spaceId}/stories/${id}`, {
+    method: 'DELETE',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `${accessToken}`,
     },
-  )
+  })
   if (!res.ok) {
     console.error(res)
     throw new Error('Request failed')
   }
+}
+
+export const pushStories = async (
+  credentials: Credentials,
+  stories: Omit<Story, 'id' | 'uuid'>[],
+) => {
+  await Promise.all(stories.map((story) => postStory(credentials, story)))
 }

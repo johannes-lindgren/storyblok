@@ -12,6 +12,7 @@ const migrate = createMigration({
 await migrate((oldStory) => {
   return {
     ...oldStory,
+    component: 'page@2',
     padding: `${oldStory.padding}px`,
   }
 })

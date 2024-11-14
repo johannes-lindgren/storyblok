@@ -11,7 +11,7 @@ import {
 
 export const componentsV1 = componentLibrary([
   component({
-    name: 'page',
+    name: 'page@1',
     schema: {
       title: textField(),
       isPublic: booleanField(),
@@ -25,11 +25,11 @@ export const componentsV1 = componentLibrary([
  * You can define the parser yourself...
  */
 export type PageContentV1 = ContentFromComponent<
-  typeof componentsV1.page,
+  (typeof componentsV1)['page@1'],
   typeof componentsV1
 >
 
 export const parsePageContentV1 = contentParserFromComponent(
-  componentsV1.page,
+  componentsV1['page@1'],
   componentsV1,
 )
