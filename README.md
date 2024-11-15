@@ -1,4 +1,4 @@
-# storyblok-content
+# `@johannes-lindgren` Storyblok POCs
 
 Proof of concepts for Storyblok libraries:
 
@@ -42,12 +42,24 @@ Magic!
 
 Directory: `examples/migrations`
 
-Over time, your component library might evolve. By defining components in code, you can easily retain the entire version history. The challenge is to migrate the content, once the components have been updated.
+Over time, your component library might evolve. By defining components in code, you can easily retain the entire version history. But once the components have been updated, the challenge becomes to migrate your components.
 
 The migration example demonstrates how you can migrate content from one version to another by making use of the parsers from the previous examples.
 
-#### Questions:
+There are two scripts:
 
-This example is more work-in-progress than the others. This one has not been proven to work yet. Considering the way Storyblok models content, it might prove to be unfeasible to get right.
+- `start:0` initializes your space with some example content and an initial state of your component library.
+- `start:1` updates the component library by changing a number field (of pixel values) to a string field (to a style length attribute value).
 
-- When you perform the migration, the user needs to be dealing with a data format that allows the migration library to write the data back in a loss-free manner. For example, when you migrate a number field, you cannot be dealing with a number—it may be more convenient to do so when rendering the content, but conversions between binary and decimal formats are lossy.
+Initially, you start out with one component and one story:
+
+![img_1.png](docs/img_component_v1.png)
+![img.png](docs/img_story_v1.png)
+
+After migration (`start:1`), you get a new component that represents an updated version:
+
+![img.png](docs/img_component_v2.png)
+
+And the content is migrated:
+
+![img.png](docs/img_story_v2.png)
