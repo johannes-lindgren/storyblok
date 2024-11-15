@@ -26,6 +26,10 @@ export type MigrationConfig<
   credentials: Credentials
 }
 
+/**
+ * Use this migration when you update a component, and you want to migrate all content on a per-story basis.
+ * @param config
+ */
 export const createMigration =
   <OldLibrary extends ComponentLibrary, NewLibrary extends ComponentLibrary>(
     config: MigrationConfig<OldLibrary, NewLibrary>,
@@ -49,7 +53,14 @@ export const createMigration =
         return
       }
       const storyWithContent = await getStory(credentials, storyV1.id)
+      if (storyWithContent.is_folder) {
+        // Should not happen, but needed for type inference
+        return
+      }
       const contentV1 = parseContentV1(storyWithContent.content)
+      if (contentV1.tag === 'failure') {
+        return
+      }
       const contentV2 = migrateStory(contentV1.value)
       const storyV2 = {
         ...storyV1,
