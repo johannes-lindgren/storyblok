@@ -23,7 +23,7 @@ Finally, with the help of [PureParse](https://www.npmjs.com/package/pure-parse),
 
 #### Questions
 
-- Should it handle field-level translations? In case we don not want the Delivery API to do so for us.
+- Should it handle field-level translations? In case we do not want the Delivery API to do so for us.
 - Should it resolve references? In case we do not want this to be handled by a separate tool.
 
 ### Configuration as Code
