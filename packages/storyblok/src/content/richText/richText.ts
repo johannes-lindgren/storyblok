@@ -47,13 +47,13 @@ export const parseParagraphNode = object<ParagraphNode>({
   content: array(parseRichTextContent),
 })
 
-export type TextContent = {
+export type TextNode = {
   type: 'text'
   text: string
   marks: Mark[]
 }
 
-export const parseTextContent = object<TextContent>({
+export const parseTextNode = object<TextNode>({
   type: literal('text'),
   text: parseString,
   marks: array(parseMark),
