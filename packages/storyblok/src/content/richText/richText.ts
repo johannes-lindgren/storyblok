@@ -1,6 +1,27 @@
-import { array, literal, object, Parser } from 'pure-parse'
+import {
+  array,
+  literal,
+  object,
+  Parser,
+  ParseResult,
+  parseString,
+} from 'pure-parse'
 import { BlockContent } from '../block'
 import { AssetContent } from '../asset'
+import { Mark, parseMark } from './marks'
+
+// TODO: Add more node types
+export type RichTextContent = DocNode
+
+// TODO options as a parameter
+export function parseRichTextContent(
+  data: unknown,
+): ParseResult<RichTextContent> {
+  return parseDocNode(data)
+}
+
+export const richTextContent = (): Parser<RichTextContent> =>
+  parseRichTextContent
 
 /*
  * Nodes
@@ -11,10 +32,20 @@ export type DocNode = {
   content: RichTextContent[]
 }
 
+export const parseDocNode = object<RichTextContent>({
+  type: literal('doc'),
+  content: array(parseRichTextContent),
+})
+
 export type ParagraphNode = {
   type: 'paragraph'
   content: RichTextContent[]
 }
+
+export const parseParagraphNode = object<ParagraphNode>({
+  type: literal('paragraph'),
+  content: array(parseRichTextContent),
+})
 
 export type TextContent = {
   type: 'text'
@@ -22,29 +53,59 @@ export type TextContent = {
   marks: Mark[]
 }
 
+export const parseTextContent = object<TextContent>({
+  type: literal('text'),
+  text: parseString,
+  marks: array(parseMark),
+})
+
 export type HorizontalRuleNode = {
   type: 'horizontal_rule'
 }
+
+export const parseHorizontalRuleNode = object<HorizontalRuleNode>({
+  type: literal('horizontal_rule'),
+})
 
 export type BlockQuoteNode = {
   type: 'blockquote'
   content: RichTextContent[]
 }
 
+export const parseBlockQuoteNode = object<BlockQuoteNode>({
+  type: literal('blockquote'),
+  content: array(parseRichTextContent),
+})
+
+export type ListItemNode = {
+  type: 'list_item'
+  content: RichTextContent[]
+}
+
+export const parseListItemNode = object<ListItemNode>({
+  type: literal('list_item'),
+  content: array(parseRichTextContent),
+})
+
 export type BulletListNode = {
   type: 'bullet_list'
   content: ListItemNode[]
 }
+
+export const parseBulletListNode = object<BulletListNode>({
+  type: literal('bullet_list'),
+  content: array(parseListItemNode),
+})
 
 export type OrderedListNode = {
   type: 'ordered_list'
   content: ListItemNode[]
 }
 
-export type ListItemNode = {
-  type: 'list_item'
-  content: RichTextContent[]
-}
+export const parseOrderedListNode = object<OrderedListNode>({
+  type: literal('ordered_list'),
+  content: array(parseListItemNode),
+})
 
 export type HeadingNode = {
   type: 'heading'
@@ -73,87 +134,3 @@ export type ImageNode = {
   type: 'image'
   attrs: AssetContent
 }
-
-/*
- * Marks
- */
-
-export type ItalicMark = {
-  type: 'italic'
-}
-
-export type BoldMark = {
-  type: 'bold'
-}
-
-export type UnderlineMark = {
-  type: 'underline'
-}
-
-export type StrikethroughMark = {
-  type: 'strike'
-}
-
-export type SuperScriptMark = {
-  type: 'superscript'
-}
-
-export type SubScriptMark = {
-  type: 'subscript'
-}
-
-export type CodeMark = {
-  type: 'code'
-}
-
-export type LinkMark = {
-  type: 'link'
-  attrs: LinkAttrs
-}
-
-export type UrlLinkAttrs = {
-  linktype: 'url'
-  href: string
-}
-
-export type StoryLinkAttrs = {
-  linktype: 'story'
-  href: string
-  uuid: string
-}
-
-export type EmailLinkAttrs = {
-  linktype: 'email'
-  href: string
-}
-
-export type AssetLinkAttrs = {
-  linktype: 'asset'
-  href: string
-}
-
-export type LinkAttrs =
-  | UrlLinkAttrs
-  | StoryLinkAttrs
-  | EmailLinkAttrs
-  | AssetLinkAttrs
-
-export type Mark =
-  | ItalicMark
-  | BoldMark
-  | UnderlineMark
-  | StrikethroughMark
-  | SuperScriptMark
-  | SubScriptMark
-  | CodeMark
-  | LinkMark
-
-// TODO: Add more node types
-export type RichTextContent = DocNode
-
-// TODO options as a parameter
-export const richTextContent = (): Parser<RichTextContent> =>
-  object<RichTextContent>({
-    type: literal('doc'),
-    content: array(richTextContent()),
-  })
