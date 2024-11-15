@@ -1,18 +1,19 @@
 import {
-  booleanField,
-  component,
-  numberField,
-  textField,
-  blocksField,
-  optionField,
-  optionsField,
   assetField,
   assetsField,
+  blocksField,
+  booleanField,
+  component,
+  componentLibrary,
   ContentFromComponent,
   contentParserFromComponent,
-  componentLibrary,
+  numberField,
+  optionField,
+  optionsField,
+  textField,
 } from '@johannes-lindgren/storyblok'
-import { pushComponents } from './management-api'
+import { pushComponents } from '@johannes-lindgren/storyblok-migrations'
+import { credentialsFromEnvironment } from './credentialsFromEnvironment'
 
 const heroComponent = component({
   name: 'hero',
@@ -79,7 +80,7 @@ const page: PageContent = {
   _uid: '123',
   component: 'page',
   title: 'Hello, World!',
-  padding: 10,
+  padding: (10).toString(),
   isPublic: true,
   body: [
     {
@@ -93,11 +94,12 @@ const page: PageContent = {
     {
       _uid: 'aadfsd',
       component: 'gallery',
-      columnCount: 3,
+      columnCount: (3).toString(),
       images: [],
     },
   ],
 }
 
-await pushComponents(components)
+const credentials = credentialsFromEnvironment()
+await pushComponents(credentials, components)
 console.log('Done')
