@@ -1,18 +1,18 @@
 {
-  "name": "components-as-code",
+  "name": "astro-app-migrations",
   "version": "1.0.0",
-  "main": "src/index.ts",
+  "main": "index.js",
   "author": "",
   "license": "MIT",
   "description": "",
   "type": "module",
   "scripts": {
-    "start": "tsx --env-file=.env.local ./src/main.ts"
+    "start:0": "tsx --env-file=.env.local ./src/migrations/0.ts"
   },
   "dependencies": {
     "@johannes-lindgren/storyblok": "workspace:*",
     "@johannes-lindgren/storyblok-migrations": "workspace:*",
-    "pure-parse": "^0.0.0-beta.6"
+    "astro-app-components": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^22.9.0",

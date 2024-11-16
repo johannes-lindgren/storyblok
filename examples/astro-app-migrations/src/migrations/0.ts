@@ -1,7 +1,8 @@
 import { prepareSpace } from '../prepare'
 import { credentialsFromEnvironment } from '../credentialsFromEnvironment'
-import { componentsV1, PageContentV1 } from '../component-library/v1'
 import { ContentStory } from '@johannes-lindgren/storyblok-migrations'
+import { components } from 'astro-app-components'
+import { ContentFromLibrary } from '@johannes-lindgren/storyblok'
 
 const initialStories: Omit<ContentStory, 'id' | 'uuid'>[] = [
   {
@@ -10,15 +11,13 @@ const initialStories: Omit<ContentStory, 'id' | 'uuid'>[] = [
     slug: 'a-new-story',
     content: {
       _uid: 'abc-123',
-      component: 'page@1',
+      component: 'article',
       title: 'A New Blog',
-      padding: (10).toString(),
-      isPublic: true,
-      body: [],
-    } satisfies PageContentV1,
+      body: { type: 'doc', content: [] },
+    } satisfies ContentFromLibrary<typeof components>,
     parent_id: 0,
     is_startpage: false,
   },
 ]
 
-await prepareSpace(credentialsFromEnvironment(), componentsV1, initialStories)
+await prepareSpace(credentialsFromEnvironment(), components, initialStories)

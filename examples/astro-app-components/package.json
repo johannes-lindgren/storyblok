@@ -1,5 +1,5 @@
 {
-  "name": "components-as-code",
+  "name": "astro-app-components",
   "version": "1.0.0",
   "main": "src/index.ts",
   "author": "",
@@ -11,7 +11,6 @@
   },
   "dependencies": {
     "@johannes-lindgren/storyblok": "workspace:*",
-    "@johannes-lindgren/storyblok-migrations": "workspace:*",
     "pure-parse": "^0.0.0-beta.6"
   },
   "devDependencies": {

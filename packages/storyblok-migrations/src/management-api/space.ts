@@ -1,10 +1,20 @@
 import { Credentials } from '../Credentials'
 import { baseUrl } from './baseUrl'
 
+export type PreviewLocation = {
+  name: string
+  location: string
+}
+
 export type Space = {
   id: number
   name: string
   default_root: string
+  // The default preview
+  domain: string
+  // Non-default previews
+  environments: PreviewLocation[]
+  encode_preview_urls: true
 }
 
 export const putSpace = async (

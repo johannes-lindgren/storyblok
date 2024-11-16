@@ -16,6 +16,8 @@ import {
   numberContent,
   optionContent,
   optionsContent,
+  RichTextContent,
+  richTextContent,
   textContent,
 } from './content'
 import { ComponentLibrary } from './componentLibrary'
@@ -42,6 +44,7 @@ export type ContentFromField<
           bloks: never
           asset: AssetContent | undefined
           multiasset: AssetContent[]
+          richtext: RichTextContent
           // Handled in the other branch of the ternary; story references
           option: never
           options: never
@@ -96,6 +99,11 @@ const contentParserFromField = <
         optionContent(...Object.keys(field.options)),
         undefined,
       ) as Parser<ContentFromField<F, Components>>
+    case 'richtext':
+      return withDefault(richTextContent(), {
+        type: 'doc',
+        content: [],
+      }) as Parser<ContentFromField<F, Components>>
     case 'bloks':
       // TODO this can cause infinite recursion
       return withDefault(

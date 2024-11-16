@@ -13,6 +13,7 @@ import {
   ContentStory,
   getComponent,
   getComponents,
+  PreviewLocation,
 } from '@johannes-lindgren/storyblok-migrations'
 import {
   ComponentLibrary,
@@ -53,6 +54,15 @@ export const prepareSpace = async (
   await pushStories(credentials, initialStories)
   console.log('Finished pushing initial content.')
 
+  console.log('Creating previews...')
+  await initPreviews(credentials, [
+    {
+      name: 'Dev',
+      location: 'http://localhost:4321',
+    },
+  ])
+  console.log('Finished creating previews.')
+
   console.log('Finished preparing.')
 }
 
@@ -78,6 +88,36 @@ const initDefaultComponent = async (
     credentials.spaceId,
   )
   return defaultComponentName
+}
+
+/**
+ * Ensure that the passed location is https and ends with a trailing slash
+ * @param location
+ */
+const parseLocation = (location: string): string => {
+  const url = new URL(location)
+  url.protocol = 'https:'
+  console.log('in', location)
+  console.log('out', url.toString())
+  return url.toString()
+}
+
+const initPreviews = async (
+  credentials: Credentials,
+  previews: [PreviewLocation, ...PreviewLocation[]],
+): Promise<void> => {
+  await putSpace(
+    credentials,
+    {
+      domain: parseLocation(previews[0].location),
+      encode_preview_urls: true,
+      environments: previews.map((preview) => ({
+        ...preview,
+        location: parseLocation(preview.location),
+      })),
+    },
+    credentials.spaceId,
+  )
 }
 
 const deleteAllStories = async (credentials: Credentials) => {

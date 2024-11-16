@@ -69,6 +69,7 @@ export type Field =
   | BlocksField
   | OptionField
   | OptionsField
+  | RichTextField
 
 export type BlockSchema = Record<string, Field>
 
@@ -105,6 +106,10 @@ export const numberField = (): NumberField => ({
 
 export const booleanField = (): BooleanField => ({
   type: 'boolean',
+})
+
+export const richTextField = (): RichTextField => ({
+  type: 'richtext',
 })
 
 export const optionField = <Options extends Record<string, string>>(options: {
