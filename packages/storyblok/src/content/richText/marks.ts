@@ -1,4 +1,4 @@
-import { literal, object, oneOf } from 'pure-parse'
+import { literal, object, oneOf, parseString } from 'pure-parse'
 
 export type ItalicMark = {
   type: 'italic'
@@ -63,7 +63,7 @@ export type UrlLinkAttrs = {
 
 export const parseUrlLinkAttrs = object<UrlLinkAttrs>({
   linktype: literal('url'),
-  href: literal('string'),
+  href: parseString,
 })
 
 export type StoryLinkAttrs = {
@@ -74,8 +74,8 @@ export type StoryLinkAttrs = {
 
 export const parseStoryLinkAttrs = object<StoryLinkAttrs>({
   linktype: literal('story'),
-  href: literal('string'),
-  uuid: literal('string'),
+  href: parseString,
+  uuid: parseString,
 })
 
 export type EmailLinkAttrs = {
@@ -85,7 +85,7 @@ export type EmailLinkAttrs = {
 
 export const parseEmailLinkAttrs = object<EmailLinkAttrs>({
   linktype: literal('email'),
-  href: literal('string'),
+  href: parseString,
 })
 
 export type AssetLinkAttrs = {
@@ -95,7 +95,7 @@ export type AssetLinkAttrs = {
 
 export const parseAssetLinkAttrs = object<AssetLinkAttrs>({
   linktype: literal('asset'),
-  href: literal('string'),
+  href: parseString,
 })
 
 export type LinkAttrs =
@@ -121,6 +121,60 @@ export const parseLinkMark = object<LinkMark>({
   attrs: parseLinkAttrs,
 })
 
+export type TextStyleAttrs = {
+  color: string
+}
+
+export const parseTextStyleAttrs = object<TextStyleAttrs>({
+  color: parseString,
+})
+
+export type TextStyleMark = {
+  type: 'textStyle'
+  attrs: TextStyleAttrs
+}
+
+export const parseTextStyleMark = object<TextStyleMark>({
+  type: literal('textStyle'),
+  attrs: parseTextStyleAttrs,
+})
+
+export type HighlightAttrs = {
+  color: string
+}
+
+export const parseHighlightAttrs = object<HighlightAttrs>({
+  color: parseString,
+})
+
+export type HighlightMark = {
+  type: 'highlight'
+  attrs: HighlightAttrs
+}
+
+export const parseHighlightMark = object<HighlightMark>({
+  type: literal('highlight'),
+  attrs: parseHighlightAttrs,
+})
+
+export type StyledAttrs = {
+  class: string
+}
+
+export const parseStyledAttrs = object<StyledAttrs>({
+  class: parseString,
+})
+
+export type StyledMark = {
+  type: 'styled'
+  attrs: StyledAttrs
+}
+
+export const parseStyledMark = object<StyledMark>({
+  type: literal('styled'),
+  attrs: parseStyledAttrs,
+})
+
 export type Mark =
   | ItalicMark
   | BoldMark
@@ -130,6 +184,9 @@ export type Mark =
   | SubScriptMark
   | CodeMark
   | LinkMark
+  | TextStyleMark
+  | HighlightMark
+  | StyledMark
 
 export const parseMark = oneOf(
   parseItalicMark,
@@ -140,4 +197,7 @@ export const parseMark = oneOf(
   parseSubScriptMark,
   parseCodeMark,
   parseLinkMark,
+  parseTextStyleMark,
+  parseHighlightMark,
+  parseStyledMark,
 )

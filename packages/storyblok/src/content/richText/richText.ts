@@ -8,10 +8,10 @@ import {
   Parser,
   ParseResult,
   parseString,
+  parseUnknown,
   withDefault,
 } from 'pure-parse'
 import { BlockContent } from '../block'
-import { assetContent, AssetContent } from '../asset'
 import { Mark, parseMark } from './marks'
 
 export type RichTextContent =
@@ -163,23 +163,16 @@ export type BlockNode = {
   attrs: {
     // Actually a UUID
     id: string
-    body: BlockContent[]
+    body: unknown[]
   }
-  content: RichTextContent[]
 }
 
 export const parseBlockNode = object<BlockNode>({
   type: literal('blok'),
   attrs: object({
     id: parseString,
-    body: array(
-      object({
-        _uid: parseString,
-        component: parseString,
-      }),
-    ),
+    body: array(parseUnknown),
   }),
-  content: array(parseRichTextContent),
 })
 
 export type CodeBlockNode = {

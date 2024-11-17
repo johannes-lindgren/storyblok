@@ -89,15 +89,15 @@ const contentParserFromField = <
       return withDefault(numberContent(), '0') as Parser<
         ContentFromField<F, Components>
       >
-    case 'options':
-      return withDefault(
-        optionsContent(...Object.keys(field.options)),
-        [],
-      ) as Parser<ContentFromField<F, Components>>
     case 'option':
       return withDefault(
-        optionContent(...Object.keys(field.options)),
+        optionContent(...field.options.map((option) => option.value)),
         undefined,
+      ) as Parser<ContentFromField<F, Components>>
+    case 'options':
+      return withDefault(
+        optionsContent(...field.options.map((option) => option.value)),
+        [],
       ) as Parser<ContentFromField<F, Components>>
     case 'richtext':
       return withDefault(richTextContent(), {

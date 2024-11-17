@@ -24,6 +24,7 @@ export type TextAreaField = {
 
 export type RichTextField = {
   type: 'richtext'
+  style_options: OptionRecordToArray<Record<string, string>>
 }
 
 export type NumberField = {
@@ -34,12 +35,19 @@ export type BooleanField = {
   type: 'boolean'
 }
 
+type OptionRecordToArray<Options extends Record<string, any>> = {
+  [K in keyof Options]: {
+    name: Options[K]
+    value: K
+  }
+}[keyof Options][]
+
 export type OptionField<
   Options extends Record<string, string> = Record<string, string>,
 > = {
   type: 'option'
   source: 'self'
-  options: Options
+  options: OptionRecordToArray<Options>
 }
 
 export type ReferenceField = {
@@ -52,7 +60,7 @@ export type OptionsField<
 > = {
   type: 'options'
   source: 'self'
-  options: Options
+  options: OptionRecordToArray<Options>
 }
 
 export type ReferencesField = {
@@ -108,16 +116,29 @@ export const booleanField = (): BooleanField => ({
   type: 'boolean',
 })
 
-export const richTextField = (): RichTextField => ({
+export type RichTextOptions = {
+  styledOptions: Record<string, string>
+}
+
+export const richTextField = (options?: RichTextOptions): RichTextField => ({
   type: 'richtext',
+  style_options: optionRecordToArray(options?.styledOptions ?? {}),
 })
+
+const optionRecordToArray = <Options extends Record<string, string>>(
+  options: Options,
+): OptionRecordToArray<Options> =>
+  Object.entries(options).map(([key, value]) => ({
+    name: value,
+    value: key,
+  })) as OptionRecordToArray<Options>
 
 export const optionField = <Options extends Record<string, string>>(options: {
   options: Options
 }): OptionField<Options> => ({
   type: 'option',
   source: 'self',
-  options: options.options,
+  options: optionRecordToArray(options.options),
 })
 
 export const optionsField = <Options extends Record<string, string>>(options: {
@@ -125,7 +146,7 @@ export const optionsField = <Options extends Record<string, string>>(options: {
 }): OptionsField<Options> => ({
   type: 'options',
   source: 'self',
-  options: options.options,
+  options: optionRecordToArray(options.options),
 })
 
 export const blocksField = <const ComponentNames extends string[]>(options: {

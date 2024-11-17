@@ -1,26 +1,40 @@
 import {
-  assetField,
-  assetsField,
-  blocksField,
-  booleanField,
   component,
   componentLibrary,
-  ContentFromComponent,
-  contentParserFromComponent,
-  numberField,
   optionField,
-  optionsField,
   textField,
   richTextField,
   contentParserFromLibrary,
   ContentFromLibrary,
+  RichTextOptions,
 } from '@johannes-lindgren/storyblok'
+
+const richTextOptions: RichTextOptions = {
+  styledOptions: {
+    gradient: 'Gradient',
+  },
+}
 
 const articleComponent = component({
   name: 'article',
   schema: {
     title: textField(),
-    body: richTextField(),
+    body: richTextField(richTextOptions),
+  },
+})
+
+const admonitionComponent = component({
+  name: 'admonition',
+  schema: {
+    type: optionField({
+      options: {
+        info: 'Info',
+        tip: 'Tip',
+        warning: 'Warning',
+        danger: 'Danger',
+      },
+    }),
+    body: richTextField(richTextOptions),
   },
 })
 
@@ -29,7 +43,10 @@ const articleComponent = component({
  * This object will be serialized and pushed to Storyblok
  */
 
-export const components = componentLibrary([articleComponent])
+export const components = componentLibrary([
+  articleComponent,
+  admonitionComponent,
+])
 
 /*
  * ...or generate one
