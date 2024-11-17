@@ -22,6 +22,7 @@
     "@johannes-lindgren/storyblok": "workspace:*",
     "@johannes-lindgren/storyblok-migrations": "workspace:*",
     "@johannes-lindgren/storyblok-delivery-api": "workspace:*",
+    "@johannes-lindgren/storyblok-live-preview": "workspace:*",
     "pure-parse": "^0.0.0-beta.6"
   },
   "devDependencies": {
