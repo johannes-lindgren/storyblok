@@ -212,7 +212,6 @@ export const RichTextView: FunctionComponent<{
       return (
         <div>
           {node.attrs.body.map((content) => {
-            console.log('content', content)
             const res = parseContent(content)
             if (res.tag === 'failure') {
               // Failed to parse content
@@ -346,9 +345,8 @@ const styleFromStyledMark = (mark: StyledMark): CSSProperties => {
     case 'gradient':
       return {
         backgroundImage: 'var(--accent-gradient)',
-        // @ts-expect-error
-        '-webkit-background-clip': 'text',
-        '-webkit-text-fill-color': 'transparent',
+        WebkitBackgroundClip: 'text',
+        WebkitTextFillColor: 'transparent',
         backgroundSize: '400%',
         backgroundPosition: '0%',
       }

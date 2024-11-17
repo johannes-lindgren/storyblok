@@ -30,8 +30,7 @@ export type RichTextContent =
 export function parseRichTextContent(
   data: unknown,
 ): ParseResult<RichTextContent> {
-  console.log('parsing', JSON.stringify(data, null, 2))
-  const res = oneOf(
+  return oneOf(
     parseDocNode,
     parseParagraphNode,
     parseTextNode,
@@ -44,8 +43,6 @@ export function parseRichTextContent(
     parseCodeBlockNode,
     parseImageNode,
   )(data)
-  console.log('res', JSON.stringify(res, null, 2))
-  return res
 }
 
 export const richTextContent = (): Parser<RichTextContent> =>
