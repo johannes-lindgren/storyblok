@@ -81,3 +81,6 @@ Directory: `astro-examples`
 This example ties together all the previous examples and demonstrates how you can use it with and Astro app.
 
 It includes an example on how to render rich text with a framework, which means that you can easily render blocks that are nested within rich text.
+
+> [!NOTE]
+> This example does not enable the live preview... yet. At the moment, it renders on the server and does not ship the framework, which means that you can't rerender. However, it would be possible to adjust it so that it does rerender in preview mode only.
