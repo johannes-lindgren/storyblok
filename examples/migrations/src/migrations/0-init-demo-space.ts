@@ -1,4 +1,4 @@
-import { prepareMigrationsDemoSpace } from '../prepare'
+import { prepareSpace } from '../prepare'
 import { credentialsFromEnvironment } from '../credentialsFromEnvironment'
 import { componentsV1, PageContentV1 } from '../component-library/v1'
 import { ContentStory } from '@johannes-lindgren/storyblok-migrations'
@@ -21,8 +21,4 @@ const initialStories: Omit<ContentStory, 'id' | 'uuid'>[] = [
   },
 ]
 
-await prepareMigrationsDemoSpace(
-  credentialsFromEnvironment(),
-  componentsV1,
-  initialStories,
-)
+await prepareSpace(credentialsFromEnvironment(), componentsV1, initialStories)

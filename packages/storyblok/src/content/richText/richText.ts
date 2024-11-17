@@ -2,22 +2,47 @@ import {
   array,
   literal,
   object,
+  oneOf,
+  optional,
+  parseNumber,
   Parser,
   ParseResult,
   parseString,
+  parseUnknown,
+  withDefault,
 } from 'pure-parse'
 import { BlockContent } from '../block'
-import { AssetContent } from '../asset'
 import { Mark, parseMark } from './marks'
 
-// TODO: Add more node types
-export type RichTextContent = DocNode
+export type RichTextContent =
+  | DocNode
+  | ParagraphNode
+  | TextNode
+  | HorizontalRuleNode
+  | BlockQuoteNode
+  | BulletListNode
+  | OrderedListNode
+  | HeadingNode
+  | BlockNode
+  | CodeBlockNode
+  | ImageNode
 
-// TODO options as a parameter
 export function parseRichTextContent(
   data: unknown,
 ): ParseResult<RichTextContent> {
-  return parseDocNode(data)
+  return oneOf(
+    parseDocNode,
+    parseParagraphNode,
+    parseTextNode,
+    parseHorizontalRuleNode,
+    parseBlockQuoteNode,
+    parseBulletListNode,
+    parseOrderedListNode,
+    parseHeadingNode,
+    parseBlockNode,
+    parseCodeBlockNode,
+    parseImageNode,
+  )(data)
 }
 
 export const richTextContent = (): Parser<RichTextContent> =>
@@ -44,7 +69,7 @@ export type ParagraphNode = {
 
 export const parseParagraphNode = object<ParagraphNode>({
   type: literal('paragraph'),
-  content: array(parseRichTextContent),
+  content: withDefault(array(parseRichTextContent), []),
 })
 
 export type TextNode = {
@@ -56,7 +81,7 @@ export type TextNode = {
 export const parseTextNode = object<TextNode>({
   type: literal('text'),
   text: parseString,
-  marks: array(parseMark),
+  marks: withDefault(array(parseMark), []),
 })
 
 export type HorizontalRuleNode = {
@@ -115,22 +140,70 @@ export type HeadingNode = {
   content: RichTextContent[]
 }
 
+export const parseHeadingNode = object<HeadingNode>({
+  type: literal('heading'),
+  attrs: object({
+    level: oneOf(
+      literal(1),
+      literal(2),
+      literal(3),
+      literal(4),
+      literal(5),
+      literal(6),
+    ),
+  }),
+  content: withDefault(array(parseRichTextContent), []),
+})
+
 export type BlockNode = {
   type: 'blok'
   attrs: {
     // Actually a UUID
     id: string
-    body: BlockContent[]
+    body: unknown[]
   }
-  content: RichTextContent[]
 }
+
+export const parseBlockNode = object<BlockNode>({
+  type: literal('blok'),
+  attrs: object({
+    id: parseString,
+    body: array(parseUnknown),
+  }),
+})
 
 export type CodeBlockNode = {
   type: 'code_block'
   content: RichTextContent[]
 }
 
+export const parseCodeBlockNode = object<CodeBlockNode>({
+  type: literal('code_block'),
+  content: withDefault(array(parseRichTextContent), []),
+})
+
 export type ImageNode = {
   type: 'image'
-  attrs: AssetContent
+  attrs: ImageAttrs
 }
+
+export type ImageAttrs = {
+  id: number
+  alt: string
+  src: string
+  title: string
+  source: string
+  copyright: string
+}
+
+export const parseImageNode = object<ImageNode>({
+  type: literal('image'),
+  attrs: object<ImageAttrs>({
+    id: parseNumber,
+    alt: parseString,
+    src: parseString,
+    title: parseString,
+    source: parseString,
+    copyright: parseString,
+  }),
+})
