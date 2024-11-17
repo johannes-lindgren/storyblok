@@ -103,7 +103,7 @@ export const ArticleView: FunctionComponent<{
   content: Extract<Content, { component: 'article' }>
 }> = ({ content }) => {
   return (
-    <article>
+    <article {...contentAttributes(content)}>
       {/*<h1>{content.title}</h1>*/}
       <RichTextView content={content.body} />
     </article>
