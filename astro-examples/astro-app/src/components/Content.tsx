@@ -6,7 +6,8 @@ import {
 import { type Content, parseContent } from 'astro-app-components'
 import type { RichTextContent } from '@johannes-lindgren/storyblok'
 import type { HeadingNode, Mark, TextNode } from '@johannes-lindgren/storyblok'
-import type { StyledMark } from '@johannes-lindgren/storyblok/src'
+import type { StyledMark } from '@johannes-lindgren/storyblok'
+import { contentAttributes } from './LivePreview.tsx'
 
 export const ContentView: FunctionComponent<{
   content: Content
@@ -24,7 +25,7 @@ export const AdmonitionView: FunctionComponent<{
 }> = ({ content }) => {
   const type = content.type ?? 'info'
   return (
-    <div style={admonitionStyle(type)}>
+    <div style={admonitionStyle(type)} {...contentAttributes(content)}>
       <h3
         style={{
           margin: 0,
@@ -102,7 +103,7 @@ export const ArticleView: FunctionComponent<{
   content: Extract<Content, { component: 'article' }>
 }> = ({ content }) => {
   return (
-    <article>
+    <article {...contentAttributes(content)}>
       {/*<h1>{content.title}</h1>*/}
       <RichTextView content={content.body} />
     </article>

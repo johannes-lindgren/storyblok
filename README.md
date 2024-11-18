@@ -8,6 +8,12 @@ Proof of concepts for Storyblok libraries:
 - Generating parsers from components
 - Inferring types from components
 - Migrations
+- Live preview bridge with package that can be published on NPM
+- Server Side Rendering with Astro as a proof of concept for
+  - Excellent DX: types and parsers are generated from components.
+  - Excellent performance—no JavaScript bundled in production mode, and only the bare minimum of JavaScript in preview mode.
+  - Secure—the preview token does not need to be exposed to the client.
+  - Example of how to create a custom Rich Text renderer in React, with 100% TypeScript support.
 
 ## Examples
 
@@ -63,3 +69,18 @@ After migration (`start:1`), you get a new component that represents an updated 
 And the content is migrated:
 
 ![img.png](docs/img_story_v2.png)
+
+### Live Preview Bridge
+
+A new implementation of the bridge as a package, with 100% TypeScript support. Since it is a package, it can be published on NPM.
+
+### Astro Example
+
+Directory: `astro-examples`
+
+This example ties together all the previous examples and demonstrates how you can use it with and Astro app.
+
+It includes an example on how to render rich text with a framework, which means that you can easily render blocks that are nested within rich text.
+
+> [!NOTE]
+> This example does not enable the live preview... yet. At the moment, it renders on the server and does not ship the framework, which means that you can't rerender. However, it would be possible to adjust it so that it does rerender in preview mode only.
