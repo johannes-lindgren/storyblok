@@ -11,8 +11,8 @@ import {
   optionContent,
   storyLinkContent,
   StoryLinkContent,
+  numberContentAsNumber,
 } from '@johannes-lindgren/storyblok'
-import { numberContentAsNumber } from '@johannes-lindgren/storyblok/src'
 
 type PageContent = BlockContent<{
   component: 'page'
