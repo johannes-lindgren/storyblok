@@ -20,6 +20,20 @@ import {
   component,
 } from '@johannes-lindgren/storyblok'
 
+export const clearSpace = async (credentials: Credentials) => {
+  console.log('Creating dummy default component...')
+  const defaultComponentName = await initDefaultComponent(credentials)
+  console.log('Finished creating dummy default component.')
+
+  console.log('Deleting all components...')
+  await deleteAllComponents(credentials, defaultComponentName)
+  console.log('Finished deleting all components.')
+
+  console.log('Deleting all stories...')
+  await deleteAllStories(credentials)
+  console.log('Finished deleting all stories.')
+}
+
 /**
  * Prepare a space with initial content to demo migrations.
  * @param credentials
@@ -33,17 +47,7 @@ export const prepareSpace = async (
 ) => {
   console.log('Starting preparing space...')
 
-  console.log('Creating dummy default component...')
-  const defaultComponentName = await initDefaultComponent(credentials)
-  console.log('Finished creating dummy default component.')
-
-  console.log('Deleting all components...')
-  await deleteAllComponents(credentials, defaultComponentName)
-  console.log('Finished deleting all components.')
-
-  console.log('Deleting all stories...')
-  await deleteAllStories(credentials)
-  console.log('Finished deleting all stories.')
+  await clearSpace(credentials)
 
   console.log('Starting pushing initial components...')
   await pushComponents(credentials, initialComponents)

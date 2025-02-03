@@ -124,6 +124,28 @@ importers:
         specifier: ^5.6.3
         version: 5.6.3
 
+  examples/demo:
+    dependencies:
+      '@johannes-lindgren/storyblok':
+        specifier: workspace:*
+        version: link:../../packages/storyblok
+      '@johannes-lindgren/storyblok-migrations':
+        specifier: workspace:*
+        version: link:../../packages/storyblok-migrations
+      pure-parse:
+        specifier: ^0.0.0-beta.6
+        version: 0.0.0-beta.6
+    devDependencies:
+      '@types/node':
+        specifier: ^22.9.0
+        version: 22.9.0
+      tsx:
+        specifier: ^4.19.2
+        version: 4.19.2
+      typescript:
+        specifier: ^5.6.3
+        version: 5.6.3
+
   examples/example-template:
     dependencies:
       '@johannes-lindgren/storyblok':
