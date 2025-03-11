@@ -1,0 +1,14 @@
+{
+  "name": "@johannes-lindgren/example-open-api-mapi",
+  "type": "module",
+  "scripts": {
+    "test:ts": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@johannes-lindgren/open-api-mapi": "workspace:*",
+    "openapi-fetch": "^0.13.4"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.2"
+  }
+}

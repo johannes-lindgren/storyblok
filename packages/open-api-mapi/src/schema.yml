@@ -1,0 +1,36 @@
+openapi: 3.0.0
+info:
+  title: Simple API
+  description: A basic API with a single endpoint
+  version: 1.0.0
+paths:
+  /v1/spaces/{space_id}/stories/:
+    get:
+      summary: Returns a list of stories for a given space
+      description: A simple endpoint that returns a JSON response with a list of stories for the specified space.
+      parameters:
+        - name: space_id
+          in: path
+          required: true
+          description: The ID of the space
+          schema:
+            type: string
+      responses:
+        '200':
+          description: A successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  stories:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        title:
+                          type: string
+                        content:
+                          type: string
