@@ -17,10 +17,12 @@
     }
   },
   "scripts": {
-    "generate:ts": "openapi-typescript ./src/schema.yml --output dist/index.d.ts"
+    "build:ts": "openapi-typescript ./src/openapi.yml --output dist/index.d.ts",
+    "build:redoc": "redocly build-docs ./src/openapi.yml"
   },
   "devDependencies": {
     "openapi-typescript": "^7.6.1",
-    "typescript": "^5.8.2"
+    "typescript": "^5.8.2",
+    "@redocly/cli": "^1.33.1"
   }
 }
