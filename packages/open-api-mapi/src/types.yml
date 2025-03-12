@@ -1,0 +1,13 @@
+# $schema: https://json-schema.org/draft/2020-12/schema
+Json:
+  oneOf:
+    - type: 'string'
+    - type: 'number'
+    - type: 'boolean'
+    - type: 'array'
+      items:
+        $ref: '#/Json'
+    - type: 'object'
+      additionalProperties:
+        $ref: '#/Json'
+    - type: 'null'
