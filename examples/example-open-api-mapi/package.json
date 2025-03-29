@@ -5,7 +5,7 @@
     "test:ts": "tsc --noEmit"
   },
   "dependencies": {
-    "@johannes-lindgren/open-api-mapi": "workspace:*",
+    "@johannes-lindgren/openapi": "workspace:*",
     "openapi-fetch": "^0.13.4"
   },
   "devDependencies": {
