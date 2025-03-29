@@ -1,6 +1,7 @@
-# $schema: https://json-schema.org/draft/2020-12/schema
+$schema: 'https://json-schema.org/draft/2020-12/schema'
 Json:
   oneOf:
+    - type: 'null'
     - type: 'string'
     - type: 'number'
     - type: 'boolean'
@@ -10,4 +11,3 @@ Json:
     - type: 'object'
       additionalProperties:
         $ref: '#/Json'
-    - type: 'null'

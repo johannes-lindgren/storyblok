@@ -1,0 +1,164 @@
+summary: stories
+description: Get stories
+parameters:
+  - $ref: '../parameters.yml#/SpaceId'
+  - name: page
+    in: query
+    description: Current page of stories
+    schema:
+      type: number
+  - name: contain_component
+    in: query
+    description: Filters by component in all levels of the content. Allows comma-separated values for multiple components
+    schema:
+      type: string
+  - name: text_search
+    in: query
+    description: Filter by a term using full text search
+    schema:
+      type: string
+  - name: sort_by
+    in: query
+    description: Sort entries by specific attribute and order
+    schema:
+      type: string
+  - name: pinned
+    in: query
+    description: Filter by pinned stories if '1'
+    schema:
+      type: boolean
+  - name: excluding_ids
+    in: query
+    description: Exclude specific stories by providing their IDs as a comma-separated string
+    schema:
+      type: string
+  - name: by_ids
+    in: query
+    description: Filter by IDs (comma-separated)
+    schema:
+      type: string
+  - name: by_uuids
+    in: query
+    description: Retrieve specific stories by providing their UUIDs as a comma-separated string
+    schema:
+      type: string
+  - name: with_tag
+    in: query
+    description: Filter by specific tag(s). Multiple tags can be provided as a comma-separated string (treated like an OR operator)
+    schema:
+      type: string
+  - name: folder_only
+    in: query
+    description: Filter by folders only
+    schema:
+      type: boolean
+  - name: story_only
+    in: query
+    description: Filter by stories only
+    schema:
+      type: boolean
+  - name: with_parent
+    in: query
+    description: Filter by parent ID
+    schema:
+      type: number
+  - name: starts_with
+    in: query
+    description: Filter stories starting with a specific slug
+    schema:
+      type: string
+  - name: in_trash
+    in: query
+    description: Filter by items in the trash folder
+    schema:
+      type: boolean
+  - name: search
+    in: query
+    description: Filter by search term
+    schema:
+      type: string
+  - name: filter_query
+    in: query
+    description: Filter by specific attribute(s) of your content type
+    schema:
+      type: string
+  - name: in_release
+    in: query
+    description: Filter items by the release ID
+    schema:
+      type: number
+  - name: is_published
+    in: query
+    description: true for entries that are currently published; false for those that are currently not published or unpublished
+    schema:
+      type: boolean
+  - name: by_slugs
+    in: query
+    description: Retrieve stories by comma-separated full_slug, allowing wildcards using '*'
+    schema:
+      type: string
+  - name: mine
+    in: query
+    description: Filters all the stories assigned to the current user whose token is being used
+    schema:
+      type: boolean
+  - name: excluding_slugs
+    in: query
+    description: Exclude stories by specifying comma-separated full_slugs, allowing wildcards using '*'
+    schema:
+      type: string
+  - name: in_workflow_stages
+    in: query
+    description: Retrieve stories that are in a particular workflow stage by providing a comma-separated list of workflow stage IDs
+    schema:
+      type: number
+  - name: by_uuids_ordered
+    in: query
+    description: Retrieve specific stories by providing their UUIDs as a comma-separated string, preserving order
+    schema:
+      type: string
+  - name: with_slug
+    in: query
+    description: Filter by exact slug. Ensure to use the full slug.
+    schema:
+      type: string
+  - name: with_summary
+    in: query
+    description: If added, returns content_summary object with relevant information. Default is 1.
+    schema:
+      type: number
+      default: 1
+  - name: scheduled_at_gt
+    in: query
+    description: Filter stories that are scheduled after the provided date.
+    schema:
+      type: string
+      format: date-time
+  - name: scheduled_at_lt
+    in: query
+    description: Filter stories that are scheduled before the provided date.
+    schema:
+      type: string
+      format: date-time
+  - name: favourite
+    in: query
+    description: Filter by your favourites
+    schema:
+      type: boolean
+  - name: reference_search
+    in: query
+    description: Filter by references (e.g., stories with a specific asset or text reference)
+    schema:
+      type: string
+responses:
+  '200':
+    description: A successful response
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            stories:
+              type: array
+              items:
+                $ref: './models/story.yml'

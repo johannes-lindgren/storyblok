@@ -1,0 +1,9 @@
+openapi: 3.1.0
+paths:
+  mark_as_read:
+    description: Mark Comments as read
+    parameters:
+      - $ref: '../../../parameters.yml#/SpaceId'
+    put:
+      summary: Mark Comment as Read
+      description: Get the comments in a discussion

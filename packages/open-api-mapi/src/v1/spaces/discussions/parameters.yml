@@ -1,0 +1,7 @@
+DiscussionId:
+  name: discussion_id
+  in: path
+  required: true
+  description: The ID of a discussion
+  schema:
+    type: string

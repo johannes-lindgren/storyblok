@@ -1,0 +1,7 @@
+CommentId:
+  name: comment_id
+  in: path
+  required: true
+  description: The ID of a comment
+  schema:
+    type: string

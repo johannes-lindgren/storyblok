@@ -1,24 +1,22 @@
 {
-  "name": "@johannes-lindgren/open-api-mapi",
+  "name": "@johannes-lindgren/openapi",
   "type": "module",
   "license": "MIT",
   "sideEffects": false,
   "files": [
-    "dist"
+    "dist",
+    "src"
   ],
   "module": "./dist/index.js",
   "main": "./dist/index.cjs",
   "types": "./dist/index.d.ts",
   "exports": {
-    ".": {
-      "require": "./dist/index.cjs",
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
-    }
+    "./*": "./src/*"
   },
   "scripts": {
-    "build:ts": "openapi-typescript ./src/openapi.yml --output dist/index.d.ts",
-    "build:redoc": "redocly build-docs ./src/openapi.yml"
+    "build:ts": "openapi-typescript ./src/openapi.yml --output dist/index.d.ts --export-type",
+    "dev:redoc": "redocly preview-docs ./src/openapi.yml",
+    "build:redoc": "redocly build-docs ./src/openapi.yml --output=docs/redoc/index.html"
   },
   "devDependencies": {
     "openapi-typescript": "^7.6.1",

@@ -1,0 +1,29 @@
+openapi: 3.1.0
+paths:
+  /v1/spaces/{space_id}/discussions/{discussion_id}/comments:
+    description: Manage collections of comments
+    parameters:
+      - $ref: '../../parameters.yml#/SpaceId'
+      - $ref: '../parameters.yml#/DiscussionId'
+    get:
+      summary: Comments
+      description: Get the comments in a discussion
+    post:
+      summary: Comment
+      description: Post a comment
+
+  /v1/spaces/{space_id}/discussions/{discussion_id}/comments/{comment_id}:
+    description: Manage existing comments
+    parameters:
+      - $ref: '../../parameters.yml#/SpaceId'
+      - $ref: '../parameters.yml#/DiscussionId'
+      - $ref: './parameters.yml#/CommentId'
+    get:
+      summary: Comment
+      description: Get a comment by its ID
+    put:
+      summary: Comment
+      description: Update a comment
+    delete:
+      summary: Comment
+      description: Delete a comment

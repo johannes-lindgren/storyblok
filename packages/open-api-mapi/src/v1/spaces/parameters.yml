@@ -1,0 +1,7 @@
+SpaceId:
+  name: space_id
+  in: path
+  required: true
+  description: The ID of the space
+  schema:
+    type: string
