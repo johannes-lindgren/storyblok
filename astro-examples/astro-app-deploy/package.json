@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev-api": "concurrently \"vercel dev\" \"esbuild --watch\"",
+    "dev-api": "concurrently \"vercel dev\" \"pnpm build\"",
     "build": "tsx esbuild.config.js"
   },
   "keywords": [],
