@@ -1,8 +1,8 @@
 import { build } from 'esbuild'
 
 build({
-  entryPoints: ['src/test.ts'], // Your function entry
-  outfile: 'dist/test.js', // Output in dist/
+  entryPoints: ['src/index.ts'], // Your function entry
+  outfile: 'dist/index.js', // Output in dist/
   platform: 'node',
   target: 'node18',
   // Ensures dependencies are included

@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev-api": "concurrently \"vercel dev\" \"pnpm build\"",
+    "dev-api": "pnpm build && vercel dev",
     "build": "tsx esbuild.config.js"
   },
   "keywords": [],
@@ -15,10 +15,10 @@
   "dependencies": {
     "astro-app-components": "workspace:*",
     "@johannes-lindgren/storyblok-migrations": "workspace:*",
-    "@johannes-lindgren/storyblok": "workspace:*"
+    "@johannes-lindgren/storyblok": "workspace:*",
+    "pure-parse": "^0.0.0-beta.7"
   },
   "devDependencies": {
-    "concurrently": "^9.1.2",
     "vercel": "^41.4.1",
     "@types/node": "^22.13.14",
     "typescript": "^5.6.3",
