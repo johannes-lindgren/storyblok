@@ -1,1 +1,0 @@
-console.log(process.env.STORYBLOK_MANAGEMENT_API_TOKEN)
