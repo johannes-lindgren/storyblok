@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "ESNext",
+    "strict": true,
+    "importHelpers": true,
+    "moduleResolution": "node",
+    "experimentalDecorators": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "sourceMap": true,
+    // "baseUrl": ".",
+    "types": ["node"],
+    "paths": {},
+    "lib": ["ES2020"],
+    "declaration": true,
+    "outDir": "lib"
+  },
+  "include": ["src"],
+  "exclude": ["dist"]
+}

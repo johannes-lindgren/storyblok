@@ -1,0 +1,28 @@
+{
+  "name": "astro-app-deploy",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev-api": "concurrently \"vercel dev\" \"esbuild --watch\"",
+    "build": "tsx esbuild.config.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "astro-app-components": "workspace:*",
+    "@johannes-lindgren/storyblok-migrations": "workspace:*",
+    "@johannes-lindgren/storyblok": "workspace:*"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2",
+    "vercel": "^41.4.1",
+    "@types/node": "^22.13.14",
+    "typescript": "^5.6.3",
+    "esbuild": "^0.25.1",
+    "tsx": "^4.19.3"
+  }
+}
