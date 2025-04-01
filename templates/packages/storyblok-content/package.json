@@ -1,0 +1,12 @@
+{
+  "name": "@storyblok/content",
+  "type": "module",
+  "main": "./src/index.ts",
+  "scripts": {},
+  "dependencies": {
+    "pure-parse": "^0.0.0-beta.7"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.2"
+  }
+}
