@@ -55,3 +55,5 @@ export const components = componentLibrary([
 export const parseContent = contentParserFromLibrary(components)
 
 export type Content = ContentFromLibrary<typeof components>
+
+export const testVar = 11233213

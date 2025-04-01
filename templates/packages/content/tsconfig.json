@@ -20,7 +20,8 @@
     "noUnusedParameters": false,
     "noFallthroughCasesInSwitch": true,
     "noUncheckedIndexedAccess": true,
-    "noImplicitAny": true
+    "noImplicitAny": true,
+    "verbatimModuleSyntax": true
   },
   "include": ["src"]
 }

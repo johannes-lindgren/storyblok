@@ -1,5 +1,13 @@
 # `@johannes-lindgren` Storyblok POCs
 
+Deploy with:
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fjohannes-lindgren%2Fstoryblok&env=STORYBLOK_DELIVERY_API_TOKEN&project-name=storyblok-astro&repository-name=storyblok-astro)
+
+[![Deploy to Netlify](https://www.netlify.com/img/deploy/button.svg)](https://app.netlify.com/start/deploy?repository=https://github.com/johannes-lindgren/storyblok&base=astro-examples/astro-app&fullConfiguration=true#STORYBLOK_DELIVERY_API_TOKEN=)
+
+## Overview
+
 Proof of concepts for Storyblok libraries:
 
 - Strict type safety with Storyblok

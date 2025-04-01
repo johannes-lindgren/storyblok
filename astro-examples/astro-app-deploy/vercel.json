@@ -1,0 +1,15 @@
+{
+  "outputDirectory": "dist",
+  "builds": [
+    {
+      "src": "dist/test.js",
+      "use": "@vercel/node"
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/dist/test.js"
+    }
+  ]
+}
